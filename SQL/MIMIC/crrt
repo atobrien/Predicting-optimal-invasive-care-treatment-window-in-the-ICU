@@ -98,7 +98,7 @@ WITH crrt_settings AS (
 	                  GROUP BY icustay_id, charttime
                        ),
                    
-             vd1 AS ( 
+             rd1 AS ( 
 		         SELECT
                  icustay_id,
                  -- this carries over the previous charttime
@@ -124,15 +124,15 @@ WITH crrt_settings AS (
                  FROM crrt_settings
                      ),
 	        
-			vd2 AS (
+			rd2 AS (
                 SELECT 
-				vd1.*,
+				rd1.*,
                 -- create a cumulative sum of the instances of new CRRT
                 -- this results in a monotonically increasing integer assigned to each CRRT
                 CASE WHEN RRT_start = 1 OR RRT=1 OR RRT_end = 1 THEN SUM(NewCRRT) OVER (PARTITION BY icustay_id ORDER BY charttime) ELSE NULL END AS NUM
                 --- now we convert CHARTTIME of CRRT settings into durations
                
-				FROM vd1
+				FROM rd1
                 -- now we can isolate to just rows with settings
                 -- (before we had rows with start/end flags)
                 -- this removes any null values for NewCRRT
@@ -140,7 +140,7 @@ WITH crrt_settings AS (
 				WHERE RRT_start = 1 or RRT = 1 or RRT_end = 1
                     ),
 		     
-			vd3 AS (
+			rd3 AS (
 				SELECT
 				icustay_id,
 				ROW_NUMBER() OVER (PARTITION BY icustay_id ORDER BY num) AS num,
@@ -150,7 +150,7 @@ WITH crrt_settings AS (
 				GENERATE_SERIES(0,CEIL((EXTRACT(epoch FROM MAX(charttime)-MIN(charttime))/60/60))::INT-1,1) AS icudayseq_asc,
 				date_trunc('day', MIN(charttime)) AS startday
 									  
-				FROM vd2
+				FROM rd2
 									  
 				GROUP BY icustay_id, num
                 HAVING MIN(charttime) != MAX(charttime)
@@ -158,11 +158,11 @@ WITH crrt_settings AS (
 				ORDER BY icustay_id, num					  
 			        ),						
  
-			vd4 AS(
+			rd4 AS(
 				SELECT
 				*,
 				CASE WHEN icudayseq_asc = 1 THEN starttime ELSE starttime + (INTERVAL '1 hour' * icudayseq_asc) END AS starthour
-				FROM vd3	
+				FROM rd3	
 			       ),						
 
 						   
@@ -173,7 +173,7 @@ WITH crrt_settings AS (
 		        icustay_id,						   
                 date_trunc('day', starthour) AS crrt_day,
                 CASE WHEN date_trunc('day', starthour) = date_trunc('day', starthour) THEN 1 ELSE 1 END AS crrt_flag							  
-                FROM vd4
+                FROM rd4
 				GROUP BY icustay_id, date_trunc('day', starthour)
                 ORDER BY icustay_id, date_trunc('day', starthour)
 	              )
