@@ -13,9 +13,6 @@
 -- The ventilation events are numbered consecutively by the `num` column.
 
 
--- First, create a temporary table to store relevant data from CHARTEVENTS.
-DROP MATERIALIZED VIEW IF EXISTS ventsettings CASCADE;
-CREATE MATERIALIZED VIEW ventsettings AS
 select
   icustay_id, charttime
   -- case statement determining whether it is an instance of mech vent
@@ -101,7 +98,7 @@ select
       end
       )
       as SelfExtubated
-from chartevents ce
+from mimiciii.chartevents ce
 where ce.value is not null
 -- exclude rows marked as error
 and ce.error IS DISTINCT FROM 1
@@ -148,7 +145,7 @@ select
   , 0 as OxygenTherapy
   , 1 as Extubated
   , case when itemid = 225468 then 1 else 0 end as SelfExtubated
-from procedureevents_mv
+from mimiciii.procedureevents_mv
 where itemid in
 (
   227194 -- "Extubation"
@@ -157,9 +154,7 @@ where itemid in
 );
 
 
---DROP MATERIALIZED VIEW IF EXISTS VENTDURATIONS CASCADE;
-DROP MATERIALIZED VIEW IF EXISTS VENTDURATIONS CASCADE;
-create MATERIALIZED VIEW ventdurations as
+
 with vd0 as
 (
   select
