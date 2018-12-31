@@ -1,0 +1,23 @@
+-- Note to self
+-- There were no subject with any of the ECMO ITEMIDs in chartevents,
+-- Nor did these items appear in other tables except for d_items
+
+SELECT 
+*
+FROM `physionet-data.mimiciii_demo.chartevents` 
+WHERE ITEMID IN 
+(
+5931, --ECMO
+2957, --ECMO FLOW
+7015, --ECMO FLOW RATE
+7449, --ECMO flow
+6931, --ECMO Flow L/min
+224660, --ECMO
+228193, --Oxygenator/ECMO
+43928, --ECMO CRYSTALLOID
+3265, --ecmo flow
+5937, --ecmo l/min
+7018, --ecmo fio2
+6758 --ecmo
+)
+LIMIT 20
