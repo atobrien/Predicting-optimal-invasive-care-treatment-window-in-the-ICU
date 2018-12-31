@@ -1,0 +1,39 @@
+--These two queries extract cmo from the notes
+--the first one uses a couple of keywords using clinical criteria, the second one uses the IBM NLP tool for getting more specific ways to extract CMO from the notes
+
+with sq AS(SELECT distinct subject_id, hadm_id 
+,Row_Number() Over (Partition By noteevents.subject_id ORDER BY noteevents.charttime Desc) As position,
+ charttime
+FROM mimiciii.noteevents
+WHERE 
+text ILIKE '%cmo%'
+OR
+text ILIKE '%comfort meas%'
+OR
+text ILIKE '%terminal ext%'
+OR
+text ILIKE '%terminally ext%'
+)
+
+SELECT subject_id, hadm_id, charttime
+FROM sq
+WHERE position =1 ;
+
+
+with sq as(
+SELECT DISTINCT subject_id
+,hadm_id
+,charttime
+,Row_Number() Over (Partition By mimiciii.noteevents.subject_id Order By  mimiciii.noteevents.charttime DESC) As position
+  FROM mimiciii.noteevents
+  WHERE
+  text similar to '%(made comfort measures only%|confort measures|cmo status|confort measures only|pursue comfort measures|dnr/dni/comfort|institute comfort measures|comfort measures only|comfort measure|terminally extubated|comfort focused|comfort-measures-only|made comfort measures|made cmo|cmo|comfort measures|comfort measures only|confort care|comfort care|comofort)%'
+ )
+ 
+SELECT
+ subject_id
+ ,hadm_id 
+ ,charttime
+FROM sq
+WHERE position =1 --we only want the hadm_id associated with the very last note
+ORDER BY subject_id;
