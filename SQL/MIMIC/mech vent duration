@@ -233,20 +233,47 @@ with vd0 as
     as ventnum
   --- now we convert CHARTTIME of ventilator settings into durations
   from vd1
-)
+),
+
 -- create the durations for each mechanical ventilation instance
-select icustay_id
-  -- regenerate ventnum so it's sequential
-  , ROW_NUMBER() over (partition by icustay_id order by ventnum) as ventnum
-  , min(charttime) as starttime
-  , max(charttime) as endtime
-  , extract(epoch from max(charttime)-min(charttime))/60/60 AS duration_hours
-from vd2
-group by icustay_id, ventnum
-having min(charttime) != max(charttime)
--- patient had to be mechanically ventilated at least once
--- i.e. max(mechvent) should be 1
--- this excludes a frequent situation of NIV/oxygen before intub
--- in these cases, ventnum=0 and max(mechvent)=0, so they are ignored
-and max(mechvent) = 1
-order by icustay_id, ventnum;
+vd3 AS (
+	SELECT 
+	icustay_id,
+	-- regenerate ventnum so it's sequential
+	ROW_NUMBER() OVER (PARTITION BY icustay_id ORDER BY ventnum) AS ventnum,
+	MIN(charttime) AS starttime,
+	MAX(charttime) AS endtime,
+	EXTRACT(epoch FROM MAX(charttime)-MIN(charttime))/60/60 AS duration_hours,
+	GENERATE_SERIES(0,CEIL((EXTRACT(epoch FROM MAX(charttime)-MIN(charttime))/60/60))::INT-1,1) AS icudayseq_asc
+	FROM vd2
+	GROUP BY icustay_id, ventnum
+    HAVING MIN(charttime) != MAX(charttime)
+	-- patient had to be mechanically ventilated at least once
+    -- i.e. max(mechvent) should be 1
+    -- this excludes a frequent situation of NIV/oxygen before intub
+    -- in these cases, ventnum=0 and max(mechvent)=0, so they are ignored
+	AND MAX(mechvent) = 1
+    ORDER BY icustay_id, ventnum							  
+        ),
+
+vd4 AS (
+    SELECT
+    *,
+    CASE WHEN icudayseq_asc = 1 THEN starttime ELSE starttime + (INTERVAL '1 hour' * icudayseq_asc) END AS starthour
+    FROM vd3
+       ),
+
+mv_status AS (
+          SELECT
+		  icustay_id,						   
+          date_trunc('day', starthour) AS vent_day,               
+		  CASE WHEN date_trunc('day', starthour) = date_trunc('day', starthour) THEN 1 ELSE 0 END AS vent_flag 
+	      FROM vd4
+	      GROUP BY icustay_id, date_trunc('day', starthour)
+	      ORDER BY icustay_id, date_trunc('day', starthour)
+              )
+
+SELECT
+*
+FROM mv_status
+LIMIT 10
