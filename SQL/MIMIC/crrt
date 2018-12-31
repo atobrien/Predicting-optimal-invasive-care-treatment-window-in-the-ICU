@@ -92,10 +92,10 @@ WITH crrt_settings AS (
                         611, -- Replace Rate ml/hr
                         5683 -- Hourly PFR
 					   )
-                AND ce.value IS NOT NULL
-                AND COALESCE(ce.valuenum,1) != 0 -- non-zero rates/values
+                      AND ce.value IS NOT NULL
+                      AND COALESCE(ce.valuenum,1) != 0 -- non-zero rates/values
                
-	            GROUP BY icustay_id, charttime
+	                  GROUP BY icustay_id, charttime
                        ),
                    
              vd1 AS ( 
@@ -124,32 +124,62 @@ WITH crrt_settings AS (
                  FROM crrt_settings
                      ),
 	        
-			vd2 AS
-(
-  select vd1.*
-  -- create a cumulative sum of the instances of new CRRT
-  -- this results in a monotonically increasing integer assigned to each CRRT
-  , case when RRT_start = 1 or RRT=1 or RRT_end = 1 then
-      SUM( NewCRRT )
-      OVER ( partition by icustay_id order by charttime )
-    else null end
-    as num
-  --- now we convert CHARTTIME of CRRT settings into durations
-  from vd1
-  -- now we can isolate to just rows with settings
-  -- (before we had rows with start/end flags)
-  -- this removes any null values for NewCRRT
-  where
-    RRT_start = 1 or RRT = 1 or RRT_end = 1
-)
--- create the durations for each CRRT instance
-select icustay_id
-  , ROW_NUMBER() over (partition by icustay_id order by num) as num
-  , min(charttime) as starttime
-  , max(charttime) as endtime
- 	, extract(epoch from max(charttime)-min(charttime))/60/60 AS duration_hours
-  -- add durations
-from vd2
-group by icustay_id, num
-having min(charttime) != max(charttime)
-order by icustay_id, num
+			vd2 AS (
+                SELECT 
+				vd1.*,
+                -- create a cumulative sum of the instances of new CRRT
+                -- this results in a monotonically increasing integer assigned to each CRRT
+                CASE WHEN RRT_start = 1 OR RRT=1 OR RRT_end = 1 THEN SUM(NewCRRT) OVER (PARTITION BY icustay_id ORDER BY charttime) ELSE NULL END AS NUM
+                --- now we convert CHARTTIME of CRRT settings into durations
+               
+				FROM vd1
+                -- now we can isolate to just rows with settings
+                -- (before we had rows with start/end flags)
+                -- this removes any null values for NewCRRT
+                
+				WHERE RRT_start = 1 or RRT = 1 or RRT_end = 1
+                    ),
+		     
+			vd3 AS (
+				SELECT
+				icustay_id,
+				ROW_NUMBER() OVER (PARTITION BY icustay_id ORDER BY num) AS num,
+				MIN(charttime) AS starttime,
+                MAX(charttime) AS endtime,
+				EXTRACT(epoch FROM MAX(charttime)-MIN(charttime))/60/60 AS duration_hours,
+				GENERATE_SERIES(0,CEIL((EXTRACT(epoch FROM MAX(charttime)-MIN(charttime))/60/60))::INT-1,1) AS icudayseq_asc,
+				date_trunc('day', MIN(charttime)) AS startday
+									  
+				FROM vd2
+									  
+				GROUP BY icustay_id, num
+                HAVING MIN(charttime) != MAX(charttime)
+				
+				ORDER BY icustay_id, num					  
+			        ),						
+ 
+			vd4 AS(
+				SELECT
+				*,
+				CASE WHEN icudayseq_asc = 1 THEN starttime ELSE starttime + (INTERVAL '1 hour' * icudayseq_asc) END AS starthour
+				FROM vd3	
+			       ),						
+
+						   
+    -- 	continuous renal therapy table flag			
+    
+	crrt_status AS(
+		        SELECT
+		        icustay_id,						   
+                date_trunc('day', starthour) AS crrt_day,
+                CASE WHEN date_trunc('day', starthour) = date_trunc('day', starthour) THEN 1 ELSE 1 END AS crrt_flag							  
+                FROM vd4
+				GROUP BY icustay_id, date_trunc('day', starthour)
+                ORDER BY icustay_id, date_trunc('day', starthour)
+	              )
+									
+						   
+SELECT 
+*
+FROM crrt_status
+LIMIT 1000									  
