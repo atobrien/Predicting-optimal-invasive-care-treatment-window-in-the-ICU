@@ -122,8 +122,6 @@ WITH v1 AS(
 	 v9 AS(
         SELECT
         icustay_id,
-        intime,
-        outtime,
         startday,
         endday,
         icudayseq_asc,
