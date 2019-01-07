@@ -117,8 +117,25 @@ WITH v1 AS(
           USING (icustay_id,day_start)
           LEFT JOIN v7 --this is the cmo flag table
           USING (icustay_id,day_start)		   
-		   )
-		   
+		   ),
+	
+	 v9 AS(
+        SELECT
+        icustay_id,
+        intime,
+        outtime,
+        startday,
+        endday,
+        icudayseq_asc,
+        cv_flag,
+        crrt_flag,
+        vasopres_flag,
+        mechvent AS mechvent_flag,
+        cmo_flag,
+        sofa_last,
+        CASE WHEN (cv_flag = 1 OR crrt_flag = 1 OR vasopres_flag = 1 OR mechvent = 1) THEN 1 ELSE 0 END AS status_flag
+        FROM v8)
+
 SELECT
 icustay_id,
 intime,
@@ -126,11 +143,6 @@ outtime,
 startday,
 endday,
 icudayseq_asc,
-cv_flag,
-crrt_flag,
-vasopres_flag,
-mechvent AS mechvent_flag,
-cmo_flag,
-sofa_last
-FROM v8
-LIMIT 10
+sofa_last,
+CASE WHEN cmo_flag = 1 THEN 2 ELSE status_flag END AS state_transition
+FROM v9
