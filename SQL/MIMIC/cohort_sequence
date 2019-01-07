@@ -198,7 +198,5 @@ death_flag,
 gender,
 admission_age,
 first_icu_stay,
-CASE WHEN cmo_flag = 1 THEN 2 ELSE status_flag END AS state_transition,
-cirrhosis_flag
+CASE WHEN cmo_flag = 1 THEN 2 ELSE status_flag END AS state_transition
 FROM v9
-WHERE cirrhosis_flag IS NOT NULL
