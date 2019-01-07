@@ -1,0 +1,76 @@
+WITH v1 AS(
+        SELECT
+		*,
+	    date_trunc('day', startday) AS day_start,
+	    date_trunc('day', endday) AS day_end
+	    FROM transition), 
+
+     v2 AS(
+	    SELECT
+	    *,
+	    cv_day AS day_start
+	    FROM central), 
+
+  	 v3 AS(
+	    SELECT
+	    *,
+	    crrt_day AS day_start	
+	    FROM crrt),
+	 
+	 v4 AS(
+	    SELECT
+	    *,
+	    vasopres_day AS day_start
+	    FROM vaso),
+
+     m1 AS(
+        SELECT
+        *,
+        date_trunc('day', charttime) AS day_start
+        FROM mech_vent
+        WHERE mechvent = 1 
+        ORDER BY icustay_id, charttime),
+ 
+     v5 AS(
+ 	    SELECT DISTINCT
+        icustay_id,
+        day_start,
+		day_start AS mech_day,
+        mechvent
+        FROM m1),
+
+      sofa AS(
+	      SELECT 
+          *,
+          date_trunc('day', starttime) AS day_start
+	      FROM pivoted_sofa
+          ORDER BY icustay_id, starttime),
+
+       v6 AS(
+		  SELECT DISTINCT
+          icustay_id,
+          day_start,
+          day_start AS sofa_day,
+		  LAST_VALUE(sofa_24hours) OVER (PARTITION BY icustay_id, day_start ORDER BY day_start) AS sofa_last
+		  FROM SOFA),
+
+       v7 AS(
+		  SELECT
+		  *
+		  FROM v1 --this is the day sequence table for patients in the icu
+		  LEFT JOIN v2 --this is the central venous line table flag table
+          USING (icustay_id,day_start)
+          LEFT JOIN v3 --this is the continuous renal replacement therapy flag table
+          USING (icustay_id,day_start)
+          LEFT JOIN v4 --this is the vasopressor flag table
+          USING (icustay_id,day_start)
+          LEFT JOIN v5 --this is the mechanical ventilation flag table
+          USING (icustay_id,day_start)
+          LEFT JOIN v6 --this is the sofa 24 hour flag table
+          USING (icustay_id,day_start)
+		   )
+		   
+SELECT
+*
+FROM v7
+LIMIT 10
