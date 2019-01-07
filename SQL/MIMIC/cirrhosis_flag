@@ -1,0 +1,25 @@
+with cir1 AS(
+          SELECT DISTINCT 
+          icustay_id,
+          charttime,
+          date_trunc('day', charttime) AS day_start,
+          ROW_NUMBER() OVER (PARTITION BY mimiciii.noteevents.subject_id ORDER BY  mimiciii.noteevents.charttime DESC) AS position
+          FROM mimiciii.noteevents
+          LEFT JOIN mimiciii.icustays icu
+          USING (subject_id, hadm_id)
+          WHERE text similar to '%cirrhosis%'),
+ 
+cir2 AS (
+	 SELECT
+     icustay_id, 
+     charttime,
+     day_start,
+     CASE WHEN day_start = day_start THEN 1 END AS cirrhosis_flag 
+     FROM cir1
+     WHERE position = 1 --we only want the hadm_id associated with the very last note
+     AND charttime IS NOT NULL
+     AND icustay_id IS NOT NULL
+     ORDER BY icustay_id)
+
+select *
+from cir2
