@@ -184,10 +184,34 @@ cir2 AS (
 		gender,
         admission_age,
         first_icu_stay,
+		day_start,
         CASE WHEN (cv_flag = 1 OR crrt_flag = 1 OR vasopres_flag = 1 OR mechvent = 1) THEN 1 ELSE 0 END AS status_flag,
 		cirrhosis_flag
-        FROM v8)
+        FROM v8),
 
+     v10 AS(
+	     SELECT
+         icustay_id,
+         startday,
+         endday,
+         icudayseq_asc,
+         sofa_last,
+         death_flag,
+         gender,
+         admission_age,
+         first_icu_stay,
+         CASE WHEN cmo_flag = 1 THEN 2 ELSE status_flag END AS state_transition, --icu is 0, invasive care is 1 and cmo is 2
+		 LEAD(icudayseq_asc) OVER (PARTITION BY icustay_id ORDER BY icudayseq_asc) AS icustay_asc_lead
+         FROM v9	 
+	        ),
+			
+	 v11 AS (
+	     SELECT
+         *,
+         icustay_asc_lead-icudayseq_asc AS ending_stay_flag --when null it means the person is no longer registered in the icu
+         FROM V10
+	         )		
+		
 SELECT
 icustay_id,
 startday,
@@ -198,5 +222,5 @@ death_flag,
 gender,
 admission_age,
 first_icu_stay,
-CASE WHEN cmo_flag = 1 THEN 2 ELSE status_flag END AS state_transition
-FROM v9
+CASE WHEN (ending_stay_flag IS NULL AND death_flag IS NULL) THEN 4 ELSE state_transition END AS states --this combines state transition to include home as an option
+FROM V11
