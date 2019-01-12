@@ -222,8 +222,8 @@ death_flag,
 gender,
 admission_age,
 first_icu_stay,
-CASE WHEN (ending_stay_flag IS NULL AND death_flag IS NULL) THEN 4 --the patient left the icu
-     WHEN death_flag = 1 THEN 5 -- the patient died
+CASE WHEN (ending_stay_flag IS NULL AND death_flag IS NULL) THEN 3 --the patient left the icu
+     WHEN death_flag = 1 THEN 4 -- the patient died
      ELSE state_transition END AS states --this combines state transition to include home and death
 FROM V11
 
