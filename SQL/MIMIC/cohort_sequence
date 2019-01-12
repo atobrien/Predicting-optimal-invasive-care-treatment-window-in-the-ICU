@@ -208,7 +208,7 @@ cir2 AS (
 	 v11 AS (
 	     SELECT
          *,
-         icustay_asc_lead-icudayseq_asc AS ending_stay_flag --when null it means the person is no longer registered in the icu
+         icustay_asc_lead-icudayseq_asc AS ending_stay_flag --when null it means the person is no longer registered in the icu (so they left)
          FROM V10
 	         )		
 		
@@ -222,5 +222,14 @@ death_flag,
 gender,
 admission_age,
 first_icu_stay,
-CASE WHEN (ending_stay_flag IS NULL AND death_flag IS NULL) THEN 4 ELSE state_transition END AS states --this combines state transition to include home as an option
+CASE WHEN (ending_stay_flag IS NULL AND death_flag IS NULL) THEN 4 --the patient left the icu
+     WHEN death_flag = 1 THEN 5 -- the patient died
+     ELSE state_transition END AS states --this combines state transition to include home and death
 FROM V11
+
+
+
+
+
+
+
