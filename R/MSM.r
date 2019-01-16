@@ -137,24 +137,43 @@ detectCores()
 
 
 
-
+s
 
 
 
 
 SIMULATION & prediction
-weathersOfDays <- rmarkovchain(n = 3, 
+weathersOfDays <- rmarkovchain(n = 10, 
                                object = dtmcA, 
                                t0 = "ICU",
                                include.t0 = TRUE,
-                               parallel = TRUE)
-(as.data.frame(weathersOfDays))
+                               parallel = FALSE)
 
-predict(object = dtmcA, newdata = c("ICU", "ICU", "ICU"), n.ahead = 50)
+weathersOfDays[1:10]
+
+weathersOfDays
+
+
+B <- 100
+N <- 30
+Xhat <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = dtmcA, 
+                    t0 = "ICU",
+                    include.t0 = FALSE,
+                    parallel = FALSE)})
 
 
 
 
+
+
+
+predict(object = dtmcA, newdata = c("Invasive"), n.ahead = 50)
+
+
+
+plot(dtmcA, main="Weather Markov Chain")
 
 
 
