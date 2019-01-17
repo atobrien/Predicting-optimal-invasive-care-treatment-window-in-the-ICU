@@ -6,6 +6,7 @@ library("tdisplay", lib.loc="~/R/win-library/3.5")
 library("survival", lib.loc="~/R/win-library/3.5")
 library("survminer", lib.loc="~/R/win-library/3.5")
 library("parallel")
+library("stringr")
 
 # Read data
 df<-read.csv("C:/Users/Me/Desktop/data-1547335815982.csv")
@@ -68,8 +69,8 @@ transition<- df %>% mutate(states= as.factor(states),
                            seq= as.factor(seq))
 tm<-table(transition$states, transition$seq)
 tmA<-tm/rowSums(tm)
-attributes(tmA)$class <- "matrix"  #problem is that it creates NA 
-tmA[tmA == 'NaN'] <- 0 #problem is that it creates NA
+attributes(tmA)$class <- "matrix"  # problem is that it creates NA 
+tmA[tmA == 'NaN'] <- 0 # problem is that it creates NA
 
 # Given the above problem I write the matrix by hand and define the absorbing
 # states by using the intersection of the from-to with a probability of 1
@@ -80,17 +81,21 @@ tmA <- matrix(c(0.56735751, 0.1658031, 0.002590674, 0.2577720, 0.006476684,
                 0.00000000, 0.0000000, 0.000000000, 0.0000000, 1.000000000)
               ,nrow = 5, byrow = TRUE)
 
+# I use markovchain to define the markov object with the above transition matrix
 dtmcA <- new("markovchain",
              transitionMatrix=tmA, 
              states=c("ICU","Invasive","CMO","Discharged", "Death"), 
              name="MarkovChain A") 
 
-dtmcA
+dtmcA # this is the markov object
 
+# There are multiple ways to plot the markov object or the transition matrix
+# some of these wayss are doen below, though it is incomplete for the diagram
+# library
 plot(dtmcA, main = "Transition probability matrix for DBM")
 library(diagram)
 
-
+# To plot the transition matrix I reduce the decimals for visual appeal
 tmA <- matrix(c(0.567, 0.166, 0.0026, 0.258, 0.006,
                 0.046, 0.867, 0.002, 0.066, 0.019,
                 0, 0, 0, 0.500, 0.500,
@@ -124,116 +129,53 @@ plotmat(t(tmA),
      shadow.size = 0.0,
      txt.xadj=1, 
      txt.yadj=-1
-     
 )
 
-
-
-initialState <- c(0, 1, 0, 0, 0)
-simDays <- initialState * (dtmcA^3)
-simDays/rowSums(simDays)
-canonicForm(dtmcA)
-detectCores()
-
-
-
-s
-
-
-
-
-SIMULATION & prediction
-weathersOfDays <- rmarkovchain(n = 10, 
+# We can recreate transitions for individuals using the rmarkovchain 
+# NOTE TO SELF
+#  when not prototyping will have to set a seed due to stocastic nature
+individual <- rmarkovchain(n = 10, 
                                object = dtmcA, 
                                t0 = "ICU",
                                include.t0 = TRUE,
                                parallel = FALSE)
+individual[1:10]
 
-weathersOfDays[1:10]
+# I boot strap this function to create a matrix of multiple individuals.
+# This creates a wide matrix
 
-weathersOfDays
-
-
-B <- 100
+B <- 10000
 N <- 30
-Xhat <- replicate(B, {
+long_rmc <- replicate(B, {
   X <- rmarkovchain(n = N, 
                     object = dtmcA, 
                     t0 = "ICU",
                     include.t0 = FALSE,
                     parallel = FALSE)})
 
+# We can transpose the matrix, transform to a dataframe and then gather with 
+# dplyr to later evaluate simualted survival curves 
 
+wide_rmc<-t(long_rmc)
 
+# Now I turn this matrix into a data frame
+wide_rmc_df<- as.data.frame(wide_rmc)
+id<- 1:nrow(wide_rmc_df)
+wide_rmc_df<-cbind(id=id, wide_rmc_df)
+long_rmc_df<-gather(wide_rmc_df, key=time, value=states, -1)
 
-
-
-
-predict(object = dtmcA, newdata = c("Invasive"), n.ahead = 50)
-
-
-
-plot(dtmcA, main="Weather Markov Chain")
-
-
-
-
-# simulate discrete Markov chains according to transition matrix P
-run.mc.sim <- function( P, num.iters = 50 ) {
-  
-  # number of possible states
-  num.states <- nrow(P)
-  
-  # stores the states X_t through time
-  states     <- numeric(num.iters)
-  
-  # initialize variable for first state 
-  states[1]    <- 1
-  
-  for(t in 2:num.iters) {
-    
-    # probability vector to simulate next state X_{t+1}
-    p  <- P[states[t-1], ]
-    
-    ## draw from multinomial and determine state
-    states[t] <-  which(rmultinom(1, 1, p) == 1)
-  }
-  return(states)
-}
-
-
-num.chains     <- 5
-num.iterations <- 50
-
-# each column stores the sequence of states for a single chains
-chain.states  <- matrix(NA, ncol=num.chains, nrow=num.iterations)
-
-P <- (matrix(c(0.56735751, 0.1658031, 0.002590674, 0.2577720, 0.006476684,
-                0.04582022, 0.8674362, 0.001748863, 0.0664568, 0.018537950,
-                0.00000000, 0.0000000, 0.000000000, 0.5000000, 0.500000000,
-                0.00000000, 0.0000000, 0.000000000, 1.0000000, 0.000000000,
-                0.00000000, 0.0000000, 0.000000000, 0.0000000, 1.000000000)
-              ,nrow = 5, byrow = TRUE))
-
-# simulate chains
-for(c in seq_len(num.chains)){
-  chain.states[,c] <- run.mc.sim(P)
-}
-
-matplot(chain.states, type='l', lty=1, col=1:5, ylim=c(0,4), ylab='state', xlab='time')
-
-
-
-
-
+long_rmc_df<- long_rmc_df %>% 
+  group_by(id) %>% 
+  arrange(id) %>% 
+  mutate(time= as.numeric(str_replace_all(time, "V", "")),
+         days= time-1,
+         time=NULL)
 
 
 
 
 ################################################################################
-
-
-
+# Re structuring the data frame for survival analysis
 
 # Now I have to collapse the tstart, tstop for the MSM so I begin by making the
 # dataframe with the row id, icustay_id, tstart and tstop
@@ -281,6 +223,27 @@ df1<-df1 %>% mutate(lagstop= lag(tstop),
 df1<-df1 %>% 
   mutate(tstart = replace_na(tstart, 1))
 
+
+
+
+################################################################################
+################################################################################
+################################################################################
+## Extra- prototyping different approaches
+
+# One way I'm working on to do the simulations is to leverage the transition 
+# matrix and an initial state. However I encounter an error when trying to do
+# several days by powering the marcov object since the probabilities grow 
+# beyond one (work in progress or to be abdonded not sure)
+
+initialState <- c(0, 1, 0, 0, 0)
+simDays <- initialState * (dtmcA^3)
+simDays/rowSums(simDays)
+canonicForm(dtmcA)
+detectCores()
+
+
+
 # Prototyping-experiment
 
 # Set up a group status for the model -this will later be SOFA
@@ -300,7 +263,6 @@ state5()
 par(oldpar)
 
 summary(sfit4)
-
 
 ##########sfit4$transitions#####################################################
 ctab<-table(table(df1$icustay_id))
@@ -330,37 +292,6 @@ text(c(40, 40, 40, 40), c(.51, .13, .32, .01),
 par(mar=c(5.1, .1, 1, .1))
 state5()
 par(oldpar)
-################################################################################
-## Extra
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 test<-dplyr::pull(df, states)
@@ -440,3 +371,61 @@ ggsurvplot(fit, data = df,
 risk = function(model, newdata, time) {
   as.numeric(1-summary(survfit(model, newdata = newdata, se.fit = F, conf.int = F), times = time)$surv)
 }
+
+
+
+
+
+
+
+# simulate discrete Markov chains according to transition matrix P
+run.mc.sim <- function( P, num.iters = 50 ) {
+  
+  # number of possible states
+  num.states <- nrow(P)
+  
+  # stores the states X_t through time
+  states     <- numeric(num.iters)
+  
+  # initialize variable for first state 
+  states[1]    <- 1
+  
+  for(t in 2:num.iters) {
+    
+    # probability vector to simulate next state X_{t+1}
+    p  <- P[states[t-1], ]
+    
+    ## draw from multinomial and determine state
+    states[t] <-  which(rmultinom(1, 1, p) == 1)
+  }
+  return(states)
+}
+
+
+num.chains     <- 5
+num.iterations <- 50
+
+# each column stores the sequence of states for a single chains
+chain.states  <- matrix(NA, ncol=num.chains, nrow=num.iterations)
+
+P <- (matrix(c(0.56735751, 0.1658031, 0.002590674, 0.2577720, 0.006476684,
+               0.04582022, 0.8674362, 0.001748863, 0.0664568, 0.018537950,
+               0.00000000, 0.0000000, 0.000000000, 0.5000000, 0.500000000,
+               0.00000000, 0.0000000, 0.000000000, 1.0000000, 0.000000000,
+               0.00000000, 0.0000000, 0.000000000, 0.0000000, 1.000000000)
+             ,nrow = 5, byrow = TRUE))
+
+# simulate chains
+for(c in seq_len(num.chains)){
+  chain.states[,c] <- run.mc.sim(P)
+}
+
+matplot(chain.states, type='l', lty=1, col=1:5, ylim=c(0,4), ylab='state', xlab='time')
+
+
+
+predict(object = dtmcA, newdata = c("Invasive"), n.ahead = 50)
+
+
+plot(dtmcA, main="Weather Markov Chain")
+
