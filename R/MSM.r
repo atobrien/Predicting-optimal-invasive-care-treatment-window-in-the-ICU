@@ -144,14 +144,19 @@ individual[1:10]
 # I boot strap this function to create a matrix of multiple individuals.
 # This creates a wide matrix
 
-B <- 10000
+B <- 100000
 N <- 30
+start.time <- Sys.time()
 long_rmc <- replicate(B, {
   X <- rmarkovchain(n = N, 
                     object = dtmcA, 
                     t0 = "ICU",
                     include.t0 = FALSE,
-                    parallel = FALSE)})
+                    parallel = TRUE)})
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
 
 # We can transpose the matrix, transform to a dataframe and then gather with 
 # dplyr to later evaluate simualted survival curves 
@@ -231,14 +236,33 @@ df1<-df1 %>%
 ################################################################################
 ## Extra- prototyping different approaches
 
+
+# Package ‘markovchain’
+noofVisitsDist(dtmcA,2,"ICU")
+
+
+
 # One way I'm working on to do the simulations is to leverage the transition 
 # matrix and an initial state. However I encounter an error when trying to do
 # several days by powering the marcov object since the probabilities grow 
 # beyond one (work in progress or to be abdonded not sure)
 
 initialState <- c(0, 1, 0, 0, 0)
-simDays <- initialState * (dtmcA^3)
+simDays <- initialState * (dtmcA)
+simDays
 simDays/rowSums(simDays)
+
+
+
+mcWP <- new("markovchain", states = c("rainy", "nice", "snowy"),
+            transitionMatrix = matrix(c(0.5, 0.25, 0.25,
+                                        0, 1, 0,
+                                        0,0,1), byrow = T, nrow = 3))
+
+W0 <- t(as.matrix(c(0, 1, 0)))
+W1 <- W0 * mcWP^6; W1
+
+
 canonicForm(dtmcA)
 detectCores()
 
