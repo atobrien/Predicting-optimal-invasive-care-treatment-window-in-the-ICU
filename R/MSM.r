@@ -8,12 +8,22 @@ library("survminer", lib.loc="~/R/win-library/3.5")
 library("parallel")
 library("stringr")
 
-# Read data
-df<-read.csv("C:/Users/Me/Desktop/data-1547335815982.csv")
+################################################################################
+### SELECT CIRRHOSIS COHORT, ASSIGN SOFA QUARTILES #############################
+################################################################################
 
-# Replace NA in death_flag with 0
+
+# Read data
+df<-read.csv("C:/Users/Me/Desktop/mimic_timecohort_20190304.csv")
+
+# Replace NA in flags with 0
 df<-df %>% 
-  mutate(death_flag = replace_na(death_flag, 0))
+  mutate(death_flag = replace_na(death_flag, 0),
+         cv_flag = replace_na(cv_flag, 0),
+         crrt_flag = replace_na(crrt_flag, 0),
+         vasopres_flag = replace_na(vasopres_flag, 0),
+         mechvent_flag = replace_na(mechvent_flag, 0),
+         cmo_flag = replace_na(cmo_flag, 0))
 
 # Select icustays with more than 1 day stay, only first time admission,
 # >=18years and with a sofa score
@@ -43,17 +53,235 @@ rm(key)
 df<-df %>% 
   mutate(death_flag= as.numeric(death_flag), states= as.numeric(states))
 
+# Find the quartiles of SOFA for first day of admission (day 0)
+sofa<-df %>% filter(icudayseq_asc == 0)
+quantile(sofa$sofa_last)
+q.sofa<-quantile(sofa$sofa_last)
+
+# Results:
+# 0%  25%  50%  75% 100% 
+# 0    4    7   10.5   22 
+# Q1: 0-4
+# Q2: 5-7
+# Q3: 8-10.5
+# Q4: 11-22
+
+# Assign cohort groups to sofa data frame
+
+sofa<-sofa %>% mutate(sofa_group= case_when(sofa_last %in% c(q.sofa[[1]]:q.sofa[[2]])~"Q1",
+                                      sofa_last %in% c(q.sofa[[2]]+1:q.sofa[[3]])~"Q2",
+                                      sofa_last %in% c(q.sofa[[3]]+1:)~"Q3",
+                                      sofa_last %in% c(q.sofa[[4]]+0.5:q.sofa[[5]])~"Q4")) 
+sofa<- sofa %>% select(icustay_id, sofa_group)
+
+# Using semi-join with the sofa dataframe we add the sofa group to  df 
+df<-merge(df, sofa, by="icustay_id")
+
+# Remove sofa from memory
+rm(sofa)
+rm(q.sofa)
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+################################################################################
+### REDEFINE CMO ###############################################################
+################################################################################
+
+# CMO will be redefined as follows: 
+# state--lead_state_1_day_out--2_day_out--3_day_out--4_day_out--5_day_out--CMO
+#   1               0              4                                        1
+#   1               0              0           4                            1 
+#   1               0              0           0         4                  1 
+#   1               0              0           0         0          4       1
+# This is making the assumption that patients that transition from 
+# highly invasive care to non-invasive care and then died were on CMO 
+
+df<-df %>% 
+  mutate(onedayout=lead(states, n=1L),
+         twodayout=lead(states, n=2L),
+         threedayout=lead(states, n=3L),
+         fourdayout=lead(states, n=4L),
+         fivedayout=lead(states, n=5L),
+         sixdayout=lead(states, n=6L),
+         sevendayout=lead(states, n=7L),
+         eightdayout=lead(states, n=8L),
+         ninedayout=lead(states, n=9L),
+         tendayout=lead(states, n=10L))
+
+df<-df %>% 
+  mutate(CMO_additional_flag=
+           case_when((states==1)&(onedayout==0)&(twodayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==0)&(ninedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==0)&(ninedayout==0)&(tendayout==4)~1))
+
+# Drop additional columns created to be organized
+df$onedayout<-NULL
+df$twodayout<-NULL
+df$threedayout<-NULL
+df$fourdayout<-NULL
+df$fivedayout<-NULL
+df$sixdayout<-NULL
+df$sevendayout<-NULL
+df$eightdayout<-NULL
+df$ninedayout<-NULL
+df$tendayout<-NULL
+
+# Add in the end state when it is dead (4) 
+df<-df %>% 
+  mutate(A= ifelse(states==4, 4,CMO_additional_flag))
+
+# Filling in CMO cases according to above assumption on post-HIC days
+A <- c(df$A)
+index.1<-which(df$A %in% c(1)) # define location for 1s in A
+index.14<-which(df$A %in% c(1,4)) # define location for 1s and 4s in A
+loc.1<-which(index.14 %in% index.1) # location of 1s in  index.14
+loc.4<-loc.1+1 # location of 4s relative to 1s in index.14
+start.i<-((index.14[loc.1])+1) # starting index for replacing with 2
+end.i<-((index.14[loc.4])-1) # ending index for replacing with 2 in index
+fill.v<-sort(c(start.i, end.i))# sequence of indexes to fill-in with # 2
+fill.m<-matrix(fill.v,nrow = (length(fill.v)/2),ncol = 2, byrow=TRUE) # create matrix of 
+list.1<-apply(fill.m, MARGIN=1,FUN=function(x) seq(x[1],x[2])) # create a list with indexes to replace
+list.2<-unlist(list.1) # unlist list to use as the indexes for replacement
+df$A[list.2] <- 2 # replace indexed location with 2
+
+
+rm(index.1)
+rm(index.14)
+rm(loc.1)
+rm(loc.4)
+rm(start.i)
+rm(end.i)
+rm(fill.v)
+rm(fill.m)
+rm(list.2)
+rm(list.1)
+rm(A)
+
+# Update states & cmo flag with new CMO definition
+df<-df %>%mutate(states= ifelse(A %in% 2, 2, states),
+                 cmo_flag=ifelse(A %in% 2, 1, cmo_flag))
+df$A<-NULL
+df$CMO_additional_flag<-NULL
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+################################################################################
+# Divide cohort based on groups and demographics ###############################
+################################################################################
+
+# Obtain keys for sofa groups
+sofa<-df %>% filter(icudayseq_asc == 0)
+
+# Create df keys for each quantile sofa severity group
+key.q1<-sofa %>% filter(sofa_group %in% "Q1") %>% select(icustay_id)
+key.q2<-sofa %>% filter(sofa_group %in% "Q2") %>% select(icustay_id)
+key.q3<-sofa %>% filter(sofa_group %in% "Q3") %>% select(icustay_id)
+key.q4<-sofa %>% filter(sofa_group %in% "Q4") %>% select(icustay_id)
+
+# Create df for each quantile sofa severity group
+df.q1<-semi_join(df, key.q1)
+df.q2<-semi_join(df, key.q2)
+df.q3<-semi_join(df, key.q3)
+df.q4<-semi_join(df, key.q4)
+
+# Drop keys and sofa table
+rm(key.q1)
+rm(key.q2)
+rm(key.q3)
+rm(key.q4)
+rm(sofa)
+
+# Compute demographics for each quantile sofa group
+
+#Q1#########################
+table(df.q1$gender)
+summary(df.q1$admission_age)
+table(df.q1$death_flag)
+length(unique(df.q1$icustay_id))
+#Q2#########################
+table(df.q2$gender)
+summary(df.q2$admission_age)
+table(df.q2$death_flag)
+length(unique(df.q2$icustay_id))
+#Q3#########################
+table(df.q3$gender)
+summary(df.q3$admission_age)
+table(df.q3$death_flag)
+length(unique(df.q3$icustay_id))
+#Q4#########################
+table(df.q4$gender)
+summary(df.q4$admission_age)
+table(df.q4$death_flag)
+length(unique(df.q4$icustay_id))
+
+# How many days on average did they spend in each unit
+
+#Q1#########################
+table(df.q1$states)[1:3]
+#Q2#########################
+table(df.q2$states)[1:3]
+#Q3#########################
+table(df.q3$states)[1:3]
+#Q4#########################
+table(df.q4$states)[1:3]
+
+# Obtain the last day metrics for each quantile sofa group
+df.q1.lastrow<-df.q1 %>% group_by(icustay_id) %>% filter(icudayseq_asc %in% max(icudayseq_asc))
+df.q2.lastrow<-df.q2 %>% group_by(icustay_id) %>% filter(icudayseq_asc %in% max(icudayseq_asc))
+df.q3.lastrow<-df.q3 %>% group_by(icustay_id) %>% filter(icudayseq_asc %in% max(icudayseq_asc))
+df.q4.lastrow<-df.q4 %>% group_by(icustay_id) %>% filter(icudayseq_asc %in% max(icudayseq_asc))
+
+# Last row statistics for each quantile sofa group
+
+#Q1#########################
+summary(df.q1.lastrow$icudayseq_asc)
+summary(df.q1.lastrow$sofa_last)
+#Q2#########################
+summary(df.q2.lastrow$icudayseq_asc)
+summary(df.q2.lastrow$sofa_last)
+#Q3#########################
+summary(df.q3.lastrow$icudayseq_asc)
+summary(df.q3.lastrow$sofa_last)
+#Q4#########################
+summary(df.q4.lastrow$icudayseq_asc)
+summary(df.q4.lastrow$sofa_last)
+
+rm(df.q1.lastrow)
+rm(df.q2.lastrow)
+rm(df.q3.lastrow)
+rm(df.q4.lastrow)
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
 # Create a lead and a lag column for states
 # this is to prepare the dataframe for the Multi State Model
-# I create a lead and lag state to create the tstart and tstop columns
+# I create a lead and lag state to create the tstart and tstop columnsmy
 # I also converted NA in these columns to 99 for the ifelse statesments to work
 df<-df %>% 
   mutate(lag_states= lag(states),
-              lead_states= lead(states), 
-              lag_states = replace_na(lag_states, 99),
-              lead_states = replace_na(lead_states, 99),
-              tstart= ifelse(states != lag_states, icudayseq_asc, NA),
-              tstop= ifelse(states != lead_states, icudayseq_asc, NA))
+         lead_states= lead(states), 
+         lag_states = replace_na(lag_states, 99),
+         lead_states = replace_na(lead_states, 99),
+         tstart= ifelse(states != lag_states, icudayseq_asc, NA),
+         tstop= ifelse(states != lead_states, icudayseq_asc, NA))
+
+
+
 
 # https://www.coursera.org/lecture/foundations-marketing-analytics/how-to-compute-a-transition-matrix-in-r-recital-1-jD6xC
 
@@ -62,15 +290,16 @@ df<-df %>%
 mysequence<-df$states
 createSequenceMatrix(mysequence)
 
-df<- df %>% mutate(seq= ifelse(states %in% c(3,4), NA, lead_states)) 
+df<- df %>% mutate(seq= ifelse(states %in% c(3,4), NA, lead_states),
+                   seq= ifelse(seq %in% NA, states, lead_states)) 
 
 transition<- df %>% select(states, seq) %>% filter(!is.na(seq))
 transition<- df %>% mutate(states= as.factor(states), 
                            seq= as.factor(seq))
 tm<-table(transition$states, transition$seq)
 tmA<-tm/rowSums(tm)
-attributes(tmA)$class <- "matrix"  # problem is that it creates NA 
-tmA[tmA == 'NaN'] <- 0 # problem is that it creates NA
+# attributes(tmA)$class <- "matrix"  # problem is that it creates NA 
+# tmA[tmA == 'NaN'] <- 0 # problem is that it creates NA
 
 # Given the above problem I write the matrix by hand and define the absorbing
 # states by using the intersection of the from-to with a probability of 1
@@ -144,7 +373,7 @@ individual[1:10]
 # I boot strap this function to create a matrix of multiple individuals.
 # This creates a wide matrix
 
-B <- 100000
+B <- 10000
 N <- 30
 start.time <- Sys.time()
 long_rmc <- replicate(B, {
@@ -177,6 +406,7 @@ long_rmc_df<- long_rmc_df %>%
          time=NULL)
 
 
+> heart.msm<-msm(states ~ icudayseq_asc, subject=icustay_id, data=df, qmatrix=tmA, death= c(4,5))
 
 
 ################################################################################
@@ -237,7 +467,7 @@ df1<-df1 %>%
 ## Extra- prototyping different approaches
 
 
-# Package ‘markovchain’
+# Package 'markovchain'
 noofVisitsDist(dtmcA,2,"ICU")
 
 
@@ -452,4 +682,3 @@ predict(object = dtmcA, newdata = c("Invasive"), n.ahead = 50)
 
 
 plot(dtmcA, main="Weather Markov Chain")
-
