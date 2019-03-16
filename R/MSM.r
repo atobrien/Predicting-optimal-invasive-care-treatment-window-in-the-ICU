@@ -56,22 +56,23 @@ df<-df %>%
 # Find the quartiles of SOFA for first day of admission (day 0)
 sofa<-df %>% filter(icudayseq_asc == 0)
 quantile(sofa$sofa_last)
-q.sofa<-quantile(sofa$sofa_last)
+q.sofa<-floor(quantile(sofa$sofa_last))
 
-# Results:
+# Results(floor):
 # 0%  25%  50%  75% 100% 
 # 0    4    7   10.5   22 
 # Q1: 0-4
 # Q2: 5-7
-# Q3: 8-10.5
+# Q3: 8-10
 # Q4: 11-22
 
 # Assign cohort groups to sofa data frame
 
 sofa<-sofa %>% mutate(sofa_group= case_when(sofa_last %in% c(q.sofa[[1]]:q.sofa[[2]])~"Q1",
-                                      sofa_last %in% c(q.sofa[[2]]+1:q.sofa[[3]])~"Q2",
-                                      sofa_last %in% c(q.sofa[[3]]+1:)~"Q3",
-                                      sofa_last %in% c(q.sofa[[4]]+0.5:q.sofa[[5]])~"Q4")) 
+                                            sofa_last %in% c(q.sofa[[2]]+1:q.sofa[[3]])~"Q2",
+                                            sofa_last %in% c(q.sofa[[3]]+1:q.sofa[[4]])~"Q3",
+                                            sofa_last %in% c(q.sofa[[4]]+1:q.sofa[[5]])~"Q4"))
+                                            
 sofa<- sofa %>% select(icustay_id, sofa_group)
 
 # Using semi-join with the sofa dataframe we add the sofa group to  df 
@@ -262,6 +263,307 @@ rm(df.q1.lastrow)
 rm(df.q2.lastrow)
 rm(df.q3.lastrow)
 rm(df.q4.lastrow)
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+################################################################################
+## TRANSITION MATRIX ###########################################################
+################################################################################
+# Create a lead and a lag column for states
+# this is to prepare the dataframe for the Multi State Model
+# I create a lead and lag state to create the tstart and tstop columns
+# I also converted NA in these columns to 99 for the ifelse statesments to work
+df.q1<-df.q1 %>% 
+  mutate(lag_states= lag(states),
+         lead_states= lead(states), 
+         lag_states = replace_na(lag_states, 99),
+         lead_states = replace_na(lead_states, 99),
+         tstart= ifelse(states != lag_states, icudayseq_asc, NA),
+         tstop= ifelse(states != lead_states, icudayseq_asc, NA))
+
+df.q2<-df.q2 %>% 
+  mutate(lag_states= lag(states),
+         lead_states= lead(states), 
+         lag_states = replace_na(lag_states, 99),
+         lead_states = replace_na(lead_states, 99),
+         tstart= ifelse(states != lag_states, icudayseq_asc, NA),
+         tstop= ifelse(states != lead_states, icudayseq_asc, NA))
+
+df.q3<-df.q3 %>% 
+  mutate(lag_states= lag(states),
+         lead_states= lead(states), 
+         lag_states = replace_na(lag_states, 99),
+         lead_states = replace_na(lead_states, 99),
+         tstart= ifelse(states != lag_states, icudayseq_asc, NA),
+         tstop= ifelse(states != lead_states, icudayseq_asc, NA))
+
+df.q4<-df.q4 %>% 
+  mutate(lag_states= lag(states),
+         lead_states= lead(states), 
+         lag_states = replace_na(lag_states, 99),
+         lead_states = replace_na(lead_states, 99),
+         tstart= ifelse(states != lag_states, icudayseq_asc, NA),
+         tstop= ifelse(states != lead_states, icudayseq_asc, NA))
+
+
+# TRANSITION MATRIX Q1
+
+df.q1<- df.q1 %>% mutate(seq= ifelse(states %in% c(3,4), NA, lead_states),
+                         seq= ifelse(seq %in% NA, states, lead_states)) 
+
+dfq1.loop<-c()
+tm.list<-c()
+tma.list<-c()
+q1.tma<-c()
+for (i in 1:30){
+  dfq1.loop[i]<-list(df.q1 %>% filter(icudayseq_asc %in% c(0:i-1)))
+  tm.list[i]<-list(table(dfq1.loop[[i]][["states"]], dfq1.loop[[i]][["seq"]]))
+  tma.list[i]<-list(tm.list[[i]]/rowSums(tm.list[[i]]))
+  q1.tma[i]<-list(matrix(tma.list[[i]], ncol=(dim(tma.list[[i]])[2]), byrow=FALSE))
+}
+
+
+# TRANSITION MATRIX Q2
+
+df.q2<- df.q2 %>% mutate(seq= ifelse(states %in% c(3,4), NA, lead_states),
+                         seq= ifelse(seq %in% NA, states, lead_states)) 
+
+dfq2.loop<-c()
+tm.list<-c()
+tma.list<-c()
+q2.tma<-c()
+for (i in 1:30){
+  dfq2.loop[i]<-list(df.q1 %>% filter(icudayseq_asc %in% c(0:i-1)))
+  tm.list[i]<-list(table(dfq1.loop[[i]][["states"]], dfq1.loop[[i]][["seq"]]))
+  tma.list[i]<-list(tm.list[[i]]/rowSums(tm.list[[i]]))
+  q2.tma[i]<-list(matrix(tma.list[[i]], ncol=(dim(tma.list[[i]])[2]), byrow=FALSE))
+}
+
+
+# TRANSITION MATRIX Q3
+
+df.q3<- df.q3 %>% mutate(seq= ifelse(states %in% c(3,4), NA, lead_states),
+                         seq= ifelse(seq %in% NA, states, lead_states)) 
+
+dfq3.loop<-c()
+tm.list<-c()
+tma.list<-c()
+q3.tma<-c()
+for (i in 1:30){
+  dfq3.loop[i]<-list(df.q1 %>% filter(icudayseq_asc %in% c(0:i-1)))
+  tm.list[i]<-list(table(dfq1.loop[[i]][["states"]], dfq1.loop[[i]][["seq"]]))
+  tma.list[i]<-list(tm.list[[i]]/rowSums(tm.list[[i]]))
+  q3.tma[i]<-list(matrix(tma.list[[i]], ncol=(dim(tma.list[[i]])[2]), byrow=FALSE))
+}
+
+# TRANSITION MATRIX Q4
+
+df.q4<- df.q4 %>% mutate(seq= ifelse(states %in% c(3,4), NA, lead_states),
+                         seq= ifelse(seq %in% NA, states, lead_states)) 
+
+dfq4.loop<-c()
+tm.list<-c()
+tma.list<-c()
+q4.tma<-c()
+for (i in 1:30){
+  dfq4.loop[i]<-list(df.q1 %>% filter(icudayseq_asc %in% c(0:i-1)))
+  tm.list[i]<-list(table(dfq1.loop[[i]][["states"]], dfq1.loop[[i]][["seq"]]))
+  tma.list[i]<-list(tm.list[[i]]/rowSums(tm.list[[i]]))
+  q4.tma[i]<-list(matrix(tma.list[[i]], ncol=(dim(tma.list[[i]])[2]), byrow=FALSE))
+}
+
+rm(dfq1.loop)
+rm(dfq2.loop)
+rm(dfq3.loop)
+rm(dfq4.loop)
+rm(tm.list)
+rm(tma.list)
+
+# q1.tma,  q2.tma,  q3.tma,  q4.tma are the transition matrices for each strata
+# where we have a list of matrices for 0-1 days, 0-2 days, 0-3 days etc
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+################################################################################
+## MARKOV OBJECT ###############################################################
+################################################################################
+
+# Q1 object
+
+MOq1.1<-new("markovchain",transitionMatrix=q1.tma[[1]], name="MarkovChain Q1")
+MOq1.2<-new("markovchain",transitionMatrix=q1.tma[[2]], name="MarkovChain Q1")
+MOq1.3<-new("markovchain",transitionMatrix=q1.tma[[3]], name="MarkovChain Q1")
+MOq1.4<-new("markovchain",transitionMatrix=q1.tma[[4]], name="MarkovChain Q1")
+MOq1.5<-new("markovchain",transitionMatrix=q1.tma[[5]], name="MarkovChain Q1")
+MOq1.6<-new("markovchain",transitionMatrix=q1.tma[[6]], name="MarkovChain Q1")
+MOq1.7<-new("markovchain",transitionMatrix=q1.tma[[7]], name="MarkovChain Q1")
+MOq1.8<-new("markovchain",transitionMatrix=q1.tma[[8]], name="MarkovChain Q1")
+MOq1.9<-new("markovchain",transitionMatrix=q1.tma[[9]], name="MarkovChain Q1")
+MOq1.10<-new("markovchain",transitionMatrix=q1.tma[[10]], name="MarkovChain Q1")
+MOq1.11<-new("markovchain",transitionMatrix=q1.tma[[11]], name="MarkovChain Q1")
+MOq1.12<-new("markovchain",transitionMatrix=q1.tma[[12]], name="MarkovChain Q1")
+MOq1.13<-new("markovchain",transitionMatrix=q1.tma[[13]], name="MarkovChain Q1")
+MOq1.14<-new("markovchain",transitionMatrix=q1.tma[[14]], name="MarkovChain Q1")
+MOq1.15<-new("markovchain",transitionMatrix=q1.tma[[15]], name="MarkovChain Q1")
+MOq1.16<-new("markovchain",transitionMatrix=q1.tma[[16]], name="MarkovChain Q1")
+MOq1.17<-new("markovchain",transitionMatrix=q1.tma[[17]], name="MarkovChain Q1")
+MOq1.18<-new("markovchain",transitionMatrix=q1.tma[[18]], name="MarkovChain Q1")
+MOq1.19<-new("markovchain",transitionMatrix=q1.tma[[19]], name="MarkovChain Q1")
+MOq1.20<-new("markovchain",transitionMatrix=q1.tma[[20]], name="MarkovChain Q1")
+MOq1.21<-new("markovchain",transitionMatrix=q1.tma[[21]], name="MarkovChain Q1")
+MOq1.22<-new("markovchain",transitionMatrix=q1.tma[[22]], name="MarkovChain Q1")
+MOq1.23<-new("markovchain",transitionMatrix=q1.tma[[23]], name="MarkovChain Q1")
+MOq1.24<-new("markovchain",transitionMatrix=q1.tma[[24]], name="MarkovChain Q1")
+MOq1.25<-new("markovchain",transitionMatrix=q1.tma[[25]], name="MarkovChain Q1")
+MOq1.26<-new("markovchain",transitionMatrix=q1.tma[[26]], name="MarkovChain Q1")
+MOq1.27<-new("markovchain",transitionMatrix=q1.tma[[27]], name="MarkovChain Q1")
+MOq1.28<-new("markovchain",transitionMatrix=q1.tma[[28]], name="MarkovChain Q1")
+MOq1.29<-new("markovchain",transitionMatrix=q1.tma[[29]], name="MarkovChain Q1")
+MOq1.30<-new("markovchain",transitionMatrix=q1.tma[[30]], name="MarkovChain Q1")
+
+# Q2 object
+
+MOq2.1<-new("markovchain",transitionMatrix=q2.tma[[1]], name="MarkovChain Q2")
+MOq2.2<-new("markovchain",transitionMatrix=q2.tma[[2]], name="MarkovChain Q2")
+MOq2.3<-new("markovchain",transitionMatrix=q2.tma[[3]], name="MarkovChain Q2")
+MOq2.4<-new("markovchain",transitionMatrix=q2.tma[[4]], name="MarkovChain Q2")
+MOq2.5<-new("markovchain",transitionMatrix=q2.tma[[5]], name="MarkovChain Q2")
+MOq2.6<-new("markovchain",transitionMatrix=q2.tma[[6]], name="MarkovChain Q2")
+MOq2.7<-new("markovchain",transitionMatrix=q2.tma[[7]], name="MarkovChain Q2")
+MOq2.8<-new("markovchain",transitionMatrix=q2.tma[[8]], name="MarkovChain Q2")
+MOq2.9<-new("markovchain",transitionMatrix=q2.tma[[9]], name="MarkovChain Q2")
+MOq2.10<-new("markovchain",transitionMatrix=q2.tma[[10]], name="MarkovChain Q2")
+MOq2.11<-new("markovchain",transitionMatrix=q2.tma[[11]], name="MarkovChain Q2")
+MOq2.12<-new("markovchain",transitionMatrix=q2.tma[[12]], name="MarkovChain Q2")
+MOq2.13<-new("markovchain",transitionMatrix=q2.tma[[13]], name="MarkovChain Q2")
+MOq2.14<-new("markovchain",transitionMatrix=q2.tma[[14]], name="MarkovChain Q2")
+MOq2.15<-new("markovchain",transitionMatrix=q2.tma[[15]], name="MarkovChain Q2")
+MOq2.16<-new("markovchain",transitionMatrix=q2.tma[[16]], name="MarkovChain Q2")
+MOq2.17<-new("markovchain",transitionMatrix=q2.tma[[17]], name="MarkovChain Q2")
+MOq2.18<-new("markovchain",transitionMatrix=q2.tma[[18]], name="MarkovChain Q2")
+MOq2.19<-new("markovchain",transitionMatrix=q2.tma[[19]], name="MarkovChain Q2")
+MOq2.20<-new("markovchain",transitionMatrix=q2.tma[[20]], name="MarkovChain Q2")
+MOq2.21<-new("markovchain",transitionMatrix=q2.tma[[21]], name="MarkovChain Q2")
+MOq2.22<-new("markovchain",transitionMatrix=q2.tma[[22]], name="MarkovChain Q2")
+MOq2.23<-new("markovchain",transitionMatrix=q2.tma[[23]], name="MarkovChain Q2")
+MOq2.24<-new("markovchain",transitionMatrix=q2.tma[[24]], name="MarkovChain Q2")
+MOq2.25<-new("markovchain",transitionMatrix=q2.tma[[25]], name="MarkovChain Q2")
+MOq2.26<-new("markovchain",transitionMatrix=q2.tma[[26]], name="MarkovChain Q2")
+MOq2.27<-new("markovchain",transitionMatrix=q2.tma[[27]], name="MarkovChain Q2")
+MOq2.28<-new("markovchain",transitionMatrix=q2.tma[[28]], name="MarkovChain Q2")
+MOq2.29<-new("markovchain",transitionMatrix=q2.tma[[29]], name="MarkovChain Q2")
+MOq2.30<-new("markovchain",transitionMatrix=q2.tma[[30]], name="MarkovChain Q2")
+
+# Q3 object
+
+MOq3.1<-new("markovchain",transitionMatrix=q3.tma[[1]], name="MarkovChain Q3")
+MOq3.2<-new("markovchain",transitionMatrix=q3.tma[[2]], name="MarkovChain Q3")
+MOq3.3<-new("markovchain",transitionMatrix=q3.tma[[3]], name="MarkovChain Q3")
+MOq3.4<-new("markovchain",transitionMatrix=q3.tma[[4]], name="MarkovChain Q3")
+MOq3.5<-new("markovchain",transitionMatrix=q3.tma[[5]], name="MarkovChain Q3")
+MOq3.6<-new("markovchain",transitionMatrix=q3.tma[[6]], name="MarkovChain Q3")
+MOq3.7<-new("markovchain",transitionMatrix=q3.tma[[7]], name="MarkovChain Q3")
+MOq3.8<-new("markovchain",transitionMatrix=q3.tma[[8]], name="MarkovChain Q3")
+MOq3.9<-new("markovchain",transitionMatrix=q3.tma[[9]], name="MarkovChain Q3")
+MOq3.10<-new("markovchain",transitionMatrix=q3.tma[[10]], name="MarkovChain Q3")
+MOq3.11<-new("markovchain",transitionMatrix=q3.tma[[11]], name="MarkovChain Q3")
+MOq3.12<-new("markovchain",transitionMatrix=q3.tma[[12]], name="MarkovChain Q3")
+MOq3.13<-new("markovchain",transitionMatrix=q3.tma[[13]], name="MarkovChain Q3")
+MOq3.14<-new("markovchain",transitionMatrix=q3.tma[[14]], name="MarkovChain Q3")
+MOq3.15<-new("markovchain",transitionMatrix=q3.tma[[15]], name="MarkovChain Q3")
+MOq3.16<-new("markovchain",transitionMatrix=q3.tma[[16]], name="MarkovChain Q3")
+MOq3.17<-new("markovchain",transitionMatrix=q3.tma[[17]], name="MarkovChain Q3")
+MOq3.18<-new("markovchain",transitionMatrix=q3.tma[[18]], name="MarkovChain Q3")
+MOq3.19<-new("markovchain",transitionMatrix=q3.tma[[19]], name="MarkovChain Q3")
+MOq3.20<-new("markovchain",transitionMatrix=q3.tma[[20]], name="MarkovChain Q3")
+MOq3.21<-new("markovchain",transitionMatrix=q3.tma[[21]], name="MarkovChain Q3")
+MOq3.22<-new("markovchain",transitionMatrix=q3.tma[[22]], name="MarkovChain Q3")
+MOq3.23<-new("markovchain",transitionMatrix=q3.tma[[23]], name="MarkovChain Q3")
+MOq3.24<-new("markovchain",transitionMatrix=q3.tma[[24]], name="MarkovChain Q3")
+MOq3.25<-new("markovchain",transitionMatrix=q3.tma[[25]], name="MarkovChain Q3")
+MOq3.26<-new("markovchain",transitionMatrix=q3.tma[[26]], name="MarkovChain Q3")
+MOq3.27<-new("markovchain",transitionMatrix=q3.tma[[27]], name="MarkovChain Q3")
+MOq3.28<-new("markovchain",transitionMatrix=q3.tma[[28]], name="MarkovChain Q3")
+MOq3.29<-new("markovchain",transitionMatrix=q3.tma[[29]], name="MarkovChain Q3")
+MOq3.30<-new("markovchain",transitionMatrix=q3.tma[[30]], name="MarkovChain Q3")
+
+# Q4 object
+
+MOq4.1<-new("markovchain",transitionMatrix=q4.tma[[1]], name="MarkovChain Q4")
+MOq4.2<-new("markovchain",transitionMatrix=q4.tma[[2]], name="MarkovChain Q4")
+MOq4.3<-new("markovchain",transitionMatrix=q4.tma[[3]], name="MarkovChain Q4")
+MOq4.4<-new("markovchain",transitionMatrix=q4.tma[[4]], name="MarkovChain Q4")
+MOq4.5<-new("markovchain",transitionMatrix=q4.tma[[5]], name="MarkovChain Q4")
+MOq4.6<-new("markovchain",transitionMatrix=q4.tma[[6]], name="MarkovChain Q4")
+MOq4.7<-new("markovchain",transitionMatrix=q4.tma[[7]], name="MarkovChain Q4")
+MOq4.8<-new("markovchain",transitionMatrix=q4.tma[[8]], name="MarkovChain Q4")
+MOq4.9<-new("markovchain",transitionMatrix=q4.tma[[9]], name="MarkovChain Q4")
+MOq4.10<-new("markovchain",transitionMatrix=q4.tma[[10]], name="MarkovChain Q4")
+MOq4.11<-new("markovchain",transitionMatrix=q4.tma[[11]], name="MarkovChain Q4")
+MOq4.12<-new("markovchain",transitionMatrix=q4.tma[[12]], name="MarkovChain Q4")
+MOq4.13<-new("markovchain",transitionMatrix=q4.tma[[13]], name="MarkovChain Q4")
+MOq4.14<-new("markovchain",transitionMatrix=q4.tma[[14]], name="MarkovChain Q4")
+MOq4.15<-new("markovchain",transitionMatrix=q4.tma[[15]], name="MarkovChain Q4")
+MOq4.16<-new("markovchain",transitionMatrix=q4.tma[[16]], name="MarkovChain Q4")
+MOq4.17<-new("markovchain",transitionMatrix=q4.tma[[17]], name="MarkovChain Q4")
+MOq4.18<-new("markovchain",transitionMatrix=q4.tma[[18]], name="MarkovChain Q4")
+MOq4.19<-new("markovchain",transitionMatrix=q4.tma[[19]], name="MarkovChain Q4")
+MOq4.20<-new("markovchain",transitionMatrix=q4.tma[[20]], name="MarkovChain Q4")
+MOq4.21<-new("markovchain",transitionMatrix=q4.tma[[21]], name="MarkovChain Q4")
+MOq4.22<-new("markovchain",transitionMatrix=q4.tma[[22]], name="MarkovChain Q4")
+MOq4.23<-new("markovchain",transitionMatrix=q4.tma[[23]], name="MarkovChain Q4")
+MOq4.24<-new("markovchain",transitionMatrix=q4.tma[[24]], name="MarkovChain Q4")
+MOq4.25<-new("markovchain",transitionMatrix=q4.tma[[25]], name="MarkovChain Q4")
+MOq4.26<-new("markovchain",transitionMatrix=q4.tma[[26]], name="MarkovChain Q4")
+MOq4.27<-new("markovchain",transitionMatrix=q4.tma[[27]], name="MarkovChain Q4")
+MOq4.28<-new("markovchain",transitionMatrix=q4.tma[[28]], name="MarkovChain Q4")
+MOq4.29<-new("markovchain",transitionMatrix=q4.tma[[29]], name="MarkovChain Q4")
+MOq4.30<-new("markovchain",transitionMatrix=q4.tma[[30]], name="MarkovChain Q4")
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+################################################################################
+## MARKOV OBJECT ###############################################################
+################################################################################
+
+
+# We can recreate transitions for individuals using the rmarkovchain 
+# NOTE TO SELF
+#  when not prototyping will have to set a seed due to stocastic nature
+individual <- rmarkovchain(n = 10, 
+                           object = dtmcA, 
+                           t0 = "ICU",
+                           include.t0 = TRUE,
+                           parallel = FALSE)
+individual[1:10]
+
+# I boot strap this function to create a matrix of multiple individuals.
+# This creates a wide matrix
+
+B <- 10000
+N <- 30
+start.time <- Sys.time()
+long_rmc <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = dtmcA, 
+                    t0 = "ICU",
+                    include.t0 = FALSE,
+                    parallel = TRUE)})
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+
+
 
 #______________________________________________________________________________#
 #______________________________________________________________________________#
@@ -682,3 +984,15 @@ predict(object = dtmcA, newdata = c("Invasive"), n.ahead = 50)
 
 
 plot(dtmcA, main="Weather Markov Chain")
+
+
+
+
+# # new("markovchain",transitionMatrix=q1.tma[[30]], name="MarkovChain Q1") 
+# 
+# 
+# mcobj.q1<-list()
+# for (i in 1:30){
+#   mcobj.q1[i]<-new("markovchain",transitionMatrix=q1.tma[[i]], name="MarkovChain Q1")
+# }
+# lapply(q1.tma, , )
