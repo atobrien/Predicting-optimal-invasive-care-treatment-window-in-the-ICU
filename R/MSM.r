@@ -1,3 +1,4 @@
+# Work in progress
 # Load library
 library("tidyr")
 library("dplyr")
@@ -336,8 +337,8 @@ tm.list<-c()
 tma.list<-c()
 q2.tma<-c()
 for (i in 1:30){
-  dfq2.loop[i]<-list(df.q1 %>% filter(icudayseq_asc %in% c(0:i-1)))
-  tm.list[i]<-list(table(dfq1.loop[[i]][["states"]], dfq1.loop[[i]][["seq"]]))
+  dfq2.loop[i]<-list(df.q2 %>% filter(icudayseq_asc %in% c(0:i-1)))
+  tm.list[i]<-list(table(dfq2.loop[[i]][["states"]], dfq2.loop[[i]][["seq"]]))
   tma.list[i]<-list(tm.list[[i]]/rowSums(tm.list[[i]]))
   q2.tma[i]<-list(matrix(tma.list[[i]], ncol=(dim(tma.list[[i]])[2]), byrow=FALSE))
 }
@@ -353,8 +354,8 @@ tm.list<-c()
 tma.list<-c()
 q3.tma<-c()
 for (i in 1:30){
-  dfq3.loop[i]<-list(df.q1 %>% filter(icudayseq_asc %in% c(0:i-1)))
-  tm.list[i]<-list(table(dfq1.loop[[i]][["states"]], dfq1.loop[[i]][["seq"]]))
+  dfq3.loop[i]<-list(df.q3 %>% filter(icudayseq_asc %in% c(0:i-1)))
+  tm.list[i]<-list(table(dfq3.loop[[i]][["states"]], dfq3.loop[[i]][["seq"]]))
   tma.list[i]<-list(tm.list[[i]]/rowSums(tm.list[[i]]))
   q3.tma[i]<-list(matrix(tma.list[[i]], ncol=(dim(tma.list[[i]])[2]), byrow=FALSE))
 }
@@ -369,8 +370,8 @@ tm.list<-c()
 tma.list<-c()
 q4.tma<-c()
 for (i in 1:30){
-  dfq4.loop[i]<-list(df.q1 %>% filter(icudayseq_asc %in% c(0:i-1)))
-  tm.list[i]<-list(table(dfq1.loop[[i]][["states"]], dfq1.loop[[i]][["seq"]]))
+  dfq4.loop[i]<-list(df.q4 %>% filter(icudayseq_asc %in% c(0:i-1)))
+  tm.list[i]<-list(table(dfq4.loop[[i]][["states"]], dfq4.loop[[i]][["seq"]]))
   tma.list[i]<-list(tm.list[[i]]/rowSums(tm.list[[i]]))
   q4.tma[i]<-list(matrix(tma.list[[i]], ncol=(dim(tma.list[[i]])[2]), byrow=FALSE))
 }
