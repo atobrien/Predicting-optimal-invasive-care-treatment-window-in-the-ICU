@@ -1,4 +1,3 @@
-# Work in progress
 # Load library
 library("tidyr")
 library("dplyr")
@@ -179,6 +178,200 @@ df$CMO_additional_flag<-NULL
 #______________________________________________________________________________#
 #______________________________________________________________________________#
 
+# The leads below will be used to define transition matrices later on
+# I could have used a loop but I opted for hard code due to interpretability
+
+df<-df %>% mutate(lead1=lead(states),
+                  lead2=lead(states, n=2),
+                  lead3=lead(states, n=3),
+                  lead4=lead(states, n=4),
+                  lead5=lead(states, n=5),
+                  lead6=lead(states, n=6),
+                  lead7=lead(states, n=7),
+                  lead8=lead(states, n=8),
+                  lead9=lead(states, n=9),
+                  lead10=lead(states, n=10),
+                  lead11=lead(states, n=11),
+                  lead12=lead(states, n=12),
+                  lead13=lead(states, n=13),
+                  lead14=lead(states, n=14),
+                  lead15=lead(states, n=15),
+                  lead16=lead(states, n=16),
+                  lead17=lead(states, n=17),
+                  lead18=lead(states, n=18),
+                  lead19=lead(states, n=19),
+                  lead20=lead(states, n=20),
+                  lead21=lead(states, n=21),
+                  lead22=lead(states, n=22),
+                  lead23=lead(states, n=23),
+                  lead24=lead(states, n=24),
+                  lead25=lead(states, n=25),
+                  lead26=lead(states, n=26),
+                  lead27=lead(states, n=27),
+                  lead28=lead(states, n=28),
+                  lead29=lead(states, n=29),
+                  lead30=lead(states, n=30))
+
+
+
+
+
+################################################################################
+# Halved analysis                                                              #
+################################################################################
+# Divide cohort based on groups and demographics ###############################
+################################################################################
+
+# Obtain keys for sofa groups
+sofa<-df %>% filter(icudayseq_asc == 0)
+
+# Create df keys for each quantile sofa severity group
+key.low<-sofa %>% filter(sofa_group %in% c("Q1","Q2")) %>% select(icustay_id)
+key.high<-sofa %>% filter(sofa_group %in% c("Q3","Q4")) %>% select(icustay_id)
+
+# Create df for each quantile sofa severity group
+df.low<-semi_join(df, key.low)
+df.high<-semi_join(df, key.high)
+
+
+# Drop keys and sofa table
+rm(key.low)
+rm(key.high)
+rm(sofa)
+
+# Compute demographics for each quantile sofa group
+
+#Q1#########################
+table(df.low$death_flag)
+length(unique(df.low$icustay_id))
+#Q2#########################
+table(df.high$death_flag)
+length(unique(df.high$icustay_id))
+
+
+# How many days on average did they spend in each unit
+
+#Q1#########################
+table(df.low$states)[1:3]
+sum(table(df.low$states)[1:3]) # total number of days in ICU
+sum(table(df.low$states)) # total number of days passed
+#Q2#########################
+table(df.high$states)[1:3]
+sum(table(df.high$states)[1:3])# total number of days in ICU
+sum(table(df.high$states)) # total number of days passed
+
+# Obtain the last day metrics for each quantile sofa group
+df.low.lastrow<-df.low %>% group_by(icustay_id) %>% filter(icudayseq_asc %in% max(icudayseq_asc))
+df.high.lastrow<-df.high %>% group_by(icustay_id) %>% filter(icudayseq_asc %in% max(icudayseq_asc))
+
+# Last row statistics for each quantile sofa group
+
+#Q1#########################
+summary(df.low.lastrow$icudayseq_asc)
+summary(df.low.lastrow$sofa_last)
+summary(df.low.lastrow$admission_age)
+table(df.low.lastrow$gender)
+(table(df.low.lastrow$gender)/length(unique(df.low$icustay_id)))*100
+#Q2#########################
+summary(df.high.lastrow$icudayseq_asc)
+summary(df.high.lastrow$sofa_last)
+summary(df.high.lastrow$admission_age)
+table(df.high.lastrow$gender)
+(table(df.high.lastrow$gender)/length(unique(df.high$icustay_id)))*100
+
+rm(df.low.lastrow)
+rm(df.high.lastrow)
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+
+
+
+################################################################################
+## TRANSITION MATRIX ###########################################################
+################################################################################
+# Create a lead and a lag column for states
+# this is to prepare the dataframe for the Multi State Model
+# I create a lead and lag state to create the tstart and tstop columns
+# I also converted NA in these columns to 99 for the ifelse statesments to work
+df.low<-df.low %>% 
+  mutate(lag_states= lag(states),
+         lead_states= lead(states), 
+         lag_states = replace_na(lag_states, 99),
+         lead_states = replace_na(lead_states, 99),
+         tstart= ifelse(states != lag_states, icudayseq_asc, NA),
+         tstop= ifelse(states != lead_states, icudayseq_asc, NA))
+
+df.high<-df.high %>% 
+  mutate(lag_states= lag(states),
+         lead_states= lead(states), 
+         lag_states = replace_na(lag_states, 99),
+         lead_states = replace_na(lead_states, 99),
+         tstart= ifelse(states != lag_states, icudayseq_asc, NA),
+         tstop= ifelse(states != lead_states, icudayseq_asc, NA))
+
+
+# TRANSITION MATRIX LOW
+
+df.low<- df.low %>% mutate(seq= ifelse(states %in% c(3,4), NA, lead_states),
+                         seq= ifelse(seq %in% NA, states, lead_states)) 
+
+dflow.loop<-c()
+tm.list<-c()
+tma.list<-c()
+low.tma<-c()
+for (i in 1:30){
+  dflow.loop[i]<-list(df.low %>% filter(icudayseq_asc %in% c(0:i-1)))
+  tm.list[i]<-list(table(dflow.loop[[i]][["states"]], dflow.loop[[i]][["seq"]]))
+  tma.list[i]<-list(tm.list[[i]]/rowSums(tm.list[[i]]))
+  low.tma[i]<-list(matrix(tma.list[[i]], ncol=(dim(tma.list[[i]])[2]), byrow=FALSE))
+}
+
+
+# TRANSITION MATRIX HIGH
+
+df.high<- df.high %>% mutate(seq= ifelse(states %in% c(3,4), NA, lead_states),
+                         seq= ifelse(seq %in% NA, states, lead_states)) 
+
+dfhigh.loop<-c()
+tm.list<-c()
+tma.list<-c()
+high.tma<-c()
+for (i in 1:30){
+  dfhigh.loop[i]<-list(df.high %>% filter(icudayseq_asc %in% c(0:i-1)))
+  tm.list[i]<-list(table(dfhigh.loop[[i]][["states"]], dfhigh.loop[[i]][["seq"]]))
+  tma.list[i]<-list(tm.list[[i]]/rowSums(tm.list[[i]]))
+  high.tma[i]<-list(matrix(tma.list[[i]], ncol=(dim(tma.list[[i]])[2]), byrow=FALSE))
+}
+
+rm(dflow.loop)
+rm(dfhigh.loop)
+rm(tm.list)
+rm(tmlow.list)
+rm(tmhigh.list)
+rm(tma.list)
+rm(tmalow.list)
+rm(tmahigh.list)
+
+
+# low.tma,  high.tma,   are the transition matrices for each strata
+# where we have a list of matrices for 0-1 days, 0-2 days, 0-3 days etc
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+
+
+
+
+
+#############################################################################################
+# Quartile analysis                                                            #
 ################################################################################
 # Divide cohort based on groups and demographics ###############################
 ################################################################################
@@ -208,23 +401,15 @@ rm(sofa)
 # Compute demographics for each quantile sofa group
 
 #Q1#########################
-table(df.q1$gender)
-summary(df.q1$admission_age)
 table(df.q1$death_flag)
 length(unique(df.q1$icustay_id))
 #Q2#########################
-table(df.q2$gender)
-summary(df.q2$admission_age)
 table(df.q2$death_flag)
 length(unique(df.q2$icustay_id))
 #Q3#########################
-table(df.q3$gender)
-summary(df.q3$admission_age)
 table(df.q3$death_flag)
 length(unique(df.q3$icustay_id))
 #Q4#########################
-table(df.q4$gender)
-summary(df.q4$admission_age)
 table(df.q4$death_flag)
 length(unique(df.q4$icustay_id))
 
@@ -232,12 +417,21 @@ length(unique(df.q4$icustay_id))
 
 #Q1#########################
 table(df.q1$states)[1:3]
+sum(table(df.q1$states)[1:3]) # total number of days in ICU
+sum(table(df.q1$states)) # total number of days passed
 #Q2#########################
 table(df.q2$states)[1:3]
+sum(table(df.q2$states)[1:3])# total number of days in ICU
+sum(table(df.q2$states)) # total number of days passed
 #Q3#########################
 table(df.q3$states)[1:3]
+sum(table(df.q3$states)[1:3])# total number of days in ICU
+sum(table(df.q3$states)) # total number of days passed
 #Q4#########################
 table(df.q4$states)[1:3]
+sum(table(df.q4$states)[1:3])# total number of days in ICU
+sum(table(df.q4$states)) # total number of days passed
+
 
 # Obtain the last day metrics for each quantile sofa group
 df.q1.lastrow<-df.q1 %>% group_by(icustay_id) %>% filter(icudayseq_asc %in% max(icudayseq_asc))
@@ -250,15 +444,27 @@ df.q4.lastrow<-df.q4 %>% group_by(icustay_id) %>% filter(icudayseq_asc %in% max(
 #Q1#########################
 summary(df.q1.lastrow$icudayseq_asc)
 summary(df.q1.lastrow$sofa_last)
+summary(df.q1.lastrow$admission_age)
+table(df.q1.lastrow$gender)
+(table(df.q1.lastrow$gender)/length(unique(df.q1$icustay_id)))*100
 #Q2#########################
 summary(df.q2.lastrow$icudayseq_asc)
 summary(df.q2.lastrow$sofa_last)
+summary(df.q2.lastrow$admission_age)
+table(df.q2.lastrow$gender)
+(table(df.q2.lastrow$gender)/length(unique(df.q2$icustay_id)))*100
 #Q3#########################
 summary(df.q3.lastrow$icudayseq_asc)
 summary(df.q3.lastrow$sofa_last)
+summary(df.q3.lastrow$admission_age)
+table(df.q3.lastrow$gender)
+(table(df.q3.lastrow$gender)/length(unique(df.q3$icustay_id)))*100
 #Q4#########################
 summary(df.q4.lastrow$icudayseq_asc)
 summary(df.q4.lastrow$sofa_last)
+summary(df.q4.lastrow$admission_age)
+table(df.q4.lastrow$gender)
+(table(df.q4.lastrow$gender)/length(unique(df.q4$icustay_id)))*100
 
 rm(df.q1.lastrow)
 rm(df.q2.lastrow)
@@ -269,6 +475,20 @@ rm(df.q4.lastrow)
 #______________________________________________________________________________#
 #______________________________________________________________________________#
 #______________________________________________________________________________#
+
+# ONE DAY OF HIC 
+hic<-df %>% filter(((states%in%1) != (lead1)))# filter states transition for patients that receive 1 day of Highly invasive care
+index.1<-which(hic.one$states %in% c(1)) # define location for 1s in A
+index<- (c(index.1,index.1+1)) # concatanation of indexes of interest
+hic.tm<- matrix(c(hic$states[index.1],hic$states[index.1+1]), nrow=length(index.1), ncol=2)
+hic.tm<- as.data.frame(hic.tm)
+tm.1<-table(hic.tm$V1, hic.tm$V2)
+
+
+
+
+
+
 
 ################################################################################
 ## TRANSITION MATRIX ###########################################################
@@ -527,10 +747,12 @@ MOq4.28<-new("markovchain",transitionMatrix=q4.tma[[28]], name="MarkovChain Q4")
 MOq4.29<-new("markovchain",transitionMatrix=q4.tma[[29]], name="MarkovChain Q4")
 MOq4.30<-new("markovchain",transitionMatrix=q4.tma[[30]], name="MarkovChain Q4")
 
-#______________________________________________________________________________#
-#______________________________________________________________________________#
-#______________________________________________________________________________#
-#______________________________________________________________________________#
+
+
+
+
+
+
 
 ################################################################################
 ## MARKOV OBJECT ###############################################################
