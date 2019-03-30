@@ -347,25 +347,1294 @@ hic.ma<- matrix(c(df.q1$states[index.1],df.q1$states[index.1+1]), nrow=length(in
 hic.df<-as.data.frame(hic.ma) %>% filter(V1!=V2)
 tm.1<-table(hic.df$V1, hic.df$V2)
 
-# TWO DAY OF HIC 
+# TWO DAYs OF HIC 
 index.3<-index.1+2
 hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.3], nrow=length(df.q1$states[index.3])))
-hic.ma<-hic.ma[hic.ma[,3] != 1, ]
-hic.ma<-hic.ma[hic.ma[,2] == 1, ]
-hic.ma<-hic.ma[,-1]
-tm.2<-table(hic.ma[,1], hic.ma[,2])
+#
+hic.ma2<-hic.ma[hic.ma[,3] != 1, ]
+hic.ma2<-hic.ma2[hic.ma2[,2] == 1, ]
+hic.ma2<-hic.ma2[,-1]
+tm.2<-table(hic.ma2[,1], hic.ma2[,2])
 
+# THREE DAYs OF HIC 
+index.4<-index.1+3
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.4], nrow=length(df.q1$states[index.4])))
+#
+hic.ma3<-hic.ma[hic.ma[,4] != 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,3] == 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,2] == 1, ]
+hic.ma3<-hic.ma3[,-c(1,2)]
+hic.ma3[complete.cases(hic.ma3), ]
+tm.3<-table(hic.ma3[,1], hic.ma3[,2])
 
+# FOUR DAYs OF HIC 
+index.5<-index.1+4
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.5], nrow=length(df.q1$states[index.5])))
+#
+hic.ma4<-hic.ma[hic.ma[,5] != 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,4] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,3] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,2] == 1, ]
+hic.ma4<-hic.ma4[,-c(1,2,3)]
+hic.ma4[complete.cases(hic.ma4), ]
+tm.4<-table(hic.ma4[,1], hic.ma4[,2])
 
+# FIVE DAYs OF HIC
+index.6<-index.1+5
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.6], nrow=length(df.q1$states[index.6])))
+#
+hic.ma5<-hic.ma[hic.ma[,6] != 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,5] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,4] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,3] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,2] == 1, ]
+hic.ma5<-hic.ma5[,-c(1,2,3,4)]
+hic.ma5[complete.cases(hic.ma5), ]
+tm.5<-table(hic.ma5[,1], hic.ma5[,2])
 
+# SIX DAYs OF HIC 
+index.7<-index.1+6
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.7], nrow=length(df.q1$states[index.7])))
+#
+hic.ma6<-hic.ma[hic.ma[,7] != 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,6] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,5] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,4] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,3] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,2] == 1, ]
+hic.ma6<-hic.ma6[,-c(1,2,3,4,5)]
+hic.ma6[complete.cases(hic.ma6), ]
+tm.6<-table(hic.ma6[,1], hic.ma6[,2])
 
+# SEVEN DAYs OF HIC 
+index.8<-index.1+7
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.8], nrow=length(df.q1$states[index.8])))
+#
+hic.ma7<-hic.ma[hic.ma[,8] != 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,7] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,6] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,5] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,4] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,3] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,2] == 1, ]
+hic.ma7<-hic.ma7[,-c(1,2,3,4,5,6)]
+hic.ma7[complete.cases(hic.ma7), ]
+tm.7<-table(hic.ma7[,1], hic.ma7[,2])
 
+# EIGHT DAYs OF HIC 
+index.9<-index.1+8
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.9], nrow=length(df.q1$states[index.9])))
+#
+hic.ma8<-hic.ma[hic.ma[,9] != 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,8] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,7] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,6] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,5] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,4] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,3] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,2] == 1, ]
+hic.ma8<-hic.ma8[,-c(1,2,3,4,5,6,7)]
+hic.ma8[complete.cases(hic.ma8), ]
+tm.8<-table(hic.ma8[,1], hic.ma8[,2])
+
+# NINE DAYs OF HIC 
+index.10<-index.1+9
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.10], nrow=length(df.q1$states[index.10])))
+#
+hic.ma9<-hic.ma[hic.ma[,10] != 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,9] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,8] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,7] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,6] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,5] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,4] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,3] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,2] == 1, ]
+hic.ma9<-hic.ma9[,-c(1,2,3,4,5,6,7,8)]
+hic.ma9[complete.cases(hic.ma9), ]
+tm.9<-table(hic.ma9[,1], hic.ma9[,2])
+
+# TEN DAYs OF HIC 
+index.11<-index.1+10
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.11], nrow=length(df.q1$states[index.11])))
+#
+hic.ma10<-hic.ma[hic.ma[,11] != 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,10] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,9] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,8] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,7] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,6] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,5] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,4] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,3] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,2] == 1, ]
+hic.ma10<-hic.ma10[,-c(1,2,3,4,5,6,7,8,9)]
+hic.ma10[complete.cases(hic.ma10), ]
+tm.10<-table(hic.ma10[,1], hic.ma10[,2])
+
+# ELEVEN DAYs OF HIC 
+index.12<-index.1+11
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.12], nrow=length(df.q1$states[index.12])))
+#
+hic.ma11<-hic.ma[hic.ma[,12] != 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,11] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,10] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,9] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,8] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,7] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,6] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,5] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,4] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,3] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,2] == 1, ]
+hic.ma11<-hic.ma11[,-c(1,2,3,4,5,6,7,8,9,10)]
+hic.ma11[complete.cases(hic.ma11), ]
+tm.11<-table(hic.ma11[,1], hic.ma11[,2])
+
+# TWELVE DAYs OF HIC 
+index.13<-index.1+12
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.13], nrow=length(df.q1$states[index.13])))
+#
+hic.ma12<-hic.ma[hic.ma[,13] != 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,12] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,11] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,10] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,9] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,8] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,7] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,6] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,5] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,4] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,3] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,2] == 1, ]
+hic.ma12<-hic.ma12[,-c(1,2,3,4,5,6,7,8,9,10,11)]
+hic.ma12[complete.cases(hic.ma12), ]
+tm.12<-table(hic.ma12[,1], hic.ma12[,2])
+
+# THIRTEEN DAYs OF HIC 
+index.14<-index.1+13
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.14], nrow=length(df.q1$states[index.14])))
+#
+hic.ma13<-hic.ma[hic.ma[,14] != 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,13] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,12] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,11] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,10] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,9] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,8] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,7] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,6] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,5] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,4] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,3] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,2] == 1, ]
+hic.ma13<-hic.ma13[,-c(1,2,3,4,5,6,7,8,9,10,11,12)]
+hic.ma13[complete.cases(hic.ma13), ]
+tm.13<-table(hic.ma13[,1], hic.ma13[,2])
+
+# FOURTEEN DAYs OF HIC 
+index.15<-index.1+14
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.15], nrow=length(df.q1$states[index.15])))
+#
+hic.ma14<-hic.ma[hic.ma[,15] != 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,14] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,13] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,12] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,11] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,10] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,9] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,8] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,7] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,6] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,5] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,4] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,3] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,2] == 1, ]
+hic.ma14<-hic.ma14[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13)]
+hic.ma14[complete.cases(hic.ma14), ]
+tm.14<-table(hic.ma14[,1], hic.ma14[,2])
+
+# FIFTEEN DAYs OF HIC 
+index.16<-index.1+15
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.16], nrow=length(df.q1$states[index.16])))
+#
+hic.ma15<-hic.ma[hic.ma[,16] != 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,15] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,14] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,13] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,12] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,11] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,10] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,9] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,8] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,7] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,6] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,5] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,4] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,3] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,2] == 1, ]
+hic.ma15<-hic.ma15[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14)]
+hic.ma15[complete.cases(hic.ma15), ]
+tm.15<-table(hic.ma15[,1], hic.ma15[,2])
+
+# SIXTEEN DAYs OF HIC 
+index.17<-index.1+16
+hic.ma<-cbind(hic.ma, matrix(df.q1$states[index.17], nrow=length(df.q1$states[index.17])))
+#
+hic.ma16<-hic.ma[hic.ma[,17] != 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,16] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,15] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,14] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,13] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,12] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,11] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,10] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,9] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,8] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,7] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,6] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,5] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,4] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,3] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,2] == 1, ]
+hic.ma16<-hic.ma16[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)]
+hic.ma16[complete.cases(hic.ma16), ]
+tm.16<-table(hic.ma16[,1], hic.ma16[,2])
+
+#------------------------------------------------------------------------------
+# With more data we can consider more days but for now we have less than 10 
+# patients at this point 
+# SEVENTEEN DAYs OF HIC 
+# EIGTHTEEN DAYs OF HIC 
+# NINETEEN DAYs OF HIC 
+# TWENTY DAYs OF HIC 
+# TWENTYONE DAYs OF HIC 
+# TWENTYTWO DAYs OF HIC 
+# TWENTYTHREE DAYs OF HIC 
+# TWENTYFOUR DAYs OF HIC 
+# TWENTYFIVE DAYs OF HIC 
+# TWENTYSIX DAYs OF HIC 
+# TWENTYSEVEN DAYs OF HIC 
+# TWENTYEIGHT DAYs OF HIC 
+# TWENTYNINE DAYs OF HIC 
+# THIRTY DAYs OF HIC 
+#-------------------------------------------------------------------------------
 
 rm(index.1)
-rm(index)
-rm(hic)
-rm(hic.tm)
+rm(index.2)
+rm(index.3)
+rm(index.4)
+rm(index.5)
+rm(index.6)
+rm(index.7)
+rm(index.8)
+rm(index.9)
+rm(index.10)
+rm(index.11)
+rm(index.12)
+rm(index.13)
+rm(index.14)
+rm(index.15)
+rm(index.16)
+rm(index.17)
+rm(hic.ma)
+rm(hic.ma2)
+rm(hic.ma3)
+rm(hic.ma4)
+rm(hic.ma5)
+rm(hic.ma6)
+rm(hic.ma7)
+rm(hic.ma8)
+rm(hic.ma9)
+rm(hic.ma10)
+rm(hic.ma11)
+rm(hic.ma12)
+rm(hic.ma13)
+rm(hic.ma14)
+rm(hic.ma15)
+rm(hic.ma16)
 
+##                                                                            ##   
+################################################################################
+################################################################################
+# Quartile II transition matrix for treatment options                          #
+################################################################################
+################################################################################
+##                                                                            ##
+
+# ONE DAY OF HIC 
+
+#find index of 1s then say if the next index is not 1 keep that row 
+index.1<-which(df.q2$states %in% c(1)) 
+index.2<-index.1+1
+hic.ma<- matrix(c(df.q2$states[index.1],df.q2$states[index.1+1]), nrow=length(index.1), ncol=2)
+hic.df<-as.data.frame(hic.ma) %>% filter(V1!=V2)
+q2tm.1<-table(hic.df$V1, hic.df$V2)
+
+# TWO DAYs OF HIC 
+index.3<-index.1+2
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.3], nrow=length(df.q2$states[index.3])))
+#
+hic.ma2<-hic.ma[hic.ma[,3] != 1, ]
+hic.ma2<-hic.ma2[hic.ma2[,2] == 1, ]
+hic.ma2<-hic.ma2[,-1]
+q2tm.2<-table(hic.ma2[,1], hic.ma2[,2])
+
+# THREE DAYs OF HIC 
+index.4<-index.1+3
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.4], nrow=length(df.q2$states[index.4])))
+#
+hic.ma3<-hic.ma[hic.ma[,4] != 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,3] == 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,2] == 1, ]
+hic.ma3<-hic.ma3[,-c(1,2)]
+hic.ma3[complete.cases(hic.ma3), ]
+q2tm.3<-table(hic.ma3[,1], hic.ma3[,2])
+
+# FOUR DAYs OF HIC 
+index.5<-index.1+4
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.5], nrow=length(df.q2$states[index.5])))
+#
+hic.ma4<-hic.ma[hic.ma[,5] != 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,4] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,3] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,2] == 1, ]
+hic.ma4<-hic.ma4[,-c(1,2,3)]
+hic.ma4[complete.cases(hic.ma4), ]
+q2tm.4<-table(hic.ma4[,1], hic.ma4[,2])
+
+# FIVE DAYs OF HIC
+index.6<-index.1+5
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.6], nrow=length(df.q2$states[index.6])))
+#
+hic.ma5<-hic.ma[hic.ma[,6] != 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,5] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,4] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,3] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,2] == 1, ]
+hic.ma5<-hic.ma5[,-c(1,2,3,4)]
+hic.ma5[complete.cases(hic.ma5), ]
+q2tm.5<-table(hic.ma5[,1], hic.ma5[,2])
+
+# SIX DAYs OF HIC 
+index.7<-index.1+6
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.7], nrow=length(df.q2$states[index.7])))
+#
+hic.ma6<-hic.ma[hic.ma[,7] != 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,6] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,5] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,4] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,3] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,2] == 1, ]
+hic.ma6<-hic.ma6[,-c(1,2,3,4,5)]
+hic.ma6[complete.cases(hic.ma6), ]
+q2tm.6<-table(hic.ma6[,1], hic.ma6[,2])
+
+# SEVEN DAYs OF HIC 
+index.8<-index.1+7
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.8], nrow=length(df.q2$states[index.8])))
+#
+hic.ma7<-hic.ma[hic.ma[,8] != 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,7] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,6] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,5] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,4] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,3] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,2] == 1, ]
+hic.ma7<-hic.ma7[,-c(1,2,3,4,5,6)]
+hic.ma7[complete.cases(hic.ma7), ]
+q2tm.7<-table(hic.ma7[,1], hic.ma7[,2])
+
+# EIGHT DAYs OF HIC 
+index.9<-index.1+8
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.9], nrow=length(df.q2$states[index.9])))
+#
+hic.ma8<-hic.ma[hic.ma[,9] != 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,8] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,7] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,6] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,5] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,4] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,3] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,2] == 1, ]
+hic.ma8<-hic.ma8[,-c(1,2,3,4,5,6,7)]
+hic.ma8[complete.cases(hic.ma8), ]
+q2tm.8<-table(hic.ma8[,1], hic.ma8[,2])
+
+# NINE DAYs OF HIC 
+index.10<-index.1+9
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.10], nrow=length(df.q2$states[index.10])))
+#
+hic.ma9<-hic.ma[hic.ma[,10] != 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,9] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,8] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,7] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,6] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,5] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,4] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,3] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,2] == 1, ]
+hic.ma9<-hic.ma9[,-c(1,2,3,4,5,6,7,8)]
+hic.ma9[complete.cases(hic.ma9), ]
+q2tm.9<-table(hic.ma9[,1], hic.ma9[,2])
+
+# TEN DAYs OF HIC 
+index.11<-index.1+10
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.11], nrow=length(df.q2$states[index.11])))
+#
+hic.ma10<-hic.ma[hic.ma[,11] != 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,10] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,9] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,8] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,7] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,6] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,5] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,4] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,3] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,2] == 1, ]
+hic.ma10<-hic.ma10[,-c(1,2,3,4,5,6,7,8,9)]
+hic.ma10[complete.cases(hic.ma10), ]
+q2tm.10<-table(hic.ma10[,1], hic.ma10[,2])
+
+# ELEVEN DAYs OF HIC 
+index.12<-index.1+11
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.12], nrow=length(df.q2$states[index.12])))
+#
+hic.ma11<-hic.ma[hic.ma[,12] != 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,11] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,10] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,9] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,8] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,7] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,6] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,5] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,4] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,3] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,2] == 1, ]
+hic.ma11<-hic.ma11[,-c(1,2,3,4,5,6,7,8,9,10)]
+hic.ma11[complete.cases(hic.ma11), ]
+q2tm.11<-table(hic.ma11[,1], hic.ma11[,2])
+
+# TWELVE DAYs OF HIC 
+index.13<-index.1+12
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.13], nrow=length(df.q2$states[index.13])))
+#
+hic.ma12<-hic.ma[hic.ma[,13] != 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,12] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,11] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,10] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,9] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,8] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,7] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,6] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,5] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,4] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,3] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,2] == 1, ]
+hic.ma12<-hic.ma12[,-c(1,2,3,4,5,6,7,8,9,10,11)]
+hic.ma12[complete.cases(hic.ma12), ]
+q2tm.12<-table(hic.ma12[,1], hic.ma12[,2])
+
+# THIRTEEN DAYs OF HIC 
+index.14<-index.1+13
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.14], nrow=length(df.q2$states[index.14])))
+#
+hic.ma13<-hic.ma[hic.ma[,14] != 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,13] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,12] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,11] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,10] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,9] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,8] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,7] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,6] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,5] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,4] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,3] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,2] == 1, ]
+hic.ma13<-hic.ma13[,-c(1,2,3,4,5,6,7,8,9,10,11,12)]
+hic.ma13[complete.cases(hic.ma13), ]
+q2tm.13<-table(hic.ma13[,1], hic.ma13[,2])
+
+# FOURTEEN DAYs OF HIC 
+index.15<-index.1+14
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.15], nrow=length(df.q2$states[index.15])))
+#
+hic.ma14<-hic.ma[hic.ma[,15] != 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,14] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,13] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,12] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,11] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,10] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,9] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,8] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,7] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,6] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,5] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,4] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,3] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,2] == 1, ]
+hic.ma14<-hic.ma14[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13)]
+hic.ma14[complete.cases(hic.ma14), ]
+q2tm.14<-table(hic.ma14[,1], hic.ma14[,2])
+
+# FIFTEEN DAYs OF HIC 
+index.16<-index.1+15
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.16], nrow=length(df.q2$states[index.16])))
+#
+hic.ma15<-hic.ma[hic.ma[,16] != 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,15] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,14] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,13] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,12] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,11] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,10] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,9] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,8] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,7] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,6] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,5] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,4] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,3] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,2] == 1, ]
+hic.ma15<-hic.ma15[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14)]
+hic.ma15[complete.cases(hic.ma15), ]
+q2tm.15<-table(hic.ma15[,1], hic.ma15[,2])
+
+# SIXTEEN DAYs OF HIC 
+index.17<-index.1+16
+hic.ma<-cbind(hic.ma, matrix(df.q2$states[index.17], nrow=length(df.q2$states[index.17])))
+#
+hic.ma16<-hic.ma[hic.ma[,17] != 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,16] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,15] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,14] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,13] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,12] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,11] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,10] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,9] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,8] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,7] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,6] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,5] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,4] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,3] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,2] == 1, ]
+hic.ma16<-hic.ma16[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)]
+hic.ma16[complete.cases(hic.ma16), ]
+q2tm.16<-table(hic.ma16[,1], hic.ma16[,2])
+
+#------------------------------------------------------------------------------
+# With more data we can consider more days but for now we have less than 10 
+# patients at this point 
+# SEVENTEEN DAYs OF HIC 
+# EIGTHTEEN DAYs OF HIC 
+# NINETEEN DAYs OF HIC 
+# TWENTY DAYs OF HIC 
+# TWENTYONE DAYs OF HIC 
+# TWENTYTWO DAYs OF HIC 
+# TWENTYTHREE DAYs OF HIC 
+# TWENTYFOUR DAYs OF HIC 
+# TWENTYFIVE DAYs OF HIC 
+# TWENTYSIX DAYs OF HIC 
+# TWENTYSEVEN DAYs OF HIC 
+# TWENTYEIGHT DAYs OF HIC 
+# TWENTYNINE DAYs OF HIC 
+# THIRTY DAYs OF HIC 
+#-------------------------------------------------------------------------------
+
+rm(index.1)
+rm(index.2)
+rm(index.3)
+rm(index.4)
+rm(index.5)
+rm(index.6)
+rm(index.7)
+rm(index.8)
+rm(index.9)
+rm(index.10)
+rm(index.11)
+rm(index.12)
+rm(index.13)
+rm(index.14)
+rm(index.15)
+rm(index.16)
+rm(index.17)
+rm(hic.ma)
+rm(hic.ma2)
+rm(hic.ma3)
+rm(hic.ma4)
+rm(hic.ma5)
+rm(hic.ma6)
+rm(hic.ma7)
+rm(hic.ma8)
+rm(hic.ma9)
+rm(hic.ma10)
+rm(hic.ma11)
+rm(hic.ma12)
+rm(hic.ma13)
+rm(hic.ma14)
+rm(hic.ma15)
+rm(hic.ma16)
+
+##                                                                            ##   
+################################################################################
+################################################################################
+# Quartile III transition matrix for treatment options                         #
+################################################################################
+################################################################################
+##                                                                            ##
+
+# ONE DAY OF HIC 
+
+#find index of 1s then say if the next index is not 1 keep that row 
+index.1<-which(df.q3$states %in% c(1)) 
+index.2<-index.1+1
+hic.ma<- matrix(c(df.q3$states[index.1],df.q3$states[index.1+1]), nrow=length(index.1), ncol=2)
+hic.df<-as.data.frame(hic.ma) %>% filter(V1!=V2)
+q3tm.1<-table(hic.df$V1, hic.df$V2)
+
+# TWO DAYs OF HIC 
+index.3<-index.1+2
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.3], nrow=length(df.q3$states[index.3])))
+#
+hic.ma2<-hic.ma[hic.ma[,3] != 1, ]
+hic.ma2<-hic.ma2[hic.ma2[,2] == 1, ]
+hic.ma2<-hic.ma2[,-1]
+q3tm.2<-table(hic.ma2[,1], hic.ma2[,2])
+
+# THREE DAYs OF HIC 
+index.4<-index.1+3
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.4], nrow=length(df.q3$states[index.4])))
+#
+hic.ma3<-hic.ma[hic.ma[,4] != 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,3] == 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,2] == 1, ]
+hic.ma3<-hic.ma3[,-c(1,2)]
+hic.ma3[complete.cases(hic.ma3), ]
+q3tm.3<-table(hic.ma3[,1], hic.ma3[,2])
+
+# FOUR DAYs OF HIC 
+index.5<-index.1+4
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.5], nrow=length(df.q3$states[index.5])))
+#
+hic.ma4<-hic.ma[hic.ma[,5] != 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,4] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,3] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,2] == 1, ]
+hic.ma4<-hic.ma4[,-c(1,2,3)]
+hic.ma4[complete.cases(hic.ma4), ]
+q3tm.4<-table(hic.ma4[,1], hic.ma4[,2])
+
+# FIVE DAYs OF HIC
+index.6<-index.1+5
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.6], nrow=length(df.q3$states[index.6])))
+#
+hic.ma5<-hic.ma[hic.ma[,6] != 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,5] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,4] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,3] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,2] == 1, ]
+hic.ma5<-hic.ma5[,-c(1,2,3,4)]
+hic.ma5[complete.cases(hic.ma5), ]
+q3tm.5<-table(hic.ma5[,1], hic.ma5[,2])
+
+# SIX DAYs OF HIC 
+index.7<-index.1+6
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.7], nrow=length(df.q3$states[index.7])))
+#
+hic.ma6<-hic.ma[hic.ma[,7] != 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,6] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,5] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,4] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,3] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,2] == 1, ]
+hic.ma6<-hic.ma6[,-c(1,2,3,4,5)]
+hic.ma6[complete.cases(hic.ma6), ]
+q3tm.6<-table(hic.ma6[,1], hic.ma6[,2])
+
+# SEVEN DAYs OF HIC 
+index.8<-index.1+7
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.8], nrow=length(df.q3$states[index.8])))
+#
+hic.ma7<-hic.ma[hic.ma[,8] != 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,7] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,6] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,5] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,4] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,3] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,2] == 1, ]
+hic.ma7<-hic.ma7[,-c(1,2,3,4,5,6)]
+hic.ma7[complete.cases(hic.ma7), ]
+q3tm.7<-table(hic.ma7[,1], hic.ma7[,2])
+
+# EIGHT DAYs OF HIC 
+index.9<-index.1+8
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.9], nrow=length(df.q3$states[index.9])))
+#
+hic.ma8<-hic.ma[hic.ma[,9] != 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,8] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,7] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,6] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,5] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,4] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,3] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,2] == 1, ]
+hic.ma8<-hic.ma8[,-c(1,2,3,4,5,6,7)]
+hic.ma8[complete.cases(hic.ma8), ]
+q3tm.8<-table(hic.ma8[,1], hic.ma8[,2])
+
+# NINE DAYs OF HIC 
+index.10<-index.1+9
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.10], nrow=length(df.q3$states[index.10])))
+#
+hic.ma9<-hic.ma[hic.ma[,10] != 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,9] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,8] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,7] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,6] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,5] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,4] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,3] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,2] == 1, ]
+hic.ma9<-hic.ma9[,-c(1,2,3,4,5,6,7,8)]
+hic.ma9[complete.cases(hic.ma9), ]
+q3tm.9<-table(hic.ma9[,1], hic.ma9[,2])
+
+# TEN DAYs OF HIC 
+index.11<-index.1+10
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.11], nrow=length(df.q3$states[index.11])))
+#
+hic.ma10<-hic.ma[hic.ma[,11] != 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,10] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,9] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,8] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,7] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,6] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,5] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,4] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,3] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,2] == 1, ]
+hic.ma10<-hic.ma10[,-c(1,2,3,4,5,6,7,8,9)]
+hic.ma10[complete.cases(hic.ma10), ]
+q3tm.10<-table(hic.ma10[,1], hic.ma10[,2])
+
+# ELEVEN DAYs OF HIC 
+index.12<-index.1+11
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.12], nrow=length(df.q3$states[index.12])))
+#
+hic.ma11<-hic.ma[hic.ma[,12] != 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,11] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,10] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,9] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,8] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,7] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,6] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,5] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,4] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,3] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,2] == 1, ]
+hic.ma11<-hic.ma11[,-c(1,2,3,4,5,6,7,8,9,10)]
+hic.ma11[complete.cases(hic.ma11), ]
+q3tm.11<-table(hic.ma11[,1], hic.ma11[,2])
+
+# TWELVE DAYs OF HIC 
+index.13<-index.1+12
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.13], nrow=length(df.q3$states[index.13])))
+#
+hic.ma12<-hic.ma[hic.ma[,13] != 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,12] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,11] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,10] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,9] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,8] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,7] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,6] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,5] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,4] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,3] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,2] == 1, ]
+hic.ma12<-hic.ma12[,-c(1,2,3,4,5,6,7,8,9,10,11)]
+hic.ma12[complete.cases(hic.ma12), ]
+q3tm.12<-table(hic.ma12[,1], hic.ma12[,2])
+
+# THIRTEEN DAYs OF HIC 
+index.14<-index.1+13
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.14], nrow=length(df.q3$states[index.14])))
+#
+hic.ma13<-hic.ma[hic.ma[,14] != 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,13] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,12] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,11] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,10] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,9] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,8] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,7] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,6] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,5] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,4] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,3] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,2] == 1, ]
+hic.ma13<-hic.ma13[,-c(1,2,3,4,5,6,7,8,9,10,11,12)]
+hic.ma13[complete.cases(hic.ma13), ]
+q3tm.13<-table(hic.ma13[,1], hic.ma13[,2])
+
+# FOURTEEN DAYs OF HIC 
+index.15<-index.1+14
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.15], nrow=length(df.q3$states[index.15])))
+#
+hic.ma14<-hic.ma[hic.ma[,15] != 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,14] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,13] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,12] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,11] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,10] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,9] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,8] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,7] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,6] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,5] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,4] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,3] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,2] == 1, ]
+hic.ma14<-hic.ma14[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13)]
+hic.ma14[complete.cases(hic.ma14), ]
+q3tm.14<-table(hic.ma14[,1], hic.ma14[,2])
+
+# FIFTEEN DAYs OF HIC 
+index.16<-index.1+15
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.16], nrow=length(df.q3$states[index.16])))
+#
+hic.ma15<-hic.ma[hic.ma[,16] != 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,15] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,14] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,13] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,12] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,11] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,10] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,9] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,8] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,7] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,6] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,5] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,4] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,3] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,2] == 1, ]
+hic.ma15<-hic.ma15[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14)]
+hic.ma15[complete.cases(hic.ma15), ]
+q3tm.15<-table(hic.ma15[,1], hic.ma15[,2])
+
+# SIXTEEN DAYs OF HIC 
+index.17<-index.1+16
+hic.ma<-cbind(hic.ma, matrix(df.q3$states[index.17], nrow=length(df.q3$states[index.17])))
+#
+hic.ma16<-hic.ma[hic.ma[,17] != 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,16] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,15] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,14] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,13] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,12] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,11] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,10] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,9] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,8] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,7] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,6] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,5] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,4] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,3] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,2] == 1, ]
+hic.ma16<-hic.ma16[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)]
+hic.ma16[complete.cases(hic.ma16), ]
+q3tm.16<-table(hic.ma16[,1], hic.ma16[,2])
+
+#------------------------------------------------------------------------------
+# With more data we can consider more days but for now we have less than 10 
+# patients at this point 
+# SEVENTEEN DAYs OF HIC 
+# EIGTHTEEN DAYs OF HIC 
+# NINETEEN DAYs OF HIC 
+# TWENTY DAYs OF HIC 
+# TWENTYONE DAYs OF HIC 
+# TWENTYTWO DAYs OF HIC 
+# TWENTYTHREE DAYs OF HIC 
+# TWENTYFOUR DAYs OF HIC 
+# TWENTYFIVE DAYs OF HIC 
+# TWENTYSIX DAYs OF HIC 
+# TWENTYSEVEN DAYs OF HIC 
+# TWENTYEIGHT DAYs OF HIC 
+# TWENTYNINE DAYs OF HIC 
+# THIRTY DAYs OF HIC 
+#-------------------------------------------------------------------------------
+
+rm(index.1)
+rm(index.2)
+rm(index.3)
+rm(index.4)
+rm(index.5)
+rm(index.6)
+rm(index.7)
+rm(index.8)
+rm(index.9)
+rm(index.10)
+rm(index.11)
+rm(index.12)
+rm(index.13)
+rm(index.14)
+rm(index.15)
+rm(index.16)
+rm(index.17)
+rm(hic.ma)
+rm(hic.ma2)
+rm(hic.ma3)
+rm(hic.ma4)
+rm(hic.ma5)
+rm(hic.ma6)
+rm(hic.ma7)
+rm(hic.ma8)
+rm(hic.ma9)
+rm(hic.ma10)
+rm(hic.ma11)
+rm(hic.ma12)
+rm(hic.ma13)
+rm(hic.ma14)
+rm(hic.ma15)
+rm(hic.ma16)
+
+##                                                                            ##   
+################################################################################
+################################################################################
+# Quartile IV transition matrix for treatment options                          #
+################################################################################
+################################################################################
+##                                                                            ##
+
+# ONE DAY OF HIC 
+
+#find index of 1s then say if the next index is not 1 keep that row 
+index.1<-which(df.q4$states %in% c(1)) 
+index.2<-index.1+1
+hic.ma<- matrix(c(df.q4$states[index.1],df.q4$states[index.1+1]), nrow=length(index.1), ncol=2)
+hic.df<-as.data.frame(hic.ma) %>% filter(V1!=V2)
+q4tm.1<-table(hic.df$V1, hic.df$V2)
+
+# TWO DAYs OF HIC 
+index.3<-index.1+2
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.3], nrow=length(df.q4$states[index.3])))
+#
+hic.ma2<-hic.ma[hic.ma[,3] != 1, ]
+hic.ma2<-hic.ma2[hic.ma2[,2] == 1, ]
+hic.ma2<-hic.ma2[,-1]
+q4tm.2<-table(hic.ma2[,1], hic.ma2[,2])
+
+# THREE DAYs OF HIC 
+index.4<-index.1+3
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.4], nrow=length(df.q4$states[index.4])))
+#
+hic.ma3<-hic.ma[hic.ma[,4] != 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,3] == 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,2] == 1, ]
+hic.ma3<-hic.ma3[,-c(1,2)]
+hic.ma3[complete.cases(hic.ma3), ]
+q4tm.3<-table(hic.ma3[,1], hic.ma3[,2])
+
+# FOUR DAYs OF HIC 
+index.5<-index.1+4
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.5], nrow=length(df.q4$states[index.5])))
+#
+hic.ma4<-hic.ma[hic.ma[,5] != 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,4] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,3] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,2] == 1, ]
+hic.ma4<-hic.ma4[,-c(1,2,3)]
+hic.ma4[complete.cases(hic.ma4), ]
+q4tm.4<-table(hic.ma4[,1], hic.ma4[,2])
+
+# FIVE DAYs OF HIC
+index.6<-index.1+5
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.6], nrow=length(df.q4$states[index.6])))
+#
+hic.ma5<-hic.ma[hic.ma[,6] != 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,5] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,4] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,3] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,2] == 1, ]
+hic.ma5<-hic.ma5[,-c(1,2,3,4)]
+hic.ma5[complete.cases(hic.ma5), ]
+q4tm.5<-table(hic.ma5[,1], hic.ma5[,2])
+
+# SIX DAYs OF HIC 
+index.7<-index.1+6
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.7], nrow=length(df.q4$states[index.7])))
+#
+hic.ma6<-hic.ma[hic.ma[,7] != 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,6] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,5] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,4] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,3] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,2] == 1, ]
+hic.ma6<-hic.ma6[,-c(1,2,3,4,5)]
+hic.ma6[complete.cases(hic.ma6), ]
+q4tm.6<-table(hic.ma6[,1], hic.ma6[,2])
+
+# SEVEN DAYs OF HIC 
+index.8<-index.1+7
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.8], nrow=length(df.q4$states[index.8])))
+#
+hic.ma7<-hic.ma[hic.ma[,8] != 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,7] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,6] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,5] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,4] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,3] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,2] == 1, ]
+hic.ma7<-hic.ma7[,-c(1,2,3,4,5,6)]
+hic.ma7[complete.cases(hic.ma7), ]
+q4tm.7<-table(hic.ma7[,1], hic.ma7[,2])
+
+# EIGHT DAYs OF HIC 
+index.9<-index.1+8
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.9], nrow=length(df.q4$states[index.9])))
+#
+hic.ma8<-hic.ma[hic.ma[,9] != 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,8] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,7] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,6] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,5] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,4] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,3] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,2] == 1, ]
+hic.ma8<-hic.ma8[,-c(1,2,3,4,5,6,7)]
+hic.ma8[complete.cases(hic.ma8), ]
+q4tm.8<-table(hic.ma8[,1], hic.ma8[,2])
+
+# NINE DAYs OF HIC 
+index.10<-index.1+9
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.10], nrow=length(df.q4$states[index.10])))
+#
+hic.ma9<-hic.ma[hic.ma[,10] != 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,9] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,8] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,7] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,6] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,5] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,4] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,3] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,2] == 1, ]
+hic.ma9<-hic.ma9[,-c(1,2,3,4,5,6,7,8)]
+hic.ma9[complete.cases(hic.ma9), ]
+q4tm.9<-table(hic.ma9[,1], hic.ma9[,2])
+
+# TEN DAYs OF HIC 
+index.11<-index.1+10
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.11], nrow=length(df.q4$states[index.11])))
+#
+hic.ma10<-hic.ma[hic.ma[,11] != 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,10] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,9] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,8] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,7] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,6] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,5] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,4] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,3] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,2] == 1, ]
+hic.ma10<-hic.ma10[,-c(1,2,3,4,5,6,7,8,9)]
+hic.ma10[complete.cases(hic.ma10), ]
+q4tm.10<-table(hic.ma10[,1], hic.ma10[,2])
+
+# ELEVEN DAYs OF HIC 
+index.12<-index.1+11
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.12], nrow=length(df.q4$states[index.12])))
+#
+hic.ma11<-hic.ma[hic.ma[,12] != 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,11] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,10] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,9] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,8] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,7] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,6] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,5] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,4] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,3] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,2] == 1, ]
+hic.ma11<-hic.ma11[,-c(1,2,3,4,5,6,7,8,9,10)]
+hic.ma11[complete.cases(hic.ma11), ]
+q4tm.11<-table(hic.ma11[,1], hic.ma11[,2])
+
+# TWELVE DAYs OF HIC 
+index.13<-index.1+12
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.13], nrow=length(df.q4$states[index.13])))
+#
+hic.ma12<-hic.ma[hic.ma[,13] != 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,12] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,11] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,10] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,9] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,8] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,7] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,6] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,5] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,4] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,3] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,2] == 1, ]
+hic.ma12<-hic.ma12[,-c(1,2,3,4,5,6,7,8,9,10,11)]
+hic.ma12[complete.cases(hic.ma12), ]
+q4tm.12<-table(hic.ma12[,1], hic.ma12[,2])
+
+# THIRTEEN DAYs OF HIC 
+index.14<-index.1+13
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.14], nrow=length(df.q4$states[index.14])))
+#
+hic.ma13<-hic.ma[hic.ma[,14] != 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,13] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,12] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,11] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,10] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,9] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,8] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,7] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,6] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,5] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,4] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,3] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,2] == 1, ]
+hic.ma13<-hic.ma13[,-c(1,2,3,4,5,6,7,8,9,10,11,12)]
+hic.ma13[complete.cases(hic.ma13), ]
+q4tm.13<-table(hic.ma13[,1], hic.ma13[,2])
+
+# FOURTEEN DAYs OF HIC 
+index.15<-index.1+14
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.15], nrow=length(df.q4$states[index.15])))
+#
+hic.ma14<-hic.ma[hic.ma[,15] != 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,14] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,13] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,12] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,11] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,10] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,9] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,8] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,7] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,6] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,5] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,4] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,3] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,2] == 1, ]
+hic.ma14<-hic.ma14[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13)]
+hic.ma14[complete.cases(hic.ma14), ]
+q4tm.14<-table(hic.ma14[,1], hic.ma14[,2])
+
+# FIFTEEN DAYs OF HIC 
+index.16<-index.1+15
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.16], nrow=length(df.q4$states[index.16])))
+#
+hic.ma15<-hic.ma[hic.ma[,16] != 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,15] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,14] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,13] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,12] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,11] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,10] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,9] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,8] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,7] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,6] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,5] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,4] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,3] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,2] == 1, ]
+hic.ma15<-hic.ma15[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14)]
+hic.ma15[complete.cases(hic.ma15), ]
+q4tm.15<-table(hic.ma15[,1], hic.ma15[,2])
+
+# SIXTEEN DAYs OF HIC 
+index.17<-index.1+16
+hic.ma<-cbind(hic.ma, matrix(df.q4$states[index.17], nrow=length(df.q4$states[index.17])))
+#
+hic.ma16<-hic.ma[hic.ma[,17] != 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,16] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,15] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,14] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,13] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,12] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,11] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,10] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,9] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,8] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,7] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,6] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,5] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,4] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,3] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,2] == 1, ]
+hic.ma16<-hic.ma16[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)]
+hic.ma16[complete.cases(hic.ma16), ]
+q4tm.16<-table(hic.ma16[,1], hic.ma16[,2])
+
+#------------------------------------------------------------------------------
+# With more data we can consider more days but for now we have less than 10 
+# patients at this point 
+# SEVENTEEN DAYs OF HIC 
+# EIGTHTEEN DAYs OF HIC 
+# NINETEEN DAYs OF HIC 
+# TWENTY DAYs OF HIC 
+# TWENTYONE DAYs OF HIC 
+# TWENTYTWO DAYs OF HIC 
+# TWENTYTHREE DAYs OF HIC 
+# TWENTYFOUR DAYs OF HIC 
+# TWENTYFIVE DAYs OF HIC 
+# TWENTYSIX DAYs OF HIC 
+# TWENTYSEVEN DAYs OF HIC 
+# TWENTYEIGHT DAYs OF HIC 
+# TWENTYNINE DAYs OF HIC 
+# THIRTY DAYs OF HIC 
+#-------------------------------------------------------------------------------
+
+rm(index.1)
+rm(index.2)
+rm(index.3)
+rm(index.4)
+rm(index.5)
+rm(index.6)
+rm(index.7)
+rm(index.8)
+rm(index.9)
+rm(index.10)
+rm(index.11)
+rm(index.12)
+rm(index.13)
+rm(index.14)
+rm(index.15)
+rm(index.16)
+rm(index.17)
+rm(hic.ma)
+rm(hic.ma2)
+rm(hic.ma3)
+rm(hic.ma4)
+rm(hic.ma5)
+rm(hic.ma6)
+rm(hic.ma7)
+rm(hic.ma8)
+rm(hic.ma9)
+rm(hic.ma10)
+rm(hic.ma11)
+rm(hic.ma12)
+rm(hic.ma13)
+rm(hic.ma14)
+rm(hic.ma15)
+rm(hic.ma16)
+
+
+# Given that there is not a lot of data in the quartiles for the very severe
+# and at presetn we are not using time varying severyity in the analysis 
+# we coallate the quartiles into halves 
+
+rm(df.q1)
+rm(df.q2)
+rm(df.q3)
+rm(df.q4)
 
 #______________________________________________________________________________#
 #______________________________________________________________________________#
@@ -442,6 +1711,698 @@ rm(df.high.lastrow)
 #______________________________________________________________________________#
 #______________________________________________________________________________#
 #______________________________________________________________________________#
+
+##                                                                            ##   
+################################################################################
+################################################################################
+# LOW SEVERITY transition matrix for treatment options                         #
+################################################################################
+################################################################################
+##                                                                            ##
+
+# ONE DAY OF HIC 
+
+#find index of 1s then say if the next index is not 1 keep that row 
+index.1<-which(df.low$states %in% c(1)) 
+index.2<-index.1+1
+hic.ma<- matrix(c(df.low$states[index.1],df.low$states[index.1+1]), nrow=length(index.1), ncol=2)
+hic.df<-as.data.frame(hic.ma) %>% filter(V1!=V2)
+lowtm.1<-table(hic.df$V1, hic.df$V2)
+
+# TWO DAYs OF HIC 
+index.3<-index.1+2
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.3], nrow=length(df.low$states[index.3])))
+#
+hic.ma2<-hic.ma[hic.ma[,3] != 1, ]
+hic.ma2<-hic.ma2[hic.ma2[,2] == 1, ]
+hic.ma2<-hic.ma2[,-1]
+lowtm.2<-table(hic.ma2[,1], hic.ma2[,2])
+
+# THREE DAYs OF HIC 
+index.4<-index.1+3
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.4], nrow=length(df.low$states[index.4])))
+#
+hic.ma3<-hic.ma[hic.ma[,4] != 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,3] == 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,2] == 1, ]
+hic.ma3<-hic.ma3[,-c(1,2)]
+hic.ma3[complete.cases(hic.ma3), ]
+lowtm.3<-table(hic.ma3[,1], hic.ma3[,2])
+
+# FOUR DAYs OF HIC 
+index.5<-index.1+4
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.5], nrow=length(df.low$states[index.5])))
+#
+hic.ma4<-hic.ma[hic.ma[,5] != 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,4] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,3] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,2] == 1, ]
+hic.ma4<-hic.ma4[,-c(1,2,3)]
+hic.ma4[complete.cases(hic.ma4), ]
+lowtm.4<-table(hic.ma4[,1], hic.ma4[,2])
+
+# FIVE DAYs OF HIC
+index.6<-index.1+5
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.6], nrow=length(df.low$states[index.6])))
+#
+hic.ma5<-hic.ma[hic.ma[,6] != 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,5] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,4] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,3] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,2] == 1, ]
+hic.ma5<-hic.ma5[,-c(1,2,3,4)]
+hic.ma5[complete.cases(hic.ma5), ]
+lowtm.5<-table(hic.ma5[,1], hic.ma5[,2])
+
+# SIX DAYs OF HIC 
+index.7<-index.1+6
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.7], nrow=length(df.low$states[index.7])))
+#
+hic.ma6<-hic.ma[hic.ma[,7] != 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,6] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,5] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,4] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,3] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,2] == 1, ]
+hic.ma6<-hic.ma6[,-c(1,2,3,4,5)]
+hic.ma6[complete.cases(hic.ma6), ]
+lowtm.6<-table(hic.ma6[,1], hic.ma6[,2])
+
+# SEVEN DAYs OF HIC 
+index.8<-index.1+7
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.8], nrow=length(df.low$states[index.8])))
+#
+hic.ma7<-hic.ma[hic.ma[,8] != 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,7] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,6] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,5] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,4] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,3] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,2] == 1, ]
+hic.ma7<-hic.ma7[,-c(1,2,3,4,5,6)]
+hic.ma7[complete.cases(hic.ma7), ]
+lowtm.7<-table(hic.ma7[,1], hic.ma7[,2])
+
+# EIGHT DAYs OF HIC 
+index.9<-index.1+8
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.9], nrow=length(df.low$states[index.9])))
+#
+hic.ma8<-hic.ma[hic.ma[,9] != 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,8] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,7] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,6] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,5] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,4] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,3] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,2] == 1, ]
+hic.ma8<-hic.ma8[,-c(1,2,3,4,5,6,7)]
+hic.ma8[complete.cases(hic.ma8), ]
+lowtm.8<-table(hic.ma8[,1], hic.ma8[,2])
+
+# NINE DAYs OF HIC 
+index.10<-index.1+9
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.10], nrow=length(df.low$states[index.10])))
+#
+hic.ma9<-hic.ma[hic.ma[,10] != 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,9] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,8] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,7] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,6] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,5] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,4] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,3] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,2] == 1, ]
+hic.ma9<-hic.ma9[,-c(1,2,3,4,5,6,7,8)]
+hic.ma9[complete.cases(hic.ma9), ]
+lowtm.9<-table(hic.ma9[,1], hic.ma9[,2])
+
+# TEN DAYs OF HIC 
+index.11<-index.1+10
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.11], nrow=length(df.low$states[index.11])))
+#
+hic.ma10<-hic.ma[hic.ma[,11] != 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,10] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,9] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,8] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,7] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,6] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,5] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,4] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,3] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,2] == 1, ]
+hic.ma10<-hic.ma10[,-c(1,2,3,4,5,6,7,8,9)]
+hic.ma10[complete.cases(hic.ma10), ]
+lowtm.10<-table(hic.ma10[,1], hic.ma10[,2])
+
+# ELEVEN DAYs OF HIC 
+index.12<-index.1+11
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.12], nrow=length(df.low$states[index.12])))
+#
+hic.ma11<-hic.ma[hic.ma[,12] != 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,11] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,10] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,9] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,8] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,7] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,6] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,5] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,4] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,3] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,2] == 1, ]
+hic.ma11<-hic.ma11[,-c(1,2,3,4,5,6,7,8,9,10)]
+hic.ma11[complete.cases(hic.ma11), ]
+lowtm.11<-table(hic.ma11[,1], hic.ma11[,2])
+
+# TWELVE DAYs OF HIC 
+index.13<-index.1+12
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.13], nrow=length(df.low$states[index.13])))
+#
+hic.ma12<-hic.ma[hic.ma[,13] != 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,12] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,11] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,10] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,9] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,8] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,7] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,6] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,5] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,4] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,3] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,2] == 1, ]
+hic.ma12<-hic.ma12[,-c(1,2,3,4,5,6,7,8,9,10,11)]
+hic.ma12[complete.cases(hic.ma12), ]
+lowtm.12<-table(hic.ma12[,1], hic.ma12[,2])
+
+# THIRTEEN DAYs OF HIC 
+index.14<-index.1+13
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.14], nrow=length(df.low$states[index.14])))
+#
+hic.ma13<-hic.ma[hic.ma[,14] != 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,13] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,12] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,11] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,10] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,9] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,8] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,7] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,6] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,5] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,4] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,3] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,2] == 1, ]
+hic.ma13<-hic.ma13[,-c(1,2,3,4,5,6,7,8,9,10,11,12)]
+hic.ma13[complete.cases(hic.ma13), ]
+lowtm.13<-table(hic.ma13[,1], hic.ma13[,2])
+
+# FOURTEEN DAYs OF HIC 
+index.15<-index.1+14
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.15], nrow=length(df.low$states[index.15])))
+#
+hic.ma14<-hic.ma[hic.ma[,15] != 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,14] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,13] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,12] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,11] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,10] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,9] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,8] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,7] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,6] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,5] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,4] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,3] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,2] == 1, ]
+hic.ma14<-hic.ma14[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13)]
+hic.ma14[complete.cases(hic.ma14), ]
+lowtm.14<-table(hic.ma14[,1], hic.ma14[,2])
+
+# FIFTEEN DAYs OF HIC 
+index.16<-index.1+15
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.16], nrow=length(df.low$states[index.16])))
+#
+hic.ma15<-hic.ma[hic.ma[,16] != 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,15] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,14] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,13] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,12] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,11] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,10] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,9] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,8] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,7] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,6] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,5] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,4] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,3] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,2] == 1, ]
+hic.ma15<-hic.ma15[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14)]
+hic.ma15[complete.cases(hic.ma15), ]
+lowtm.15<-table(hic.ma15[,1], hic.ma15[,2])
+
+# SIXTEEN DAYs OF HIC 
+index.17<-index.1+16
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.17], nrow=length(df.low$states[index.17])))
+#
+hic.ma16<-hic.ma[hic.ma[,17] != 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,16] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,15] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,14] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,13] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,12] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,11] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,10] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,9] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,8] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,7] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,6] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,5] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,4] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,3] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,2] == 1, ]
+hic.ma16<-hic.ma16[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)]
+hic.ma16[complete.cases(hic.ma16), ]
+lowtm.16<-table(hic.ma16[,1], hic.ma16[,2])
+
+#------------------------------------------------------------------------------
+# With more data we can consider more days but for now we have less than 10 
+# patients at this point 
+# SEVENTEEN DAYs OF HIC 
+# EIGTHTEEN DAYs OF HIC 
+# NINETEEN DAYs OF HIC 
+# TWENTY DAYs OF HIC 
+# TWENTYONE DAYs OF HIC 
+# TWENTYTWO DAYs OF HIC 
+# TWENTYTHREE DAYs OF HIC 
+# TWENTYFOUR DAYs OF HIC 
+# TWENTYFIVE DAYs OF HIC 
+# TWENTYSIX DAYs OF HIC 
+# TWENTYSEVEN DAYs OF HIC 
+# TWENTYEIGHT DAYs OF HIC 
+# TWENTYNINE DAYs OF HIC 
+# THIRTY DAYs OF HIC 
+#-------------------------------------------------------------------------------
+
+rm(index.1)
+rm(index.2)
+rm(index.3)
+rm(index.4)
+rm(index.5)
+rm(index.6)
+rm(index.7)
+rm(index.8)
+rm(index.9)
+rm(index.10)
+rm(index.11)
+rm(index.12)
+rm(index.13)
+rm(index.14)
+rm(index.15)
+rm(index.16)
+rm(index.17)
+rm(hic.ma)
+rm(hic.ma2)
+rm(hic.ma3)
+rm(hic.ma4)
+rm(hic.ma5)
+rm(hic.ma6)
+rm(hic.ma7)
+rm(hic.ma8)
+rm(hic.ma9)
+rm(hic.ma10)
+rm(hic.ma11)
+rm(hic.ma12)
+rm(hic.ma13)
+rm(hic.ma14)
+rm(hic.ma15)
+rm(hic.ma16)
+
+##                                                                            ##   
+################################################################################
+################################################################################
+# HIGH SEVERITY transition matrix for treatment options                        #
+################################################################################
+################################################################################
+##                                                                            ##
+
+# ONE DAY OF HIC 
+
+#find index of 1s then say if the next index is not 1 keep that row 
+index.1<-which(df.high$states %in% c(1)) 
+index.2<-index.1+1
+hic.ma<- matrix(c(df.high$states[index.1],df.high$states[index.1+1]), nrow=length(index.1), ncol=2)
+hic.df<-as.data.frame(hic.ma) %>% filter(V1!=V2)
+hightm.1<-table(hic.df$V1, hic.df$V2)
+
+# TWO DAYs OF HIC 
+index.3<-index.1+2
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.3], nrow=length(df.high$states[index.3])))
+#
+hic.ma2<-hic.ma[hic.ma[,3] != 1, ]
+hic.ma2<-hic.ma2[hic.ma2[,2] == 1, ]
+hic.ma2<-hic.ma2[,-1]
+hightm.2<-table(hic.ma2[,1], hic.ma2[,2])
+
+# THREE DAYs OF HIC 
+index.4<-index.1+3
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.4], nrow=length(df.high$states[index.4])))
+#
+hic.ma3<-hic.ma[hic.ma[,4] != 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,3] == 1, ]
+hic.ma3<-hic.ma3[hic.ma3[,2] == 1, ]
+hic.ma3<-hic.ma3[,-c(1,2)]
+hic.ma3[complete.cases(hic.ma3), ]
+hightm.3<-table(hic.ma3[,1], hic.ma3[,2])
+
+# FOUR DAYs OF HIC 
+index.5<-index.1+4
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.5], nrow=length(df.high$states[index.5])))
+#
+hic.ma4<-hic.ma[hic.ma[,5] != 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,4] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,3] == 1, ]
+hic.ma4<-hic.ma4[hic.ma4[,2] == 1, ]
+hic.ma4<-hic.ma4[,-c(1,2,3)]
+hic.ma4[complete.cases(hic.ma4), ]
+hightm.4<-table(hic.ma4[,1], hic.ma4[,2])
+
+# FIVE DAYs OF HIC
+index.6<-index.1+5
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.6], nrow=length(df.high$states[index.6])))
+#
+hic.ma5<-hic.ma[hic.ma[,6] != 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,5] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,4] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,3] == 1, ]
+hic.ma5<-hic.ma5[hic.ma5[,2] == 1, ]
+hic.ma5<-hic.ma5[,-c(1,2,3,4)]
+hic.ma5[complete.cases(hic.ma5), ]
+hightm.5<-table(hic.ma5[,1], hic.ma5[,2])
+
+# SIX DAYs OF HIC 
+index.7<-index.1+6
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.7], nrow=length(df.high$states[index.7])))
+#
+hic.ma6<-hic.ma[hic.ma[,7] != 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,6] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,5] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,4] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,3] == 1, ]
+hic.ma6<-hic.ma6[hic.ma6[,2] == 1, ]
+hic.ma6<-hic.ma6[,-c(1,2,3,4,5)]
+hic.ma6[complete.cases(hic.ma6), ]
+hightm.6<-table(hic.ma6[,1], hic.ma6[,2])
+
+# SEVEN DAYs OF HIC 
+index.8<-index.1+7
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.8], nrow=length(df.high$states[index.8])))
+#
+hic.ma7<-hic.ma[hic.ma[,8] != 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,7] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,6] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,5] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,4] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,3] == 1, ]
+hic.ma7<-hic.ma7[hic.ma7[,2] == 1, ]
+hic.ma7<-hic.ma7[,-c(1,2,3,4,5,6)]
+hic.ma7[complete.cases(hic.ma7), ]
+hightm.7<-table(hic.ma7[,1], hic.ma7[,2])
+
+# EIGHT DAYs OF HIC 
+index.9<-index.1+8
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.9], nrow=length(df.high$states[index.9])))
+#
+hic.ma8<-hic.ma[hic.ma[,9] != 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,8] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,7] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,6] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,5] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,4] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,3] == 1, ]
+hic.ma8<-hic.ma8[hic.ma8[,2] == 1, ]
+hic.ma8<-hic.ma8[,-c(1,2,3,4,5,6,7)]
+hic.ma8[complete.cases(hic.ma8), ]
+hightm.8<-table(hic.ma8[,1], hic.ma8[,2])
+
+# NINE DAYs OF HIC 
+index.10<-index.1+9
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.10], nrow=length(df.high$states[index.10])))
+#
+hic.ma9<-hic.ma[hic.ma[,10] != 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,9] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,8] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,7] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,6] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,5] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,4] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,3] == 1, ]
+hic.ma9<-hic.ma9[hic.ma9[,2] == 1, ]
+hic.ma9<-hic.ma9[,-c(1,2,3,4,5,6,7,8)]
+hic.ma9[complete.cases(hic.ma9), ]
+hightm.9<-table(hic.ma9[,1], hic.ma9[,2])
+
+# TEN DAYs OF HIC 
+index.11<-index.1+10
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.11], nrow=length(df.high$states[index.11])))
+#
+hic.ma10<-hic.ma[hic.ma[,11] != 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,10] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,9] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,8] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,7] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,6] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,5] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,4] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,3] == 1, ]
+hic.ma10<-hic.ma10[hic.ma10[,2] == 1, ]
+hic.ma10<-hic.ma10[,-c(1,2,3,4,5,6,7,8,9)]
+hic.ma10[complete.cases(hic.ma10), ]
+hightm.10<-table(hic.ma10[,1], hic.ma10[,2])
+
+# ELEVEN DAYs OF HIC 
+index.12<-index.1+11
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.12], nrow=length(df.high$states[index.12])))
+#
+hic.ma11<-hic.ma[hic.ma[,12] != 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,11] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,10] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,9] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,8] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,7] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,6] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,5] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,4] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,3] == 1, ]
+hic.ma11<-hic.ma11[hic.ma11[,2] == 1, ]
+hic.ma11<-hic.ma11[,-c(1,2,3,4,5,6,7,8,9,10)]
+hic.ma11[complete.cases(hic.ma11), ]
+hightm.11<-table(hic.ma11[,1], hic.ma11[,2])
+
+# TWELVE DAYs OF HIC 
+index.13<-index.1+12
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.13], nrow=length(df.high$states[index.13])))
+#
+hic.ma12<-hic.ma[hic.ma[,13] != 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,12] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,11] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,10] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,9] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,8] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,7] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,6] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,5] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,4] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,3] == 1, ]
+hic.ma12<-hic.ma12[hic.ma12[,2] == 1, ]
+hic.ma12<-hic.ma12[,-c(1,2,3,4,5,6,7,8,9,10,11)]
+hic.ma12[complete.cases(hic.ma12), ]
+hightm.12<-table(hic.ma12[,1], hic.ma12[,2])
+
+# THIRTEEN DAYs OF HIC 
+index.14<-index.1+13
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.14], nrow=length(df.high$states[index.14])))
+#
+hic.ma13<-hic.ma[hic.ma[,14] != 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,13] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,12] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,11] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,10] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,9] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,8] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,7] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,6] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,5] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,4] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,3] == 1, ]
+hic.ma13<-hic.ma13[hic.ma13[,2] == 1, ]
+hic.ma13<-hic.ma13[,-c(1,2,3,4,5,6,7,8,9,10,11,12)]
+hic.ma13[complete.cases(hic.ma13), ]
+hightm.13<-table(hic.ma13[,1], hic.ma13[,2])
+
+# FOURTEEN DAYs OF HIC 
+index.15<-index.1+14
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.15], nrow=length(df.high$states[index.15])))
+#
+hic.ma14<-hic.ma[hic.ma[,15] != 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,14] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,13] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,12] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,11] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,10] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,9] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,8] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,7] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,6] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,5] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,4] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,3] == 1, ]
+hic.ma14<-hic.ma14[hic.ma14[,2] == 1, ]
+hic.ma14<-hic.ma14[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13)]
+hic.ma14[complete.cases(hic.ma14), ]
+hightm.14<-table(hic.ma14[,1], hic.ma14[,2])
+
+# FIFTEEN DAYs OF HIC 
+index.16<-index.1+15
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.16], nrow=length(df.high$states[index.16])))
+#
+hic.ma15<-hic.ma[hic.ma[,16] != 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,15] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,14] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,13] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,12] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,11] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,10] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,9] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,8] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,7] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,6] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,5] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,4] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,3] == 1, ]
+hic.ma15<-hic.ma15[hic.ma15[,2] == 1, ]
+hic.ma15<-hic.ma15[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14)]
+hic.ma15[complete.cases(hic.ma15), ]
+hightm.15<-table(hic.ma15[,1], hic.ma15[,2])
+
+# SIXTEEN DAYs OF HIC 
+index.17<-index.1+16
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.17], nrow=length(df.high$states[index.17])))
+#
+hic.ma16<-hic.ma[hic.ma[,17] != 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,16] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,15] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,14] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,13] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,12] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,11] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,10] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,9] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,8] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,7] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,6] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,5] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,4] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,3] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,2] == 1, ]
+hic.ma16<-hic.ma16[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)]
+hic.ma16[complete.cases(hic.ma16), ]
+hightm.16<-table(hic.ma16[,1], hic.ma16[,2])
+
+# EIGHTEEN DAYs OF HIC 
+index.18<-index.1+17
+hic.ma<-cbind(hic.ma, matrix(df.high$states[index.18], nrow=length(df.high$states[index.18])))
+#
+hic.ma16<-hic.ma[hic.ma[,18] != 1, ]
+hic.ma16<-hic.ma[hic.ma[,17] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,16] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,15] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,14] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,13] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,12] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,11] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,10] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,9] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,8] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,7] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,6] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,5] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,4] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,3] == 1, ]
+hic.ma16<-hic.ma16[hic.ma16[,2] == 1, ]
+hic.ma16<-hic.ma16[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)]
+hic.ma16[complete.cases(hic.ma16), ]
+hightm.16<-table(hic.ma16[,1], hic.ma16[,2])
+
+
+#------------------------------------------------------------------------------
+# With more data we can consider more days but for now we have less than 10 
+# patients at this point 
+# SEVENTEEN DAYs OF HIC 
+# EIGTHTEEN DAYs OF HIC 
+# NINETEEN DAYs OF HIC 
+# TWENTY DAYs OF HIC 
+# TWENTYONE DAYs OF HIC 
+# TWENTYTWO DAYs OF HIC 
+# TWENTYTHREE DAYs OF HIC 
+# TWENTYFOUR DAYs OF HIC 
+# TWENTYFIVE DAYs OF HIC 
+# TWENTYSIX DAYs OF HIC 
+# TWENTYSEVEN DAYs OF HIC 
+# TWENTYEIGHT DAYs OF HIC 
+# TWENTYNINE DAYs OF HIC 
+# THIRTY DAYs OF HIC 
+#-------------------------------------------------------------------------------
+
+rm(index.1)
+rm(index.2)
+rm(index.3)
+rm(index.4)
+rm(index.5)
+rm(index.6)
+rm(index.7)
+rm(index.8)
+rm(index.9)
+rm(index.10)
+rm(index.11)
+rm(index.12)
+rm(index.13)
+rm(index.14)
+rm(index.15)
+rm(index.16)
+rm(index.17)
+rm(hic.ma)
+rm(hic.ma2)
+rm(hic.ma3)
+rm(hic.ma4)
+rm(hic.ma5)
+rm(hic.ma6)
+rm(hic.ma7)
+rm(hic.ma8)
+rm(hic.ma9)
+rm(hic.ma10)
+rm(hic.ma11)
+rm(hic.ma12)
+rm(hic.ma13)
+rm(hic.ma14)
+rm(hic.ma15)
+rm(hic.ma16)
+
+
+# Given that there is not a lot of data in the quartiles for the very severe
+# and at presetn we are not using time varying severyity in the analysis 
+# we coallate the quartiles into halves 
+
+rm(df.q1)
+rm(df.q2)
+rm(df.q3)
+rm(df.q4)
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+
+
 
 ################################################################################
 ## TRANSITION MATRIX ###########################################################
@@ -1377,6 +3338,7 @@ plot(dtmcA, main="Weather Markov Chain")
 
 
 # 
+# 
 # # filter states transition for patients that receive 1 day of Highly invasive care
 # hic<-df.q1 %>% filter(((states%in%1) | (lag1%in%c(0,2,3,4))))
 # 
@@ -1404,5 +3366,3 @@ plot(dtmcA, main="Weather Markov Chain")
 # hic.tm<- matrix(c(hic$states[index.1],hic$states[index.1+1]), nrow=length(index.1), ncol=2)
 # # create transition matrix for one day of hic
 # tm.1<-table(hic.tm[,1], hic.tm[,2])
-# 
-
