@@ -10,6 +10,7 @@ library("stringr")
 library("data.table")
 library("runner")
 library("DataCombine")
+library("msm")
 
 ################################################################################
 ### SELECT CIRRHOSIS COHORT, ASSIGN SOFA QUARTILES #############################
@@ -157,7 +158,6 @@ list.1<-apply(fill.m, MARGIN=1,FUN=function(x) seq(x[1],x[2])) # create a list w
 list.2<-unlist(list.1) # unlist list to use as the indexes for replacement
 df$A[list.2] <- 2 # replace indexed location with 2
 
-
 rm(index.1)
 rm(index.14)
 rm(loc.1)
@@ -195,6 +195,1948 @@ key<-key[,1] # save ids for re-entries into HIC
 df<-anti_join(df, key)# keep only those which do not re-enter HIC
 rm(df.collect)
 rm(key)
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+
+################################################################################
+# TRANSITION PROBABILITIES AND MARKOV OBJECTS ##################################
+################################################################################
+
+example.df<-df
+example.df<-example.df %>% select(icustay_id, icudayseq_asc, states, sofa_group)
+colnames(example.df)[1] <- 'id'  
+colnames(example.df)[2] <- 'day'  
+colnames(example.df)[4] <- 'sofa'  
+
+f1 <- function(data, n){
+  ids <- data %>%
+    mutate(stateslead = lead(states, default = last(states))) %>%
+    group_by(grp = rleid(states == 1)) %>% 
+    filter(n() == n, states == 1, stateslead != 1) %>%     
+    group_by(id) %>%     
+    filter(n() == 1) %>%
+    pull(id)
+  
+  data %>%
+    filter(id %in% ids) %>%
+    group_by(id) %>% 
+    filter(cumsum(states) > 0)
+}
+
+# https://stackoverflow.com/questions/55432875/select-rows-of-ids-that-have-a-pattern-without-losing-the-other-rows/55434003?noredirect=1#comment97588830_55434003
+# aknowledgement to akrun for code assistance for f1
+
+# 1 DAY OF HIC
+
+df1.msm<-f1(example.df, 1)
+# transition table
+df1.tt<-(statetable.msm(states, id, data=df1.msm))
+
+# transition matrix
+df1.tm<-as.matrix.data.frame(df1.tt)
+df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+df1.ptm<-df1.tm/rowSums(df1.tm)
+
+# markov objects
+mo1.msm<-new("markovchain",transitionMatrix=(df1.ptm), name="MarkovChain Q1")
+mo2.msm<-mo1.msm^2
+mo3.msm<-mo1.msm^3
+mo4.msm<-mo1.msm^4
+mo5.msm<-mo1.msm^5
+mo6.msm<-mo1.msm^6
+mo7.msm<-mo1.msm^7
+mo8.msm<-mo1.msm^8
+mo9.msm<-mo1.msm^9
+mo10.msm<-mo1.msm^10
+mo11.msm<-mo1.msm^11
+mo12.msm<-mo1.msm^12
+mo13.msm<-mo1.msm^13
+mo14.msm<-mo1.msm^14
+mo15.msm<-mo1.msm^15
+mo16.msm<-mo1.msm^16
+mo17.msm<-mo1.msm^17
+mo18.msm<-mo1.msm^18
+mo19.msm<-mo1.msm^19
+mo20.msm<-mo1.msm^20
+mo21.msm<-mo1.msm^21
+mo22.msm<-mo1.msm^22
+mo23.msm<-mo1.msm^23
+mo24.msm<-mo1.msm^24
+mo25.msm<-mo1.msm^25
+mo26.msm<-mo1.msm^26
+mo27.msm<-mo1.msm^27
+mo28.msm<-mo1.msm^28
+mo29.msm<-mo1.msm^29
+mo30.msm<-mo1.msm^30
+
+rm(example.df)
+rm(df1.msm)
+rm(df1.ptm)
+rm(df1.tm)
+
+#
+################################################################################
+# First order monte carlo simulations ##########################################
+################################################################################
+#
+
+B <- 10
+N <- 15
+
+sim1.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo1.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim2.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo2.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim3.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo3.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim4.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo4.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim5.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo5.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim6.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo6.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim7.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo7.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim8.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo8.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim9.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo9.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim10.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo10.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim11.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo11.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim12.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo12.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim13.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo13.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim14.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo14.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim15.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo15.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim16.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo16.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim17.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo17.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim18.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo18.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim19.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo19.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim20.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo20.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim21.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo21.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim22.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo22.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim23.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo23.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim24.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo24.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim25.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo25.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim26.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo26.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim27.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo27.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim28.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo28.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim29.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo29.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim30.msm <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo30.msm, 
+                    t0 = "2",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+rm(mo1.msm) 
+rm(mo2.msm)
+rm(mo3.msm)
+rm(mo4.msm)
+rm(mo5.msm)
+rm(mo6.msm)
+rm(mo7.msm)
+rm(mo8.msm)
+rm(mo9.msm)
+rm(mo10.msm)
+rm(mo11.msm)
+rm(mo12.msm)
+rm(mo13.msm)
+rm(mo14.msm)
+rm(mo15.msm)
+rm(mo16.msm)
+rm(mo17.msm)
+rm(mo18.msm)
+rm(mo19.msm)
+rm(mo20.msm)
+rm(mo21.msm)
+rm(mo22.msm)
+rm(mo23.msm)
+rm(mo24.msm)
+rm(mo25.msm)
+rm(mo26.msm)
+rm(mo27.msm)
+rm(mo28.msm)
+rm(mo29.msm)
+rm(mo30.msm)
+
+# 1 non-agressive
+# 2 aggressive
+# 3 cmo
+# 4 discharged
+# 5 death
+
+# Convert simulations into data frames 
+df1.sim<- as.data.frame(sim1.msm)
+df1.sim<-df1.sim %>% gather(key = "id", value = "state")
+df1.sim<-df1.sim %>% mutate(col1=streak_run(state, k=1000))
+df1.sim<-df1.sim %>% filter(!(state=="4" & col1!=1))
+df1.sim<-df1.sim %>% filter(!(state=="5" & col1!=1))
+
+df2.sim<- as.data.frame(sim2.msm)
+df2.sim<-df2.sim %>% gather(key = "id", value = "state")
+df2.sim<-df2.sim %>% mutate(col1=streak_run(state, k=1000))
+df2.sim<-df2.sim %>% filter(!(state=="4" & col1!=1))
+df2.sim<-df2.sim %>% filter(!(state=="5" & col1!=1))
+
+df3.sim<- as.data.frame(sim3.msm)
+df3.sim<-df3.sim %>% gather(key = "id", value = "state")
+df3.sim<-df3.sim %>% mutate(col1=streak_run(state, k=1000))
+df3.sim<-df3.sim %>% filter(!(state=="4" & col1!=1))
+df3.sim<-df3.sim %>% filter(!(state=="5" & col1!=1))
+
+df4.sim<- as.data.frame(sim4.msm)
+df4.sim<-df4.sim %>% gather(key = "id", value = "state")
+df4.sim<-df4.sim %>% mutate(col1=streak_run(state, k=1000))
+df4.sim<-df4.sim %>% filter(!(state=="4" & col1!=1))
+df4.sim<-df4.sim %>% filter(!(state=="5" & col1!=1))
+
+df5.sim<- as.data.frame(sim5.msm)
+df5.sim<-df5.sim %>% gather(key = "id", value = "state")
+df5.sim<-df5.sim %>% mutate(col1=streak_run(state, k=1000))
+df5.sim<-df5.sim %>% filter(!(state=="4" & col1!=1))
+df5.sim<-df5.sim %>% filter(!(state=="5" & col1!=1))
+
+df6.sim<- as.data.frame(sim6.msm)
+df6.sim<-df6.sim %>% gather(key = "id", value = "state")
+df6.sim<-df6.sim %>% mutate(col1=streak_run(state, k=1000))
+df6.sim<-df6.sim %>% filter(!(state=="4" & col1!=1))
+df6.sim<-df6.sim %>% filter(!(state=="5" & col1!=1))
+
+df7.sim<- as.data.frame(sim7.msm)
+df7.sim<-df7.sim %>% gather(key = "id", value = "state")
+df7.sim<-df7.sim %>% mutate(col1=streak_run(state, k=1000))
+df7.sim<-df7.sim %>% filter(!(state=="4" & col1!=1))
+df7.sim<-df7.sim %>% filter(!(state=="5" & col1!=1))
+
+df8.sim<- as.data.frame(sim8.msm)
+df8.sim<-df8.sim %>% gather(key = "id", value = "state")
+df8.sim<-df8.sim %>% mutate(col1=streak_run(state, k=1000))
+df8.sim<-df8.sim %>% filter(!(state=="4" & col1!=1))
+df8.sim<-df8.sim %>% filter(!(state=="5" & col1!=1))
+
+df9.sim<- as.data.frame(sim9.msm)
+df9.sim<-df9.sim %>% gather(key = "id", value = "state")
+df9.sim<-df9.sim %>% mutate(col1=streak_run(state, k=1000))
+df9.sim<-df9.sim %>% filter(!(state=="4" & col1!=1))
+df9.sim<-df9.sim %>% filter(!(state=="5" & col1!=1))
+
+df10.sim<- as.data.frame(sim10.msm)
+df10.sim<-df9.sim %>% gather(key = "id", value = "state")
+df10.sim<-df9.sim %>% mutate(col1=streak_run(state, k=1000))
+df10.sim<-df9.sim %>% filter(!(state=="4" & col1!=1))
+df10.sim<-df9.sim %>% filter(!(state=="5" & col1!=1))
+
+df11.sim<- as.data.frame(sim11.msm)
+df11.sim<-df11.sim %>% gather(key = "id", value = "state")
+df11.sim<-df11.sim %>% mutate(col1=streak_run(state, k=1000))
+df11.sim<-df11.sim %>% filter(!(state=="4" & col1!=1))
+df11.sim<-df11.sim %>% filter(!(state=="5" & col1!=1))
+
+df12.sim<- as.data.frame(sim12.msm)
+df12.sim<-df12.sim %>% gather(key = "id", value = "state")
+df12.sim<-df12.sim %>% mutate(col1=streak_run(state, k=1000))
+df12.sim<-df12.sim %>% filter(!(state=="4" & col1!=1))
+df12.sim<-df12.sim %>% filter(!(state=="5" & col1!=1))
+
+df13.sim<- as.data.frame(sim13.msm)
+df13.sim<-df13.sim %>% gather(key = "id", value = "state")
+df13.sim<-df13.sim %>% mutate(col1=streak_run(state, k=1000))
+df13.sim<-df13.sim %>% filter(!(state=="4" & col1!=1))
+df13.sim<-df13.sim %>% filter(!(state=="5" & col1!=1))
+
+df14.sim<- as.data.frame(sim14.msm)
+df14.sim<-df14.sim %>% gather(key = "id", value = "state")
+df14.sim<-df14.sim %>% mutate(col1=streak_run(state, k=1000))
+df14.sim<-df14.sim %>% filter(!(state=="4" & col1!=1))
+df14.sim<-df14.sim %>% filter(!(state=="5" & col1!=1))
+
+df15.sim<- as.data.frame(sim15.msm)
+df15.sim<-df15.sim %>% gather(key = "id", value = "state")
+df15.sim<-df15.sim %>% mutate(col1=streak_run(state, k=1000))
+df15.sim<-df15.sim %>% filter(!(state=="4" & col1!=1))
+df15.sim<-df15.sim %>% filter(!(state=="5" & col1!=1))
+
+df16.sim<- as.data.frame(sim16.msm)
+df16.sim<-df16.sim %>% gather(key = "id", value = "state")
+df16.sim<-df16.sim %>% mutate(col1=streak_run(state, k=1000))
+df16.sim<-df16.sim %>% filter(!(state=="4" & col1!=1))
+df16.sim<-df16.sim %>% filter(!(state=="5" & col1!=1))
+
+df17.sim<- as.data.frame(sim17.msm)
+df17.sim<-df17.sim %>% gather(key = "id", value = "state")
+df17.sim<-df17.sim %>% mutate(col1=streak_run(state, k=1000))
+df17.sim<-df17.sim %>% filter(!(state=="4" & col1!=1))
+df17.sim<-df17.sim %>% filter(!(state=="5" & col1!=1))
+
+df18.sim<- as.data.frame(sim18.msm)
+df18.sim<-df18.sim %>% gather(key = "id", value = "state")
+df18.sim<-df18.sim %>% mutate(col1=streak_run(state, k=1000))
+df18.sim<-df18.sim %>% filter(!(state=="4" & col1!=1))
+df18.sim<-df18.sim %>% filter(!(state=="5" & col1!=1))
+
+df19.sim<- as.data.frame(sim19.msm)
+df19.sim<-df19.sim %>% gather(key = "id", value = "state")
+df19.sim<-df19.sim %>% mutate(col1=streak_run(state, k=1000))
+df19.sim<-df19.sim %>% filter(!(state=="4" & col1!=1))
+df19.sim<-df19.sim %>% filter(!(state=="5" & col1!=1))
+
+df20.sim<- as.data.frame(sim20.msm)
+df20.sim<-df9.sim %>% gather(key = "id", value = "state")
+df20.sim<-df9.sim %>% mutate(col1=streak_run(state, k=1000))
+df20.sim<-df9.sim %>% filter(!(state=="4" & col1!=1))
+df20.sim<-df9.sim %>% filter(!(state=="5" & col1!=1))
+
+df21.sim<- as.data.frame(sim21.msm)
+df21.sim<-df21.sim %>% gather(key = "id", value = "state")
+df21.sim<-df21.sim %>% mutate(col1=streak_run(state, k=1000))
+df21.sim<-df21.sim %>% filter(!(state=="4" & col1!=1))
+df21.sim<-df21.sim %>% filter(!(state=="5" & col1!=1))
+
+df22.sim<- as.data.frame(sim22.msm)
+df22.sim<-df22.sim %>% gather(key = "id", value = "state")
+df22.sim<-df22.sim %>% mutate(col1=streak_run(state, k=1000))
+df22.sim<-df22.sim %>% filter(!(state=="4" & col1!=1))
+df22.sim<-df22.sim %>% filter(!(state=="5" & col1!=1))
+
+df23.sim<- as.data.frame(sim23.msm)
+df23.sim<-df23.sim %>% gather(key = "id", value = "state")
+df23.sim<-df23.sim %>% mutate(col1=streak_run(state, k=1000))
+df23.sim<-df23.sim %>% filter(!(state=="4" & col1!=1))
+df23.sim<-df23.sim %>% filter(!(state=="5" & col1!=1))
+
+df24.sim<- as.data.frame(sim24.msm)
+df24.sim<-df24.sim %>% gather(key = "id", value = "state")
+df24.sim<-df24.sim %>% mutate(col1=streak_run(state, k=1000))
+df24.sim<-df24.sim %>% filter(!(state=="4" & col1!=1))
+df24.sim<-df24.sim %>% filter(!(state=="5" & col1!=1))
+
+df25.sim<- as.data.frame(sim25.msm)
+df25.sim<-df25.sim %>% gather(key = "id", value = "state")
+df25.sim<-df25.sim %>% mutate(col1=streak_run(state, k=1000))
+df25.sim<-df25.sim %>% filter(!(state=="4" & col1!=1))
+df25.sim<-df25.sim %>% filter(!(state=="5" & col1!=1))
+
+df26.sim<- as.data.frame(sim26.msm)
+df26.sim<-df26.sim %>% gather(key = "id", value = "state")
+df26.sim<-df26.sim %>% mutate(col1=streak_run(state, k=1000))
+df26.sim<-df26.sim %>% filter(!(state=="4" & col1!=1))
+df26.sim<-df26.sim %>% filter(!(state=="5" & col1!=1))
+
+df27.sim<- as.data.frame(sim27.msm)
+df27.sim<-df27.sim %>% gather(key = "id", value = "state")
+df27.sim<-df27.sim %>% mutate(col1=streak_run(state, k=1000))
+df27.sim<-df27.sim %>% filter(!(state=="4" & col1!=1))
+df27.sim<-df27.sim %>% filter(!(state=="5" & col1!=1))
+
+df28.sim<- as.data.frame(sim28.msm)
+df28.sim<-df28.sim %>% gather(key = "id", value = "state")
+df28.sim<-df28.sim %>% mutate(col1=streak_run(state, k=1000))
+df28.sim<-df28.sim %>% filter(!(state=="4" & col1!=1))
+df28.sim<-df28.sim %>% filter(!(state=="5" & col1!=1))
+
+df29.sim<- as.data.frame(sim29.msm)
+df29.sim<-df29.sim %>% gather(key = "id", value = "state")
+df29.sim<-df29.sim %>% mutate(col1=streak_run(state, k=1000))
+df29.sim<-df29.sim %>% filter(!(state=="4" & col1!=1))
+df29.sim<-df29.sim %>% filter(!(state=="5" & col1!=1))
+
+df30.sim<- as.data.frame(sim30.msm)
+df30.sim<-df30.sim %>% gather(key = "id", value = "state")
+df30.sim<-df30.sim %>% mutate(col1=streak_run(state, k=1000))
+df30.sim<-df30.sim %>% filter(!(state=="4" & col1!=1))
+df30.sim<-df30.sim %>% filter(!(state=="5" & col1!=1))
+
+rm(sim1.msm) 
+rm(sim2.msm)
+rm(sim3.msm)
+rm(sim4.msm)
+rm(sim5.msm)
+rm(sim6.msm)
+rm(sim7.msm)
+rm(sim8.msm)
+rm(sim9.msm)
+rm(sim10.msm)
+rm(sim11.msm)
+rm(sim12.msm)
+rm(sim13.msm)
+rm(sim14.msm)
+rm(sim15.msm)
+rm(sim16.msm)
+rm(sim17.msm)
+rm(sim18.msm)
+rm(sim19.msm)
+rm(sim20.msm)
+rm(sim21.msm)
+rm(sim22.msm)
+rm(sim23.msm)
+rm(sim24.msm)
+rm(sim25.msm)
+rm(sim26.msm)
+rm(sim27.msm)
+rm(sim28.msm)
+rm(sim29.msm)
+rm(sim30.msm)
+
+################################################################################
+# Base case analysis Utilities and costs #######################################
+################################################################################
+
+# Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
+# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+# Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
+
+# Daily costs:
+# ICU Room & Board	 $3,805.00 	-	-
+# Dialysis	 $4,650.00 	 $400.00 	 $8,900.00 
+# Mechanical ventilation first day 	 $928.99 	-	-
+# Mechanical ventilation	 $775.00 	-	-
+# Comfort care	 $988.00 	-	-
+# Initial hospital physican care	 $662.00 	-	-
+# Subsequent hospital physican care	 $340.00 	-	-
+# Hospital discharge day	 $353.00 	-	-
+# Critical care phsycian care	 $724.00 	-	-
+  
+# sources: BIDMC - Patient Financial Services & HMFP - Finance
+
+# utilities
+u_nhic<-0.66
+u_hic<-0.55
+u_cmo<-0.28
+u_discharge<-1
+u_died<-1
+
+# 1 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df1.sim<-df1.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df1.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df1.sim$day>0, 340,0))+4650+(ifelse(df1.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df1.sim<-df1.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                      state=="1"~u_nhic,
+                                      state=="3"~u_cmo,
+                                      state=="4"~u_discharge, 
+                                      state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df1.summary<- df1.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df1.overall<- df1.summary[!duplicated(df1.summary$id), ]
+#
+df1.overall_u_mean<-mean(df1.summary$utility_mean)
+df1.overall_c_mean<-mean(df1.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df1.survival<-df1.summary %>% filter(state%in%4)
+df1.survival_u_mean<-mean(df1.survival$utility_mean)
+df1.survival_u_costs<-mean(df1.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 2 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df2.sim<-df2.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df2.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df2.sim$day>0, 340,0))+4650+(ifelse(df2.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df2.sim<-df2.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df2.summary<- df2.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df2.overall<- df2.summary[!duplicated(df2.summary$id), ]
+#
+df2.overall_u_mean<-mean(df2.summary$utility_mean)
+df2.overall_c_mean<-mean(df2.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df2.survival<-df2.summary %>% filter(state%in%4)
+df2.survival_u_mean<-mean(df2.survival$utility_mean)
+df2.survival_u_costs<-mean(df2.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 3 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df3.sim<-df3.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df3.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df3.sim$day>0, 340,0))+4650+(ifelse(df3.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df3.sim<-df3.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df3.summary<- df3.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df3.overall<- df3.summary[!duplicated(df3.summary$id), ]
+#
+df3.overall_u_mean<-mean(df3.summary$utility_mean)
+df3.overall_c_mean<-mean(df3.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df3.survival<-df3.summary %>% filter(state%in%4)
+df3.survival_u_mean<-mean(df3.survival$utility_mean)
+df3.survival_u_costs<-mean(df3.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 4 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df4.sim<-df4.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df4.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df4.sim$day>0, 340,0))+4650+(ifelse(df4.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df4.sim<-df4.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df4.summary<- df4.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df4.overall<- df4.summary[!duplicated(df4.summary$id), ]
+#
+df4.overall_u_mean<-mean(df4.summary$utility_mean)
+df4.overall_c_mean<-mean(df4.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df4.survival<-df4.summary %>% filter(state%in%4)
+df4.survival_u_mean<-mean(df4.survival$utility_mean)
+df4.survival_u_costs<-mean(df4.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 5 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df5.sim<-df5.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df5.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df5.sim$day>0, 340,0))+4650+(ifelse(df5.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df5.sim<-df5.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df5.summary<- df5.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df5.overall<- df5.summary[!duplicated(df5.summary$id), ]
+#
+df5.overall_u_mean<-mean(df5.summary$utility_mean)
+df5.overall_c_mean<-mean(df5.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df5.survival<-df5.summary %>% filter(state%in%4)
+df5.survival_u_mean<-mean(df5.survival$utility_mean)
+df5.survival_u_costs<-mean(df5.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 6 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df6.sim<-df6.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df6.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df6.sim$day>0, 340,0))+4650+(ifelse(df6.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df6.sim<-df6.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df6.summary<- df6.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df6.overall<- df6.summary[!duplicated(df6.summary$id), ]
+#
+df6.overall_u_mean<-mean(df6.summary$utility_mean)
+df6.overall_c_mean<-mean(df6.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df6.survival<-df6.summary %>% filter(state%in%4)
+df6.survival_u_mean<-mean(df6.survival$utility_mean)
+df6.survival_u_costs<-mean(df6.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 7 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df7.sim<-df7.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df7.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df7.sim$day>0, 340,0))+4650+(ifelse(df7.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df7.sim<-df7.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df7.summary<- df7.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df7.overall<- df7.summary[!duplicated(df7.summary$id), ]
+#
+df7.overall_u_mean<-mean(df7.summary$utility_mean)
+df7.overall_c_mean<-mean(df7.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df7.survival<-df7.summary %>% filter(state%in%4)
+df7.survival_u_mean<-mean(df7.survival$utility_mean)
+df7.survival_u_costs<-mean(df7.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 8 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df8.sim<-df8.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df8.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df8.sim$day>0, 340,0))+4650+(ifelse(df8.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df8.sim<-df8.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df8.summary<- df8.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df8.overall<- df8.summary[!duplicated(df8.summary$id), ]
+#
+df8.overall_u_mean<-mean(df8.summary$utility_mean)
+df8.overall_c_mean<-mean(df8.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df8.survival<-df8.summary %>% filter(state%in%4)
+df8.survival_u_mean<-mean(df8.survival$utility_mean)
+df8.survival_u_costs<-mean(df8.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 9 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df9.sim<-df9.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df9.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df9.sim$day>0, 340,0))+4650+(ifelse(df9.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df9.sim<-df9.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df9.summary<- df9.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df9.overall<- df9.summary[!duplicated(df9.summary$id), ]
+#
+df9.overall_u_mean<-mean(df9.summary$utility_mean)
+df9.overall_c_mean<-mean(df9.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df9.survival<-df9.summary %>% filter(state%in%4)
+df9.survival_u_mean<-mean(df9.survival$utility_mean)
+df9.survival_u_costs<-mean(df9.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 10 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df10.sim<-df10.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df10.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df10.sim$day>0, 340,0))+4650+(ifelse(df10.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df10.sim<-df10.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df10.summary<- df10.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df10.overall<- df10.summary[!duplicated(df10.summary$id), ]
+#
+df10.overall_u_mean<-mean(df10.summary$utility_mean)
+df10.overall_c_mean<-mean(df10.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df10.survival<-df10.summary %>% filter(state%in%4)
+df10.survival_u_mean<-mean(df10.survival$utility_mean)
+df10.survival_u_costs<-mean(df10.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 11 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df11.sim<-df11.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df11.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df11.sim$day>0, 340,0))+4650+(ifelse(df11.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df11.sim<-df11.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df11.summary<- df11.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df11.overall<- df11.summary[!duplicated(df11.summary$id), ]
+#
+df11.overall_u_mean<-mean(df11.summary$utility_mean)
+df11.overall_c_mean<-mean(df11.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df11.survival<-df11.summary %>% filter(state%in%4)
+df11.survival_u_mean<-mean(df11.survival$utility_mean)
+df11.survival_u_costs<-mean(df11.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 11 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df11.sim<-df11.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df11.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df11.sim$day>0, 340,0))+4650+(ifelse(df11.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df11.sim<-df11.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df11.summary<- df11.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df11.overall<- df11.summary[!duplicated(df11.summary$id), ]
+#
+df11.overall_u_mean<-mean(df11.summary$utility_mean)
+df11.overall_c_mean<-mean(df11.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df11.survival<-df11.summary %>% filter(state%in%4)
+df11.survival_u_mean<-mean(df11.survival$utility_mean)
+df11.survival_u_costs<-mean(df11.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 12 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df12.sim<-df12.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df12.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df12.sim$day>0, 340,0))+4650+(ifelse(df12.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df12.sim<-df12.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df12.summary<- df12.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df12.overall<- df12.summary[!duplicated(df12.summary$id), ]
+#
+df12.overall_u_mean<-mean(df12.summary$utility_mean)
+df12.overall_c_mean<-mean(df12.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df12.survival<-df12.summary %>% filter(state%in%4)
+df12.survival_u_mean<-mean(df12.survival$utility_mean)
+df12.survival_u_costs<-mean(df12.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 13 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df13.sim<-df13.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df13.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df13.sim$day>0, 340,0))+4650+(ifelse(df13.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df13.sim<-df13.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df13.summary<- df13.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df13.overall<- df13.summary[!duplicated(df13.summary$id), ]
+#
+df13.overall_u_mean<-mean(df13.summary$utility_mean)
+df13.overall_c_mean<-mean(df13.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df13.survival<-df13.summary %>% filter(state%in%4)
+df13.survival_u_mean<-mean(df13.survival$utility_mean)
+df13.survival_u_costs<-mean(df13.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 14 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df14.sim<-df14.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df14.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df14.sim$day>0, 340,0))+4650+(ifelse(df14.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df14.sim<-df14.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df14.summary<- df14.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df14.overall<- df14.summary[!duplicated(df14.summary$id), ]
+#
+df14.overall_u_mean<-mean(df14.summary$utility_mean)
+df14.overall_c_mean<-mean(df14.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df14.survival<-df14.summary %>% filter(state%in%4)
+df14.survival_u_mean<-mean(df14.survival$utility_mean)
+df14.survival_u_costs<-mean(df14.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 15 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df15.sim<-df15.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df15.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df15.sim$day>0, 340,0))+4650+(ifelse(df15.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df15.sim<-df15.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df15.summary<- df15.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df15.overall<- df15.summary[!duplicated(df15.summary$id), ]
+#
+df15.overall_u_mean<-mean(df15.summary$utility_mean)
+df15.overall_c_mean<-mean(df15.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df15.survival<-df15.summary %>% filter(state%in%4)
+df15.survival_u_mean<-mean(df15.survival$utility_mean)
+df15.survival_u_costs<-mean(df15.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 16 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df16.sim<-df16.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df16.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df16.sim$day>0, 340,0))+4650+(ifelse(df16.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df16.sim<-df16.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df16.summary<- df16.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df16.overall<- df16.summary[!duplicated(df16.summary$id), ]
+#
+df16.overall_u_mean<-mean(df16.summary$utility_mean)
+df16.overall_c_mean<-mean(df16.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df16.survival<-df16.summary %>% filter(state%in%4)
+df16.survival_u_mean<-mean(df16.survival$utility_mean)
+df16.survival_u_costs<-mean(df16.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 17 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df17.sim<-df17.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df17.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df17.sim$day>0, 340,0))+4650+(ifelse(df17.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df17.sim<-df17.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df17.summary<- df17.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df17.overall<- df17.summary[!duplicated(df17.summary$id), ]
+#
+df17.overall_u_mean<-mean(df17.summary$utility_mean)
+df17.overall_c_mean<-mean(df17.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df17.survival<-df17.summary %>% filter(state%in%4)
+df17.survival_u_mean<-mean(df17.survival$utility_mean)
+df17.survival_u_costs<-mean(df17.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 18 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df18.sim<-df18.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df18.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df18.sim$day>0, 340,0))+4650+(ifelse(df18.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df18.sim<-df18.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df18.summary<- df18.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df18.overall<- df18.summary[!duplicated(df18.summary$id), ]
+#
+df18.overall_u_mean<-mean(df18.summary$utility_mean)
+df18.overall_c_mean<-mean(df18.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df18.survival<-df18.summary %>% filter(state%in%4)
+df18.survival_u_mean<-mean(df18.survival$utility_mean)
+df18.survival_u_costs<-mean(df18.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 19 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df19.sim<-df19.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df19.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df19.sim$day>0, 340,0))+4650+(ifelse(df19.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df19.sim<-df19.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df19.summary<- df19.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df19.overall<- df19.summary[!duplicated(df19.summary$id), ]
+#
+df19.overall_u_mean<-mean(df19.summary$utility_mean)
+df19.overall_c_mean<-mean(df19.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df19.survival<-df19.summary %>% filter(state%in%4)
+df19.survival_u_mean<-mean(df19.survival$utility_mean)
+df19.survival_u_costs<-mean(df19.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 20 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df20.sim<-df20.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df20.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df20.sim$day>0, 340,0))+4650+(ifelse(df20.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df20.sim<-df20.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df20.summary<- df20.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df20.overall<- df20.summary[!duplicated(df20.summary$id), ]
+#
+df20.overall_u_mean<-mean(df20.summary$utility_mean)
+df20.overall_c_mean<-mean(df20.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df20.survival<-df20.summary %>% filter(state%in%4)
+df20.survival_u_mean<-mean(df20.survival$utility_mean)
+df20.survival_u_costs<-mean(df20.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 21 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df21.sim<-df21.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df21.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df21.sim$day>0, 340,0))+4650+(ifelse(df21.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df21.sim<-df21.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df21.summary<- df21.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df21.overall<- df21.summary[!duplicated(df21.summary$id), ]
+#
+df21.overall_u_mean<-mean(df21.summary$utility_mean)
+df21.overall_c_mean<-mean(df21.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df21.survival<-df21.summary %>% filter(state%in%4)
+df21.survival_u_mean<-mean(df21.survival$utility_mean)
+df21.survival_u_costs<-mean(df21.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 22 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df22.sim<-df22.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df22.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df22.sim$day>0, 340,0))+4650+(ifelse(df22.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df22.sim<-df22.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df22.summary<- df22.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df22.overall<- df22.summary[!duplicated(df22.summary$id), ]
+#
+df22.overall_u_mean<-mean(df22.summary$utility_mean)
+df22.overall_c_mean<-mean(df22.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df22.survival<-df22.summary %>% filter(state%in%4)
+df22.survival_u_mean<-mean(df22.survival$utility_mean)
+df22.survival_u_costs<-mean(df22.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 23 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df23.sim<-df23.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df23.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df23.sim$day>0, 340,0))+4650+(ifelse(df23.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df23.sim<-df23.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df23.summary<- df23.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df23.overall<- df23.summary[!duplicated(df23.summary$id), ]
+#
+df23.overall_u_mean<-mean(df23.summary$utility_mean)
+df23.overall_c_mean<-mean(df23.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df23.survival<-df23.summary %>% filter(state%in%4)
+df23.survival_u_mean<-mean(df23.survival$utility_mean)
+df23.survival_u_costs<-mean(df23.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 24 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df24.sim<-df24.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df24.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df24.sim$day>0, 340,0))+4650+(ifelse(df24.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df24.sim<-df24.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df24.summary<- df24.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df24.overall<- df24.summary[!duplicated(df24.summary$id), ]
+#
+df24.overall_u_mean<-mean(df24.summary$utility_mean)
+df24.overall_c_mean<-mean(df24.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df24.survival<-df24.summary %>% filter(state%in%4)
+df24.survival_u_mean<-mean(df24.survival$utility_mean)
+df24.survival_u_costs<-mean(df24.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 25 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df25.sim<-df25.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df25.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df25.sim$day>0, 340,0))+4650+(ifelse(df25.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df25.sim<-df25.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df25.summary<- df25.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df25.overall<- df25.summary[!duplicated(df25.summary$id), ]
+#
+df25.overall_u_mean<-mean(df25.summary$utility_mean)
+df25.overall_c_mean<-mean(df25.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df25.survival<-df25.summary %>% filter(state%in%4)
+df25.survival_u_mean<-mean(df25.survival$utility_mean)
+df25.survival_u_costs<-mean(df25.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 26 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df26.sim<-df26.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df26.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df26.sim$day>0, 340,0))+4650+(ifelse(df26.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df26.sim<-df26.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df26.summary<- df26.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df26.overall<- df26.summary[!duplicated(df26.summary$id), ]
+#
+df26.overall_u_mean<-mean(df26.summary$utility_mean)
+df26.overall_c_mean<-mean(df26.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df26.survival<-df26.summary %>% filter(state%in%4)
+df26.survival_u_mean<-mean(df26.survival$utility_mean)
+df26.survival_u_costs<-mean(df26.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 27 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df27.sim<-df27.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df27.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df27.sim$day>0, 340,0))+4650+(ifelse(df27.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df27.sim<-df27.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df27.summary<- df27.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df27.overall<- df27.summary[!duplicated(df27.summary$id), ]
+#
+df27.overall_u_mean<-mean(df27.summary$utility_mean)
+df27.overall_c_mean<-mean(df27.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df27.survival<-df27.summary %>% filter(state%in%4)
+df27.survival_u_mean<-mean(df27.survival$utility_mean)
+df27.survival_u_costs<-mean(df27.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 28 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df28.sim<-df28.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df28.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df28.sim$day>0, 340,0))+4650+(ifelse(df28.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df28.sim<-df28.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df28.summary<- df28.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df28.overall<- df28.summary[!duplicated(df28.summary$id), ]
+#
+df28.overall_u_mean<-mean(df28.summary$utility_mean)
+df28.overall_c_mean<-mean(df28.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df28.survival<-df28.summary %>% filter(state%in%4)
+df28.survival_u_mean<-mean(df28.survival$utility_mean)
+df28.survival_u_costs<-mean(df28.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 29 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df29.sim<-df29.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df29.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df29.sim$day>0, 340,0))+4650+(ifelse(df29.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df29.sim<-df29.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df29.summary<- df29.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df29.overall<- df29.summary[!duplicated(df29.summary$id), ]
+#
+df29.overall_u_mean<-mean(df29.summary$utility_mean)
+df29.overall_c_mean<-mean(df29.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df29.survival<-df29.summary %>% filter(state%in%4)
+df29.survival_u_mean<-mean(df29.survival$utility_mean)
+df29.survival_u_costs<-mean(df29.survival$costs_sum)
+
+#-------------------------------------------------------------------------------
+
+# 30 day hic ////////////////////////////////////////////////////////////////////
+
+# Create flags for sequential days  
+df30.sim<-df30.sim %>% mutate(day=(streak_run(id, k=1000)-1))
+# Create costs
+c_nhic<-3805+662+(ifelse(df30.sim$day>0, 340,0))
+c_hic<-3805+662+(ifelse(df30.sim$day>0, 340,0))+4650+(ifelse(df30.sim$day%in%0, 928.99, 0))
+c_cmo<-3805+988
+c_lastday<-353.00 # assumping death at beggining of day and no extra costs 
+
+df30.sim<-df30.sim %>% mutate(utility= case_when(state=="2"~u_hic,
+                                               state=="1"~u_nhic,
+                                               state=="3"~u_cmo,
+                                               state=="4"~u_discharge, 
+                                               state=="5"~u_died),
+                            costs= case_when(state=="1"~c_nhic,
+                                             state=="2"~c_hic,
+                                             state=="3"~c_cmo,
+                                             state=="4"~c_lastday,
+                                             state=="5"~c_lastday)) 
+
+# Get means of costs and utility 
+df30.summary<- df30.sim %>% 
+  group_by(id) %>% 
+  mutate(utility_mean= mean(utility),
+         costs_sum= sum(costs)) %>% 
+  ungroup() 
+
+# Overall utility and cost of strategy at N days
+
+df30.overall<- df30.summary[!duplicated(df30.summary$id), ]
+#
+df30.overall_u_mean<-mean(df30.summary$utility_mean)
+df30.overall_c_mean<-mean(df30.summary$costs_sum)
+
+# Mean survival utility and costs at N dayss
+df30.survival<-df30.summary %>% filter(state%in%4)
+df30.survival_u_mean<-mean(df30.survival$utility_mean)
+df30.survival_u_costs<-mean(df30.survival$costs_sum)
+
+
+rm(df1.sim)
+rm(df2.sim)
+rm(df3.sim)
+rm(df4.sim)
+rm(df5.sim)
+rm(df6.sim)
+rm(df7.sim)
+rm(df8.sim)
+rm(df9.sim)
+rm(df10.sim)
+rm(df11.sim)
+rm(df12.sim)
+rm(df13.sim)
+rm(df14.sim)
+rm(df15.sim)
+rm(df16.sim)
+rm(df17.sim)
+rm(df18.sim)
+rm(df19.sim)
+rm(df20.sim)
+rm(df21.sim)
+rm(df22.sim)
+rm(df23.sim)
+rm(df24.sim)
+rm(df25.sim)
+rm(df26.sim)
+rm(df27.sim)
+rm(df28.sim)
+rm(df29.sim)
+rm(df30.sim)
+
 
 #______________________________________________________________________________#
 #______________________________________________________________________________#
@@ -273,7 +2215,7 @@ rm(index.1)
 
 ##                                                                            ##
 ################################################################################
-## Create data frames for transition matrixe                                   # 
+## Create data frames for transition matrix                                    # 
 ################################################################################
 ##                                                                            ##
 
@@ -343,96 +2285,325 @@ mo29.low<-mo1.low^29
 mo30.low<-mo1.low^30
 
 
+# high severity 
 
+example.df<-df.high
+example.df<-example.df %>% select(icustay_id, icudayseq_asc, states)
+colnames(example.df)<- c("id", "day", "states")
 
-
-df1.low<-f1(example.df, 1)
+df1.high<-f1(example.df, 1)
 #
-df1.low<-df1.low %>% mutate(seq=lead(states))
-df1.low<- df1.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
-tm1.low<-table(df1.low$states, df1.low$seq)
-tmA1.low<-tm1.low/rowSums(tm1.low)
-tmA1.low<- cbind(tmA1.low, c(0,0,0,0,0))
-colnames(tmA1.low)<-(c("nhit","cmo","discharge","death","hit"))
-tmA1.low<-setcolorder(as.data.table(tmA1.low), c(1,5,2,3,4))
-tmA1.low<-as.matrix(tmA1.low)
-mo1.low<-new("markovchain",transitionMatrix=(tmA1.low), name="MarkovChain Q1")
+df1.high<-df1.high %>% mutate(seq=lead(states))
+df1.high<- df1.high %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+tm1.high<-table(df1.high$states, df1.high$seq)
+tmA1.high<-tm1.high/rowSums(tm1.high)
+tmA1.high<- cbind(tmA1.high, c(0,0,0,0,0))
+colnames(tmA1.high)<-(c("nhit","cmo","discharge","death","hit"))
+tmA1.high<-setcolorder(as.data.table(tmA1.high), c(1,5,2,3,4))
+tmA1.high<-as.matrix(tmA1.high)
+mo1.high<-new("markovchain",transitionMatrix=(tmA1.high), name="MarkovChain Q2")
+mo2.high<-mo1.high^2
+mo3.high<-mo1.high^3
+mo4.high<-mo1.high^4
+mo5.high<-mo1.high^5
+mo6.high<-mo1.high^6
+mo7.high<-mo1.high^7
+mo8.high<-mo1.high^8
+mo9.high<-mo1.high^9
+mo10.high<-mo1.high^10
+mo11.high<-mo1.high^11
+mo12.high<-mo1.high^12
+mo13.high<-mo1.high^13
+mo14.high<-mo1.high^14
+mo15.high<-mo1.high^15
+mo16.high<-mo1.high^16
+mo17.high<-mo1.high^17
+mo18.high<-mo1.high^18
+mo19.high<-mo1.high^19
+mo20.high<-mo1.high^20
+mo21.high<-mo1.high^21
+mo22.high<-mo1.high^22
+mo23.high<-mo1.high^23
+mo24.high<-mo1.high^24
+mo25.high<-mo1.high^25
+mo26.high<-mo1.high^26
+mo27.high<-mo1.high^27
+mo28.high<-mo1.high^28
+mo29.high<-mo1.high^29
+mo30.high<-mo1.high^30
 
-df2.low<-f1(example.df, 2)
-df2.low<- df2.low %>% mutate(col1=lead(states))
-df2.low<-df2.low[!(df2.low$states==1 & df2.low$col1==1),]
-df2.low$col1<-NULL
-#
-df2.low<-df2.low %>% mutate(seq=lead(states))
-df2.low<- df2.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
-tm2.low<-table(df2.low$states, df2.low$seq)
-tmA2.low<-tm2.low/rowSums(tm2.low)
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
 
-df3.low<-f1(example.df, 3)
-df3.low<- df3.low %>% mutate(col1=lead(states))
-df3.low<-df3.low[!(df3.low$states==1 & df3.low$col1==1),]
-df3.low$col1<-NULL
-#
-df3.low<-df3.low %>% mutate(seq=lead(states))
-df3.low<- df3.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
-tm3.low<-table(df3.low$states, df3.low$seq)
-tmA3.low<-tm3.low/rowSums(tm3.low)
+#                                                                              #     
+################################################################################
+# FIRST ORDER SIMULATION                                                       #
+################################################################################
+#                                                                              #   
 
-df4.low<-f1(example.df, 4)
-df4.low<- df4.low %>% mutate(col1=lead(states))
-df4.low<-df4.low[!(df4.low$states==1 & df4.low$col1==1),]
-df4.low$col1<-NULL
-#
-df4.low<-df4.low %>% mutate(seq=lead(states))
-df4.low<- df4.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
-tm4.low<-table(df4.low$states, df4.low$seq)
-tmA4.low<-tm4.low/rowSums(tm4.low)
+# We can recreate transitions for individuals using the rmarkovchain 
+# NOTE TO SELF
 
-df5.low<-f1(example.df, 5)
-df5.low<- df5.low %>% mutate(col1=lead(states))
-df5.low<-df5.low[!(df5.low$states==1 & df5.low$col1==1),]
-df5.low$col1<-NULL
-#
-df5.low<-df5.low %>% mutate(seq=lead(states))
-df5.low<- df5.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
-tm5.low<-table(df5.low$states, df5.low$seq)
-tmA5.low<-tm5.low/rowSums(tm5.low)
+set.seed(1988)
 
-df6.low<-f1(example.df, 6)
-df6.low<- df6.low %>% mutate(col1=lead(states))
-df6.low<-df6.low[!(df6.low$states==1 & df6.low$col1==1),]
-df6.low$col1<-NULL
-#
-df6.low<-df6.low %>% mutate(seq=lead(states))
-df6.low<- df6.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
-tm6.low<-table(df6.low$states, df6.low$seq)
-tmA6.low<-tm6.low/rowSums(tm6.low)
+# I boot strap this function to create a matrix of multiple individuals.
+# This creates a wide matrix
 
-df7.low<-f1(example.df, 7)
-df7.low<- df7.low %>% mutate(col1=lead(states))
-df7.low<-df7.low[!(df7.low$states==1 & df7.low$col1==1),]
-df7.low$col1<-NULL
-#
-df7.low<-df7.low %>% mutate(seq=lead(states))
-df7.low<- df7.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
-tm7.low<-table(df7.low$states, df7.low$seq)
-tmA7.low<-tm7.low/rowSums(tm7.low)
+B <- 10
+N <- 15
 
-df8.low<-f1(example.df, 8)
-df8.low<- df8.low %>% mutate(col1=lead(states))
-df8.low<-df8.low[!(df8.low$states==1 & df8.low$col1==1),]
-df8.low$col1<-NULL
-#
-df8.low<-df8.low %>% mutate(seq=lead(states))
-df8.low<- df8.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
-tm8.low<-table(df8.low$states, df8.low$seq)
-tmA8.low<-tm8.low/rowSums(tm8.low)
+sim1.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo1.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim2.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo2.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim3.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo3.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim4.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo4.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim5.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo5.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim6.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo6.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim7.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo7.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim8.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo8.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim9.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo9.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim10.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo10.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim11.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo11.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim12.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo12.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim13.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo13.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim14.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo14.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim15.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo15.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim16.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo16.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim17.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo17.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim18.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo18.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim19.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo19.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim20.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo20.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim21.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo21.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim22.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo22.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim23.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo23.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim24.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo24.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim25.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo25.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim26.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo26.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim27.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo27.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim28.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo28.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim29.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo29.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
+
+sim30.low <- replicate(B, {
+  X <- rmarkovchain(n = N, 
+                    object = mo30.low, 
+                    t0 = "hit",
+                    include.t0 = TRUE,
+                    parallel = TRUE,
+                    num.cores=3)})
 
 
 
+# Now I turn this matrix into a data frame
+wide_rmc_df<- as.data.frame(sim1.low)
+wide_rmc_df<-wide_rmc_df %>% gather(key = "id", value = "state")
+wide_rmc_df<- wide_rmc_df %>% mutate(col1=streak_run(state, k=1000))
+wide_rmc_df<-wide_rmc_df %>% filter(!(state=="discharge" & col1!=1))
 
-# library(purrr)
-# out1 <- map(1:3, f1, data = example.df)
+#note to self just do on full data due to limited data 
+
 
 #______________________________________________________________________________#
 #______________________________________________________________________________#
@@ -545,7 +2716,24 @@ rm(df.q4.lastrow)
 #______________________________________________________________________________#
 #______________________________________________________________________________#
 
-
+# not a lot of data
+# example.df<-df.q1
+# example.df<-example.df %>% select(icustay_id, icudayseq_asc, states)
+# colnames(example.df)<- c("id", "day", "states")
+# 
+# df1.q1<-f1(example.df, 1)
+# #
+# df1.q1<-df1.q1 %>% mutate(seq=lead(states))
+# df1.q1<- df1.q1 %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm1.q1<-table(df1.q1$states, df1.q1$seq)
+# tmA1.q1<-tm1.q1/rowSums(tm1.q1)
+# # fixing matrix to be a square 
+# tmA1.q1<- cbind(tmA1.q1, c(0,0,0,0,0))
+# colnames(tmA1.q1)<-(c("nhit","cmo","discharge","death","hit"))
+# tmA1.q1<-setcolorder(as.data.table(tmA1.q1), c(1,5,2,3,4))
+# tmA1.q1<-as.matrix(tmA1.q1)
+# # markov object
+# mo1.q1<-new("markovchain",transitionMatrix=(tmA1.q1), name="MarkovChain Q1")
 
 #______________________________________________________________________________#
 #______________________________________________________________________________#
@@ -2015,12 +4203,6 @@ rm(q4tm.16)
 ################################################################################
 ## MARKOV OBJECT ###############################################################
 ################################################################################
-
-# Q1 object
-
-test<-as.matrix.data.frame(q1tmA.1)
-
-MOq1.1<-new("markovchain",transitionMatrix=as.matrix.data.frame(q1tmA.1), name="MarkovChain Q1")
 
 
 
@@ -4053,16 +6235,16 @@ plot(dtmcA, main="Weather Markov Chain")
 # #
 # df14.low<-df14.low %>% mutate(seq=lead(states))
 # df14.low<- df14.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
-# tm14.low<-table(df14.low$states, df14.low$seq)
-# tmA14.low<-tm14.low/rowSums(tm14.low)
-# 
+# # tm14.low<-table(df14.low$states, df14.low$seq)
+# # tmA14.low<-tm14.low/rowSums(tm14.low)
+# # 
 # df15.low<-f1(example.df, 15)
 # df15.low<- df15.low %>% mutate(col1=lead(states))
 # df15.low<-df15.low[!(df15.low$states==1 & df15.low$col1==1),]
 # df15.low$col1<-NULL
 # #
 # df15.low<-df15.low %>% mutate(seq=lead(states))
-# df15.low<- df15.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# df15.low<- df15.low %>% mutate(seq= ifelse(seq %in% NA, states, seq))
 # tm15.low<-table(df15.low$states, df15.low$seq)
 # tmA15.low<-tm15.low/rowSums(tm15.low)
 # 
@@ -4072,7 +6254,7 @@ plot(dtmcA, main="Weather Markov Chain")
 # df16.low$col1<-NULL
 # #
 # df16.low<-df16.low %>% mutate(seq=lead(states))
-# df16.low<- df16.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# df16.low<- df16.low %>% mutate(seq= ifelse(seq %in% NA, states, seq))
 # tm16.low<-table(df16.low$states, df16.low$seq)
 # tmA16.low<-tm16.low/rowSums(tm16.low)
 # 
@@ -4082,7 +6264,7 @@ plot(dtmcA, main="Weather Markov Chain")
 # df17.low$col1<-NULL
 # #
 # df17.low<-df17.low %>% mutate(seq=lead(states))
-# df17.low<- df17.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# df17.low<- df17.low %>% mutate(seq= ifelse(seq %in% NA, states, seq))
 # tm17.low<-table(df17.low$states, df17.low$seq)
 # tmA17.low<-tm17.low/rowSums(tm17.low)
 # 
@@ -4092,7 +6274,7 @@ plot(dtmcA, main="Weather Markov Chain")
 # df18.low$col1<-NULL
 # #
 # df18.low<-df18.low %>% mutate(seq=lead(states))
-# df18.low<- df18.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# df18.low<- df18.low %>% mutate(seq= ifelse(seq %in% NA, states, seq))
 # tm18.low<-table(df18.low$states, df18.low$seq)
 # tmA18.low<-tm18.low/rowSums(tm18.low)
 # 
@@ -4102,7 +6284,7 @@ plot(dtmcA, main="Weather Markov Chain")
 # df19.low$col1<-NULL
 # #
 # df19.low<-df19.low %>% mutate(seq=lead(states))
-# df19.low<- df19.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# df19.low<- df19.low %>% mutate(seq= ifelse(seq %in% NA, states, seq))
 # tm19.low<-table(df19.low$states, df19.low$seq)
 # tmA19.low<-tm19.low/rowSums(tm19.low)
 # 
@@ -4112,6 +6294,82 @@ plot(dtmcA, main="Weather Markov Chain")
 # df20.low$col1<-NULL
 # #
 # df20.low<-df20.low %>% mutate(seq=lead(states))
-# df20.low<- df20.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# df20.low<- df20.low %>% mutate(seq= ifelse(seq %in% NA, states, seq))
 # tm20.low<-table(df20.low$states, df20.low$seq)
 # tmA20.low<-tm20.low/rowSums(tm20.low)
+# 
+# #high sev group
+# 
+# # df2.high<-f1(example.df, 2)
+# df2.high<- df2.high %>% mutate(col1=lead(states))
+# df2.high<-df2.high[!(df2.high$states==1 & df2.high$col1==1),]
+# df2.high$col1<-NULL
+# #
+# df2.high<-df2.high %>% mutate(seq=lead(states))
+# df2.high<- df2.high %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm2.high<-table(df2.high$states, df2.high$seq)
+# tmA2.high<-tm2.high/rowSums(tm2.high)
+# 
+# df3.high<-f1(example.df, 3)
+# df3.high<- df3.high %>% mutate(col1=lead(states))
+# df3.high<-df3.high[!(df3.high$states==1 & df3.high$col1==1),]
+# df3.high$col1<-NULL
+# #
+# df3.high<-df3.high %>% mutate(seq=lead(states))
+# df3.high<- df3.high %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm3.high<-table(df3.high$states, df3.high$seq)
+# tmA3.high<-tm3.high/rowSums(tm3.high)
+# 
+# df4.high<-f1(example.df, 4)
+# df4.high<- df4.high %>% mutate(col1=lead(states))
+# df4.high<-df4.high[!(df4.high$states==1 & df4.high$col1==1),]
+# df4.high$col1<-NULL
+# #
+# df4.high<-df4.high %>% mutate(seq=lead(states))
+# df4.high<- df4.high %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm4.high<-table(df4.high$states, df4.high$seq)
+# tmA4.high<-tm4.high/rowSums(tm4.high)
+# 
+# df5.high<-f1(example.df, 5)
+# df5.high<- df5.high %>% mutate(col1=lead(states))
+# df5.high<-df5.high[!(df5.high$states==1 & df5.high$col1==1),]
+# df5.high$col1<-NULL
+# #
+# df5.high<-df5.high %>% mutate(seq=lead(states))
+# df5.high<- df5.high %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm5.high<-table(df5.high$states, df5.high$seq)
+# tmA5.high<-tm5.high/rowSums(tm5.high)
+# 
+# df6.high<-f1(example.df, 6)
+# df6.high<- df6.high %>% mutate(col1=lead(states))
+# df6.high<-df6.high[!(df6.high$states==1 & df6.high$col1==1),]
+# df6.high$col1<-NULL
+# #
+# df6.high<-df6.high %>% mutate(seq=lead(states))
+# df6.high<- df6.high %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm6.high<-table(df6.high$states, df6.high$seq)
+# tmA6.high<-tm6.high/rowSums(tm6.high)
+# 
+# df7.high<-f1(example.df, 7)
+# df7.high<- df7.high %>% mutate(col1=lead(states))
+# df7.high<-df7.high[!(df7.high$states==1 & df7.high$col1==1),]
+# df7.high$col1<-NULL
+# #
+# df7.high<-df7.high %>% mutate(seq=lead(states))
+# df7.high<- df7.high %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm7.high<-table(df7.high$states, df7.high$seq)
+# tmA7.high<-tm7.high/rowSums(tm7.high)
+# 
+# df8.high<-f1(example.df, 8)
+# df8.high<- df8.high %>% mutate(col1=lead(states))
+# df8.high<-df8.high[!(df8.high$states==1 & df8.high$col1==1),]
+# df8.high$col1<-NULL
+# #
+# df8.high<-df8.high %>% mutate(seq=lead(states))
+# df8.high<- df8.high %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm8.high<-table(df8.high$states, df8.high$seq)
+# tmA8.high<-tm8.high/rowSums(tm8.high)
+
+# #
+# test.msm<-msm(events ~ day, subject=id, data=df1.msm, qmatrix=df1.ptt, death= c(4,5),covariates = ~ sofa)
+
