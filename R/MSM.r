@@ -7,6 +7,9 @@ library("survival", lib.loc="~/R/win-library/3.5")
 library("survminer", lib.loc="~/R/win-library/3.5")
 library("parallel")
 library("stringr")
+library("data.table")
+library("runner")
+library("DataCombine")
 
 ################################################################################
 ### SELECT CIRRHOSIS COHORT, ASSIGN SOFA QUARTILES #############################
@@ -173,51 +176,263 @@ df<-df %>%mutate(states= ifelse(A %in% 2, 2, states),
 df$A<-NULL
 df$CMO_additional_flag<-NULL
 
+df[2038,10] <-1 # this is a mismatch in logic  *!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 #______________________________________________________________________________#
 #______________________________________________________________________________#
 #______________________________________________________________________________#
 #______________________________________________________________________________#
 
-#
 ################################################################################
-# LEAD STATES                                                                  #
+# UNIQUE HIC - NO RE-ENTRIES INTO HIC #########################################
 ################################################################################
+
+index.1<-which(df$states %in% c(1)) # index all the rows with 1
+df<- df %>% mutate(col1=streak_run(states, k=1000)) # create a streak
+df.collect<-df %>% .[c(index.1),] # collect all the rows with 1`
+key<-df.collect %>% group_by(icustay_id) %>% count(col1) %>% filter(col1%in%1 & n!=1) # keep rentries into HIC  
+key<-key[,1] # save ids for re-entries into HIC
+df<-anti_join(df, key)# keep only those which do not re-enter HIC
+rm(df.collect)
+rm(key)
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+################################################################################
+# Halved analysis                                                              #
+################################################################################
+# Divide cohort based on groups and demographics ###############################
+################################################################################
+
+# Obtain keys for sofa groups
+sofa<-df %>% filter(icudayseq_asc == 0)
+
+# Create df keys for each quantile sofa severity group
+key.low<-sofa %>% filter(sofa_group %in% c("Q1","Q2")) %>% select(icustay_id)
+key.high<-sofa %>% filter(sofa_group %in% c("Q3","Q4")) %>% select(icustay_id)
+
+# Create df for each quantile sofa severity group
+df.low<-semi_join(df, key.low)
+df.high<-semi_join(df, key.high)
+
+# Drop keys and sofa table
+rm(key.low)
+rm(key.high)
+rm(sofa)
+
+# Compute demographics for each quantile sofa group
+
+#Q1#########################
+table(df.low$death_flag)
+length(unique(df.low$icustay_id))
+#Q2#########################
+table(df.high$death_flag)
+length(unique(df.high$icustay_id))
+
+# How many days on average did they spend in each unit
+
+#Q1#########################
+table(df.low$states)[1:3]
+sum(table(df.low$states)[1:3]) # total number of days in ICU
+sum(table(df.low$states)) # total number of days passed
+#Q2#########################
+table(df.high$states)[1:3]
+sum(table(df.high$states)[1:3])# total number of days in ICU
+sum(table(df.high$states)) # total number of days passed
+
+# Obtain the last day metrics for each quantile sofa group
+df.low.lastrow<-df.low %>% group_by(icustay_id) %>% filter(icudayseq_asc %in% max(icudayseq_asc))
+df.high.lastrow<-df.high %>% group_by(icustay_id) %>% filter(icudayseq_asc %in% max(icudayseq_asc))
+
+# Last row statistics for each quantile sofa group
+
+#Q1#########################
+summary(df.low.lastrow$icudayseq_asc)
+summary(df.low.lastrow$sofa_last)
+summary(df.low.lastrow$admission_age)
+table(df.low.lastrow$gender)
+(table(df.low.lastrow$gender)/length(unique(df.low$icustay_id)))*100
+#Q2#########################
+summary(df.high.lastrow$icudayseq_asc)
+summary(df.high.lastrow$sofa_last)
+summary(df.high.lastrow$admission_age)
+table(df.high.lastrow$gender)
+(table(df.high.lastrow$gender)/length(unique(df.high$icustay_id)))*100
+
+rm(df.low.lastrow)
+rm(df.high.lastrow)
+rm(index.1)
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+##                                                                            ##
+################################################################################
+## Create data frames for transition matrixe                                   # 
+################################################################################
+##                                                                            ##
+
+example.df<-df.low
+example.df<-example.df %>% select(icustay_id, icudayseq_asc, states)
+colnames(example.df)<- c("id", "day", "states")
+
+f1 <- function(data, n){
+  ids <- data %>%
+    mutate(stateslead = lead(states, default = last(states))) %>%
+    group_by(grp = rleid(states == 1)) %>% 
+    filter(n() == n, states == 1, stateslead != 1) %>%     
+    group_by(id) %>%     
+    filter(n() == 1) %>%
+    pull(id)
+  
+  data %>%
+    filter(id %in% ids) %>%
+    group_by(id) %>% 
+    filter(cumsum(states) > 0)
+}
+
+# https://stackoverflow.com/questions/55432875/select-rows-of-ids-that-have-a-pattern-without-losing-the-other-rows/55434003?noredirect=1#comment97588830_55434003
+# aknowledgement to akrun for code assistance for f1
+
+df1.low<-f1(example.df, 1)
 #
+df1.low<-df1.low %>% mutate(seq=lead(states))
+df1.low<- df1.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+tm1.low<-table(df1.low$states, df1.low$seq)
+tmA1.low<-tm1.low/rowSums(tm1.low)
+# fixing matrix to be a square 
+tmA1.low<- cbind(tmA1.low, c(0,0,0,0,0))
+colnames(tmA1.low)<-(c("nhit","cmo","discharge","death","hit"))
+tmA1.low<-setcolorder(as.data.table(tmA1.low), c(1,5,2,3,4))
+tmA1.low<-as.matrix(tmA1.low)
+# markov object
+mo1.low<-new("markovchain",transitionMatrix=(tmA1.low), name="MarkovChain Q1")
+mo2.low<-mo1.low^2
+mo3.low<-mo1.low^3
+mo4.low<-mo1.low^4
+mo5.low<-mo1.low^5
+mo6.low<-mo1.low^6
+mo7.low<-mo1.low^7
+mo8.low<-mo1.low^8
+mo9.low<-mo1.low^9
+mo10.low<-mo1.low^10
+mo11.low<-mo1.low^11
+mo12.low<-mo1.low^12
+mo13.low<-mo1.low^13
+mo14.low<-mo1.low^14
+mo15.low<-mo1.low^15
+mo16.low<-mo1.low^16
+mo17.low<-mo1.low^17
+mo18.low<-mo1.low^18
+mo19.low<-mo1.low^19
+mo20.low<-mo1.low^20
+mo21.low<-mo1.low^21
+mo22.low<-mo1.low^22
+mo23.low<-mo1.low^23
+mo24.low<-mo1.low^24
+mo25.low<-mo1.low^25
+mo26.low<-mo1.low^26
+mo27.low<-mo1.low^27
+mo28.low<-mo1.low^28
+mo29.low<-mo1.low^29
+mo30.low<-mo1.low^30
 
-# The leads below will be used to define transition matrices later on
-# I could have used a loop but I opted for hard code due to interpretability
 
-df<-df %>% mutate(lag1=lag(states),
-                  lag2=lag(states, n=2),
-                  lag3=lag(states, n=3),
-                  lag4=lag(states, n=4),
-                  lag5=lag(states, n=5),
-                  lag6=lag(states, n=6),
-                  lag7=lag(states, n=7),
-                  lag8=lag(states, n=8),
-                  lag9=lag(states, n=9),
-                  lag10=lag(states, n=10),
-                  lag11=lag(states, n=11),
-                  lag12=lag(states, n=12),
-                  lag13=lag(states, n=13),
-                  lag14=lag(states, n=14),
-                  lag15=lag(states, n=15),
-                  lag16=lag(states, n=16),
-                  lag17=lag(states, n=17),
-                  lag18=lag(states, n=18),
-                  lag19=lag(states, n=19),
-                  lag20=lag(states, n=20),
-                  lag21=lag(states, n=21),
-                  lag22=lag(states, n=22),
-                  lag23=lag(states, n=23),
-                  lag24=lag(states, n=24),
-                  lag25=lag(states, n=25),
-                  lag26=lag(states, n=26),
-                  lag27=lag(states, n=27),
-                  lag28=lag(states, n=28),
-                  lag29=lag(states, n=29),
-                  lag30=lag(states, n=30))
 
+
+
+df1.low<-f1(example.df, 1)
+#
+df1.low<-df1.low %>% mutate(seq=lead(states))
+df1.low<- df1.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+tm1.low<-table(df1.low$states, df1.low$seq)
+tmA1.low<-tm1.low/rowSums(tm1.low)
+tmA1.low<- cbind(tmA1.low, c(0,0,0,0,0))
+colnames(tmA1.low)<-(c("nhit","cmo","discharge","death","hit"))
+tmA1.low<-setcolorder(as.data.table(tmA1.low), c(1,5,2,3,4))
+tmA1.low<-as.matrix(tmA1.low)
+mo1.low<-new("markovchain",transitionMatrix=(tmA1.low), name="MarkovChain Q1")
+
+df2.low<-f1(example.df, 2)
+df2.low<- df2.low %>% mutate(col1=lead(states))
+df2.low<-df2.low[!(df2.low$states==1 & df2.low$col1==1),]
+df2.low$col1<-NULL
+#
+df2.low<-df2.low %>% mutate(seq=lead(states))
+df2.low<- df2.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+tm2.low<-table(df2.low$states, df2.low$seq)
+tmA2.low<-tm2.low/rowSums(tm2.low)
+
+df3.low<-f1(example.df, 3)
+df3.low<- df3.low %>% mutate(col1=lead(states))
+df3.low<-df3.low[!(df3.low$states==1 & df3.low$col1==1),]
+df3.low$col1<-NULL
+#
+df3.low<-df3.low %>% mutate(seq=lead(states))
+df3.low<- df3.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+tm3.low<-table(df3.low$states, df3.low$seq)
+tmA3.low<-tm3.low/rowSums(tm3.low)
+
+df4.low<-f1(example.df, 4)
+df4.low<- df4.low %>% mutate(col1=lead(states))
+df4.low<-df4.low[!(df4.low$states==1 & df4.low$col1==1),]
+df4.low$col1<-NULL
+#
+df4.low<-df4.low %>% mutate(seq=lead(states))
+df4.low<- df4.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+tm4.low<-table(df4.low$states, df4.low$seq)
+tmA4.low<-tm4.low/rowSums(tm4.low)
+
+df5.low<-f1(example.df, 5)
+df5.low<- df5.low %>% mutate(col1=lead(states))
+df5.low<-df5.low[!(df5.low$states==1 & df5.low$col1==1),]
+df5.low$col1<-NULL
+#
+df5.low<-df5.low %>% mutate(seq=lead(states))
+df5.low<- df5.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+tm5.low<-table(df5.low$states, df5.low$seq)
+tmA5.low<-tm5.low/rowSums(tm5.low)
+
+df6.low<-f1(example.df, 6)
+df6.low<- df6.low %>% mutate(col1=lead(states))
+df6.low<-df6.low[!(df6.low$states==1 & df6.low$col1==1),]
+df6.low$col1<-NULL
+#
+df6.low<-df6.low %>% mutate(seq=lead(states))
+df6.low<- df6.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+tm6.low<-table(df6.low$states, df6.low$seq)
+tmA6.low<-tm6.low/rowSums(tm6.low)
+
+df7.low<-f1(example.df, 7)
+df7.low<- df7.low %>% mutate(col1=lead(states))
+df7.low<-df7.low[!(df7.low$states==1 & df7.low$col1==1),]
+df7.low$col1<-NULL
+#
+df7.low<-df7.low %>% mutate(seq=lead(states))
+df7.low<- df7.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+tm7.low<-table(df7.low$states, df7.low$seq)
+tmA7.low<-tm7.low/rowSums(tm7.low)
+
+df8.low<-f1(example.df, 8)
+df8.low<- df8.low %>% mutate(col1=lead(states))
+df8.low<-df8.low[!(df8.low$states==1 & df8.low$col1==1),]
+df8.low$col1<-NULL
+#
+df8.low<-df8.low %>% mutate(seq=lead(states))
+df8.low<- df8.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+tm8.low<-table(df8.low$states, df8.low$seq)
+tmA8.low<-tm8.low/rowSums(tm8.low)
+
+
+
+
+# library(purrr)
+# out1 <- map(1:3, f1, data = example.df)
 
 #______________________________________________________________________________#
 #______________________________________________________________________________#
@@ -329,6 +544,15 @@ rm(df.q4.lastrow)
 #______________________________________________________________________________#
 #______________________________________________________________________________#
 #______________________________________________________________________________#
+
+
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+
 
 ##                                                                            ##   
 ################################################################################
@@ -1641,6 +1865,172 @@ rm(df.q4)
 #______________________________________________________________________________#
 #______________________________________________________________________________#
 
+#                                                                              #
+################################################################################
+# TRANSITION MATRIX ############################################################
+################################################################################
+#                                                                              #
+
+# QUARTILE I
+q1tmA.1<-tm.1/rowSums(tm.1)
+q1tmA.2<-tm.2/rowSums(tm.2)
+q1tmA.3<-tm.3/rowSums(tm.3)
+q1tmA.4<-tm.4/rowSums(tm.4)
+q1tmA.5<-tm.5/rowSums(tm.5)
+q1tmA.6<-tm.6/rowSums(tm.6)
+q1tmA.7<-tm.7/rowSums(tm.7)
+q1tmA.8<-tm.8/rowSums(tm.8)
+q1tmA.9<-tm.9/rowSums(tm.9)
+q1tmA.10<-tm.10/rowSums(tm.10)
+q1tmA.11<-tm.11/rowSums(tm.11)
+q1tmA.12<-tm.12/rowSums(tm.12)
+q1tmA.13<-tm.13/rowSums(tm.13)
+q1tmA.14<-tm.14/rowSums(tm.14)
+q1tmA.15<-tm.15/rowSums(tm.15)
+
+# QUARTILE II
+q2tmA.1<-q2tm.1/rowSums(q2tm.1)
+q2tmA.2<-q2tm.2/rowSums(q2tm.2)
+q2tmA.3<-q2tm.3/rowSums(q2tm.3)
+q2tmA.4<-q2tm.4/rowSums(q2tm.4)
+q2tmA.5<-q2tm.5/rowSums(q2tm.5)
+q2tmA.6<-q2tm.6/rowSums(q2tm.6)
+q2tmA.7<-q2tm.7/rowSums(q2tm.7)
+q2tmA.8<-q2tm.8/rowSums(q2tm.8)
+q2tmA.9<-q2tm.9/rowSums(q2tm.9)
+q2tmA.10<-q2tm.10/rowSums(q2tm.10)
+q2tmA.11<-q2tm.11/rowSums(q2tm.11)
+q2tmA.12<-q2tm.12/rowSums(q2tm.12)
+q2tmA.13<-q2tm.13/rowSums(q2tm.13)
+q2tmA.14<-q2tm.14/rowSums(q2tm.14)
+q2tmA.15<-q2tm.15/rowSums(q2tm.15)
+
+# QUARTILE III
+q3tmA.1<-q3tm.1/rowSums(q3tm.1)
+q3tmA.2<-q3tm.2/rowSums(q3tm.2)
+q3tmA.3<-q3tm.3/rowSums(q3tm.3)
+q3tmA.4<-q3tm.4/rowSums(q3tm.4)
+q3tmA.5<-q3tm.5/rowSums(q3tm.5)
+q3tmA.6<-q3tm.6/rowSums(q3tm.6)
+q3tmA.7<-q3tm.7/rowSums(q3tm.7)
+q3tmA.8<-q3tm.8/rowSums(q3tm.8)
+q3tmA.9<-q3tm.9/rowSums(q3tm.9)
+q3tmA.10<-q3tm.10/rowSums(q3tm.10)
+q3tmA.11<-q3tm.11/rowSums(q3tm.11)
+q3tmA.12<-q3tm.12/rowSums(q3tm.12)
+q3tmA.13<-q3tm.13/rowSums(q3tm.13)
+q3tmA.14<-q3tm.14/rowSums(q3tm.14)
+q3tmA.15<-q3tm.15/rowSums(q3tm.15)
+
+# QUARTILE IV
+q4tmA.1<-q4tm.1/rowSums(q4tm.1)
+q4tmA.2<-q4tm.2/rowSums(q4tm.2)
+q4tmA.3<-q4tm.3/rowSums(q4tm.3)
+q4tmA.4<-q4tm.4/rowSums(q4tm.4)
+q4tmA.5<-q4tm.5/rowSums(q4tm.5)
+q4tmA.6<-q4tm.6/rowSums(q4tm.6)
+q4tmA.7<-q4tm.7/rowSums(q4tm.7)
+q4tmA.8<-q4tm.8/rowSums(q4tm.8)
+q4tmA.9<-q4tm.9/rowSums(q4tm.9)
+q4tmA.10<-q4tm.10/rowSums(q4tm.10)
+q4tmA.11<-q4tm.11/rowSums(q4tm.11)
+q4tmA.12<-q4tm.12/rowSums(q4tm.12)
+q4tmA.13<-q4tm.13/rowSums(q4tm.13)
+q4tmA.14<-q4tm.14/rowSums(q4tm.14)
+q4tmA.15<-q4tm.15/rowSums(q4tm.15)
+
+rm(tm.1)
+rm(tm.2)
+rm(tm.3)
+rm(tm.4)
+rm(tm.5)
+rm(tm.6)
+rm(tm.7)
+rm(tm.8)
+rm(tm.9)
+rm(tm.10)
+rm(tm.11)
+rm(tm.12)
+rm(tm.13)
+rm(tm.14)
+rm(tm.15)
+rm(tm.16)
+
+rm(q2tm.1)
+rm(q2tm.2)
+rm(q2tm.3)
+rm(q2tm.4)
+rm(q2tm.5)
+rm(q2tm.6)
+rm(q2tm.7)
+rm(q2tm.8)
+rm(q2tm.9)
+rm(q2tm.10)
+rm(q2tm.11)
+rm(q2tm.12)
+rm(q2tm.13)
+rm(q2tm.14)
+rm(q2tm.15)
+rm(q2tm.16)
+
+rm(q3tm.1)
+rm(q3tm.2)
+rm(q3tm.3)
+rm(q3tm.4)
+rm(q3tm.5)
+rm(q3tm.6)
+rm(q3tm.7)
+rm(q3tm.8)
+rm(q3tm.9)
+rm(q3tm.10)
+rm(q3tm.11)
+rm(q3tm.12)
+rm(q3tm.13)
+rm(q3tm.14)
+rm(q3tm.15)
+rm(q3tm.16)
+
+rm(q4tm.1)
+rm(q4tm.2)
+rm(q4tm.3)
+rm(q4tm.4)
+rm(q4tm.5)
+rm(q4tm.6)
+rm(q4tm.7)
+rm(q4tm.8)
+rm(q4tm.9)
+rm(q4tm.10)
+rm(q4tm.11)
+rm(q4tm.12)
+rm(q4tm.13)
+rm(q4tm.14)
+rm(q4tm.15)
+rm(q4tm.16)
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+
+################################################################################
+## MARKOV OBJECT ###############################################################
+################################################################################
+
+# Q1 object
+
+test<-as.matrix.data.frame(q1tmA.1)
+
+MOq1.1<-new("markovchain",transitionMatrix=as.matrix.data.frame(q1tmA.1), name="MarkovChain Q1")
+
+
+
+
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#______________________________________________________________________________#
+#//////////////////////////////////////////////////////////////////////////////#
+
 ################################################################################
 # Halved analysis                                                              #
 ################################################################################
@@ -1711,6 +2101,7 @@ rm(df.high.lastrow)
 #______________________________________________________________________________#
 #______________________________________________________________________________#
 #______________________________________________________________________________#
+
 
 ##                                                                            ##   
 ################################################################################
@@ -1982,6 +2373,32 @@ hic.ma16<-hic.ma16[hic.ma16[,2] == 1, ]
 hic.ma16<-hic.ma16[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)]
 hic.ma16[complete.cases(hic.ma16), ]
 lowtm.16<-table(hic.ma16[,1], hic.ma16[,2])
+
+# SEVENTEEN DAYs OF HIC 
+index.18<-index.1+17
+hic.ma<-cbind(hic.ma, matrix(df.low$states[index.18], nrow=length(df.low$states[index.18])))
+#
+hic.ma17<-hic.ma[hic.ma[,18] != 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,17] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,16] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,15] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,14] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,13] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,12] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,11] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,10] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,9] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,8] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,7] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,6] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,5] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,4] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,3] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,2] == 1, ]
+hic.ma17<-hic.ma17[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)]
+hic.ma17[complete.cases(hic.ma17), ]
+lowtm.17<-table(hic.ma17[,1], hic.ma17[,2])
+
 
 #------------------------------------------------------------------------------
 # With more data we can consider more days but for now we have less than 10 
@@ -2307,36 +2724,35 @@ hic.ma16<-hic.ma16[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)]
 hic.ma16[complete.cases(hic.ma16), ]
 hightm.16<-table(hic.ma16[,1], hic.ma16[,2])
 
-# EIGHTEEN DAYs OF HIC 
+# SEVENTEEN DAYs OF HIC 
 index.18<-index.1+17
 hic.ma<-cbind(hic.ma, matrix(df.high$states[index.18], nrow=length(df.high$states[index.18])))
 #
-hic.ma16<-hic.ma[hic.ma[,18] != 1, ]
-hic.ma16<-hic.ma[hic.ma[,17] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,16] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,15] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,14] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,13] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,12] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,11] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,10] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,9] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,8] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,7] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,6] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,5] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,4] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,3] == 1, ]
-hic.ma16<-hic.ma16[hic.ma16[,2] == 1, ]
-hic.ma16<-hic.ma16[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)]
-hic.ma16[complete.cases(hic.ma16), ]
-hightm.16<-table(hic.ma16[,1], hic.ma16[,2])
+hic.ma17<-hic.ma[hic.ma[,18] != 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,17] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,16] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,15] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,14] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,13] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,12] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,11] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,10] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,9] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,8] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,7] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,6] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,5] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,4] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,3] == 1, ]
+hic.ma17<-hic.ma17[hic.ma17[,2] == 1, ]
+hic.ma17<-hic.ma17[,-c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)]
+hic.ma17[complete.cases(hic.ma17), ]
+hightm.17<-table(hic.ma17[,1], hic.ma17[,2])
 
 
 #------------------------------------------------------------------------------
 # With more data we can consider more days but for now we have less than 10 
 # patients at this point 
-# SEVENTEEN DAYs OF HIC 
 # EIGTHTEEN DAYs OF HIC 
 # NINETEEN DAYs OF HIC 
 # TWENTY DAYs OF HIC 
@@ -3366,3 +3782,336 @@ plot(dtmcA, main="Weather Markov Chain")
 # hic.tm<- matrix(c(hic$states[index.1],hic$states[index.1+1]), nrow=length(index.1), ncol=2)
 # # create transition matrix for one day of hic
 # tm.1<-table(hic.tm[,1], hic.tm[,2])
+
+# #______________________________________________________________________________#
+# #______________________________________________________________________________#
+# #______________________________________________________________________________#
+# #______________________________________________________________________________#
+# 
+# #
+# ################################################################################
+# # LEAD STATES                                                                  #
+# ################################################################################
+# #
+# 
+# # The leads below will be used to define transition matrices later on
+# # I could have used a loop but I opted for hard code due to interpretability
+# 
+# df<-df %>% mutate(lag1=lag(states),
+#                   lag2=lag(states, n=2),
+#                   lag3=lag(states, n=3),
+#                   lag4=lag(states, n=4),
+#                   lag5=lag(states, n=5),
+#                   lag6=lag(states, n=6),
+#                   lag7=lag(states, n=7),
+#                   lag8=lag(states, n=8),
+#                   lag9=lag(states, n=9),
+#                   lag10=lag(states, n=10),
+#                   lag11=lag(states, n=11),
+#                   lag12=lag(states, n=12),
+#                   lag13=lag(states, n=13),
+#                   lag14=lag(states, n=14),
+#                   lag15=lag(states, n=15),
+#                   lag16=lag(states, n=16),
+#                   lag17=lag(states, n=17),
+#                   lag18=lag(states, n=18),
+#                   lag19=lag(states, n=19),
+#                   lag20=lag(states, n=20),
+#                   lag21=lag(states, n=21),
+#                   lag22=lag(states, n=22),
+#                   lag23=lag(states, n=23),
+#                   lag24=lag(states, n=24),
+#                   lag25=lag(states, n=25),
+#                   lag26=lag(states, n=26),
+#                   lag27=lag(states, n=27),
+#                   lag28=lag(states, n=28),
+#                   lag29=lag(states, n=29),
+#                   lag30=lag(states, n=30))
+
+
+
+# col.q1<-df.q1 %>% select(icustay_id,icudayseq_asc,states)
+# colnames(col.q1) <- c("id", "day", "states")
+# 
+# f1 <- function(data, n){
+#   ids <- data %>%
+#     mutate(stateslead = lead(states, default = last(states))) %>%
+#     group_by(grp = rleid(states == 1)) %>% 
+#     filter(n() == n, states == 1, stateslead != 1) %>%     
+#     group_by(id) %>%     
+#     filter(n() == 1) %>%
+#     pull(id)
+#   
+#   data %>%
+#     filter(id %in% id) %>%
+#     group_by(id) %>% 
+#     filter(cumsum(states) > 0)
+# }
+# 
+# test<-col.q1 %>% group_by(rleid(states == 1))
+# 
+# ids <- col.q1 %>%
+#   mutate(stateslead = lead(states, default = last(states))) 
+# 
+# ids<-ids %>% group_by(grp = rleid(states == 1))
+# ids<-ids %>%filter(n() == n , states == 1 & stateslead != 1)
+# 
+# 
+# 
+# index.1<-which(col.q1$states %in% c(1))
+# col.q1 %>% splice(index.1,  states[index.1+1])
+# 
+# 
+# filter(col.q1, )
+# 
+# #this makes sure that they only leave hic & not re-enter
+# index.1<-which(col.q1$states %in% c(1)) # index all the rows with 1
+# col.q1<- col.q1 %>% mutate(col1=streak_run(states, k=1000)) # create a streak
+# test<-col.q1 %>% .[c(index.1),] # collect all the rows with 1`
+# cow<-test %>% group_by(id) %>% count(col1) %>% filter(col1%in%1 & n!=1)
+# cow<-cow %>% filter(col1 != 1)
+# key<-cow[,1]
+# 
+# 
+# 
+# 
+# 
+# test <- test %>% group_by(id) %>% filter(col1%in%max(col1))
+# 
+# test$column1<-sequence(rle(as.character(test$day))$lengths)
+# 
+# 
+# 
+# 
+# install.packages("runner")
+# library(runner)
+
+
+
+
+
+# There is very limited data in the following data 
+# df2.low<-f1(example.df, 2)
+# df2.low<- df2.low %>% mutate(col1=lead(states))
+# df2.low<-df2.low[!(df2.low$states==1 & df2.low$col1==1),]
+# df2.low$col1<-NULL
+# #
+# df2.low<-df2.low %>% mutate(seq=lead(states))
+# df2.low<- df2.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm2.low<-table(df2.low$states, df2.low$seq)
+# tmA2.low<-tm2.low/rowSums(tm2.low)
+# # fixing matrix to be a square 
+# tmA2.low<- cbind(tmA2.low, c(0,0,0,0,0))
+# colnames(tmA2.low)<-(c("nhit","cmo","discharge","death","hit"))
+# tmA2.low<-setcolorder(as.data.table(tmA2.low), c(1,5,2,3,4))
+# tmA2.low<-as.matrix(tmA2.low)
+# # markov object
+# mo2.low<-new("markovchain",transitionMatrix=(tmA2.low), name="MarkovChain Q1")
+# 
+# mo3.low<-mo2.low^2
+# mo4.low<-mo2.low^3
+# mo5.low<-mo2.low^4
+# 
+# df6.low<-f1(example.df, 6)
+# df6.low<- df6.low %>% mutate(col1=lead(states))
+# df6.low<-df6.low[!(df6.low$states==1 & df6.low$col1==1),]
+# df6.low$col1<-NULL
+# # 
+# df6.low<-df6.low %>% mutate(seq=lead(states))
+# df6.low<- df6.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm6.low<-table(df6.low$states, df6.low$seq)
+# tmA6.low<-tm6.low/rowSums(tm6.low)
+# # fixing to be square
+# tmA6.low<- cbind(tmA6.low, c(0,0,0,0,0))
+# colnames(tmA6.low)<-(c("nhit","cmo","discharge","death","hit"))
+# tmA6.low<-setcolorder(as.data.table(tmA6.low), c(1,5,2,3,4))
+# tmA6.low<-as.matrix(tmA6.low)
+# # markov object
+# mo6.low<-new("markovchain",transitionMatrix=(tmA6.low), name="MarkovChain Q1")
+# 
+# mo7.low<-mo6.low^2
+# 
+# df8.low<-f1(example.df, 8)
+# df8.low<- df8.low %>% mutate(col1=lead(states))
+# df8.low<-df8.low[!(df8.low$states==1 & df8.low$col1==1),]
+# df8.low$col1<-NULL
+# #
+# df8.low<-df8.low %>% mutate(seq=lead(states))
+# df8.low<- df8.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm8.low<-table(df8.low$states, df8.low$seq)
+# tmA8.low<-tm8.low/rowSums(tm8.low)
+# tmA8.low
+
+
+# here is max
+
+
+#  There is not enough data for the following days
+# df3.low<-f1(example.df, 3)
+# df3.low<- df3.low %>% mutate(col1=lead(states))
+# df3.low<-df3.low[!(df3.low$states==1 & df3.low$col1==1),]
+# df3.low$col1<-NULL
+# #
+# df3.low<-df3.low %>% mutate(seq=lead(states))
+# df3.low<- df3.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm3.low<-table(df3.low$states, df3.low$seq)
+# tmA3.low<-tm3.low/rowSums(tm3.low)
+# #
+# tmA3.low<- cbind(tmA3.low, c(0,0,0,0))
+# colnames(tmA3.low)<-(c("nhit","discharge","death","hit"))
+# tmA3.low<-setcolorder(as.data.table(tmA3.low), c(1,4,2,3))
+# tmA3.low<-as.matrix(tmA3.low)
+# # markov object
+# mo3.low<-new("markovchain",transitionMatrix=(tmA3.low), name="MarkovChain Q1")
+# #not enough data
+# df4.low<-f1(example.df, 4)
+# df4.low<- df4.low %>% mutate(col1=lead(states))
+# df4.low<-df4.low[!(df4.low$states==1 & df4.low$col1==1),]
+# df4.low$col1<-NULL
+# #
+# df4.low<-df4.low %>% mutate(seq=lead(states))
+# df4.low<- df4.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm4.low<-table(df4.low$states, df4.low$seq)
+# tmA4.low<-tm4.low/rowSums(tm4.low)
+# # not enough data
+# df5.low<-f1(example.df, 5)
+# df5.low<- df5.low %>% mutate(col1=lead(states))
+# df5.low<-df5.low[!(df5.low$states==1 & df5.low$col1==1),]
+# df5.low$col1<-NULL
+# #
+# df5.low<-df5.low %>% mutate(seq=lead(states))
+# df5.low<- df5.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm5.low<-table(df5.low$states, df5.low$seq)
+# tmA5.low<-tm5.low/rowSums(tm5.low)
+# tmA5.low
+# # not enough data
+# df7.low<-f1(example.df, 7)
+# df7.low<- df7.low %>% mutate(col1=lead(states))
+# df7.low<-df7.low[!(df7.low$states==1 & df7.low$col1==1),]
+# df7.low$col1<-NULL
+# #
+# df7.low<-df7.low %>% mutate(seq=lead(states))
+# df7.low<- df7.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm7.low<-table(df7.low$states, df7.low$seq)
+# tmA7.low<-tm7.low/rowSums(tm7.low)
+# tmA7.low
+# # not enough data
+# df9.low<-f1(example.df, 9)
+# df9.low<- df9.low %>% mutate(col1=lead(states))
+# df9.low<-df9.low[!(df9.low$states==1 & df9.low$col1==1),]
+# df9.low$col1<-NULL
+# #
+# df9.low<-df9.low %>% mutate(seq=lead(states))
+# df9.low<- df9.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm9.low<-table(df9.low$states, df9.low$seq)
+# tmA9.low<-tm9.low/rowSums(tm9.low)
+# 
+# df10.low<-f1(example.df, 10)
+# df10.low<- df10.low %>% mutate(col1=lead(states))
+# df10.low<-df10.low[!(df10.low$states==1 & df10.low$col1==1),]
+# df10.low$col1<-NULL
+# #
+# df10.low<-df10.low %>% mutate(seq=lead(states))
+# df10.low<- df10.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm10.low<-table(df10.low$states, df10.low$seq)
+# tmA10.low<-tm10.low/rowSums(tm10.low)
+# 
+# df11.low<-f1(example.df, 11)
+# df11.low<- df11.low %>% mutate(col1=lead(states))
+# df11.low<-df11.low[!(df11.low$states==1 & df11.low$col1==1),]
+# df11.low$col1<-NULL
+# #
+# df11.low<-df11.low %>% mutate(seq=lead(states))
+# df11.low<- df11.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm11.low<-table(df11.low$states, df11.low$seq)
+# tmA11.low<-tm11.low/rowSums(tm11.low)
+# 
+# df12.low<-f1(example.df, 12)
+# df12.low<- df12.low %>% mutate(col1=lead(states))
+# df12.low<-df12.low[!(df12.low$states==1 & df12.low$col1==1),]
+# df12.low$col1<-NULL
+# #
+# df12.low<-df12.low %>% mutate(seq=lead(states))
+# df12.low<- df12.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm12.low<-table(df12.low$states, df12.low$seq)
+# tmA12.low<-tm12.low/rowSums(tm12.low)
+# 
+# df13.low<-f1(example.df, 13)
+# df13.low<- df13.low %>% mutate(col1=lead(states))
+# df13.low<-df13.low[!(df13.low$states==1 & df13.low$col1==1),]
+# df13.low$col1<-NULL
+# #
+# df13.low<-df13.low %>% mutate(seq=lead(states))
+# df13.low<- df13.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm13.low<-table(df13.low$states, df13.low$seq)
+# tmA13.low<-tm13.low/rowSums(tm13.low)
+# 
+# df14.low<-f1(example.df, 14)
+# df14.low<- df14.low %>% mutate(col1=lead(states))
+# df14.low<-df14.low[!(df14.low$states==1 & df14.low$col1==1),]
+# df14.low$col1<-NULL
+# #
+# df14.low<-df14.low %>% mutate(seq=lead(states))
+# df14.low<- df14.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm14.low<-table(df14.low$states, df14.low$seq)
+# tmA14.low<-tm14.low/rowSums(tm14.low)
+# 
+# df15.low<-f1(example.df, 15)
+# df15.low<- df15.low %>% mutate(col1=lead(states))
+# df15.low<-df15.low[!(df15.low$states==1 & df15.low$col1==1),]
+# df15.low$col1<-NULL
+# #
+# df15.low<-df15.low %>% mutate(seq=lead(states))
+# df15.low<- df15.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm15.low<-table(df15.low$states, df15.low$seq)
+# tmA15.low<-tm15.low/rowSums(tm15.low)
+# 
+# df16.low<-f1(example.df, 16)
+# df16.low<- df16.low %>% mutate(col1=lead(states))
+# df16.low<-df16.low[!(df16.low$states==1 & df16.low$col1==1),]
+# df16.low$col1<-NULL
+# #
+# df16.low<-df16.low %>% mutate(seq=lead(states))
+# df16.low<- df16.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm16.low<-table(df16.low$states, df16.low$seq)
+# tmA16.low<-tm16.low/rowSums(tm16.low)
+# 
+# df17.low<-f1(example.df, 17)
+# df17.low<- df17.low %>% mutate(col1=lead(states))
+# df17.low<-df17.low[!(df17.low$states==1 & df17.low$col1==1),]
+# df17.low$col1<-NULL
+# #
+# df17.low<-df17.low %>% mutate(seq=lead(states))
+# df17.low<- df17.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm17.low<-table(df17.low$states, df17.low$seq)
+# tmA17.low<-tm17.low/rowSums(tm17.low)
+# 
+# df18.low<-f1(example.df, 18)
+# df18.low<- df18.low %>% mutate(col1=lead(states))
+# df18.low<-df18.low[!(df18.low$states==1 & df18.low$col1==1),]
+# df18.low$col1<-NULL
+# #
+# df18.low<-df18.low %>% mutate(seq=lead(states))
+# df18.low<- df18.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm18.low<-table(df18.low$states, df18.low$seq)
+# tmA18.low<-tm18.low/rowSums(tm18.low)
+# 
+# df19.low<-f1(example.df, 19)
+# df19.low<- df19.low %>% mutate(col1=lead(states))
+# df19.low<-df19.low[!(df19.low$states==1 & df19.low$col1==1),]
+# df19.low$col1<-NULL
+# #
+# df19.low<-df19.low %>% mutate(seq=lead(states))
+# df19.low<- df19.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm19.low<-table(df19.low$states, df19.low$seq)
+# tmA19.low<-tm19.low/rowSums(tm19.low)
+# 
+# df20.low<-f1(example.df, 20)
+# df20.low<- df20.low %>% mutate(col1=lead(states))
+# df20.low<-df20.low[!(df20.low$states==1 & df20.low$col1==1),]
+# df20.low$col1<-NULL
+# #
+# df20.low<-df20.low %>% mutate(seq=lead(states))
+# df20.low<- df20.low %>% mutate(seq= ifelse(seq %in% NA, states, seq)) 
+# tm20.low<-table(df20.low$states, df20.low$seq)
+# tmA20.low<-tm20.low/rowSums(tm20.low)
