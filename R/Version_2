@@ -2205,39 +2205,567 @@ sens_matrix.cmo90<-df1.ptm
 # sens_matrix.cmo90
 
 }
+{
+# 2 day hic
+#14
+sens_matrix.cmo14_2<-mo2.msm@transitionMatrix
+sens_matrix.cmo14_2[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_2<-mo2.msm@transitionMatrix
+sens_matrix.cmo28_2[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_2<-mo2.msm@transitionMatrix
+sens_matrix.cmo52_2[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_2<-mo2.msm@transitionMatrix
+sens_matrix.cmo76_2[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_2<-mo2.msm@transitionMatrix
+sens_matrix.cmo90_2[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 3 day hic
+#14
+sens_matrix.cmo14_3<-mo3.msm@transitionMatrix
+sens_matrix.cmo14_3[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_3<-mo3.msm@transitionMatrix
+sens_matrix.cmo28_3[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_3<-mo3.msm@transitionMatrix
+sens_matrix.cmo52_3[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_3<-mo3.msm@transitionMatrix
+sens_matrix.cmo76_3[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_3<-mo3.msm@transitionMatrix
+sens_matrix.cmo90_3[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 4 day hic
+#14
+sens_matrix.cmo14_4<-mo4.msm@transitionMatrix
+sens_matrix.cmo14_4[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_4<-mo4.msm@transitionMatrix
+sens_matrix.cmo28_4[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_4<-mo4.msm@transitionMatrix
+sens_matrix.cmo52_4[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_4<-mo4.msm@transitionMatrix
+sens_matrix.cmo76_4[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_4<-mo4.msm@transitionMatrix
+sens_matrix.cmo90_4[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 5 day hic
+#14
+sens_matrix.cmo14_5<-mo5.msm@transitionMatrix
+sens_matrix.cmo14_5[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_5<-mo5.msm@transitionMatrix
+sens_matrix.cmo28_5[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_5<-mo5.msm@transitionMatrix
+sens_matrix.cmo52_5[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_5<-mo5.msm@transitionMatrix
+sens_matrix.cmo76_5[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_5<-mo5.msm@transitionMatrix
+sens_matrix.cmo90_5[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 6 day hic
+#14
+sens_matrix.cmo14_6<-mo6.msm@transitionMatrix
+sens_matrix.cmo14_6[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_6<-mo6.msm@transitionMatrix
+sens_matrix.cmo28_6[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_6<-mo6.msm@transitionMatrix
+sens_matrix.cmo52_6[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_6<-mo6.msm@transitionMatrix
+sens_matrix.cmo76_6[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_6<-mo6.msm@transitionMatrix
+sens_matrix.cmo90_6[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 7 day hic
+#14
+sens_matrix.cmo14_7<-mo7.msm@transitionMatrix
+sens_matrix.cmo14_7[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_7<-mo7.msm@transitionMatrix
+sens_matrix.cmo28_7[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_7<-mo7.msm@transitionMatrix
+sens_matrix.cmo52_7[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_7<-mo7.msm@transitionMatrix
+sens_matrix.cmo76_7[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_7<-mo7.msm@transitionMatrix
+sens_matrix.cmo90_7[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 8 day hic
+#14
+sens_matrix.cmo14_8<-mo8.msm@transitionMatrix
+sens_matrix.cmo14_8[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_8<-mo8.msm@transitionMatrix
+sens_matrix.cmo28_8[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_8<-mo8.msm@transitionMatrix
+sens_matrix.cmo52_8[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_8<-mo8.msm@transitionMatrix
+sens_matrix.cmo76_8[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_8<-mo8.msm@transitionMatrix
+sens_matrix.cmo90_8[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 9 day hic
+#14
+sens_matrix.cmo14_9<-mo9.msm@transitionMatrix
+sens_matrix.cmo14_9[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_9<-mo9.msm@transitionMatrix
+sens_matrix.cmo28_9[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_9<-mo9.msm@transitionMatrix
+sens_matrix.cmo52_9[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_9<-mo9.msm@transitionMatrix
+sens_matrix.cmo76_9[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_9<-mo9.msm@transitionMatrix
+sens_matrix.cmo90_9[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 10 day hic
+#14
+sens_matrix.cmo14_10<-mo10.msm@transitionMatrix
+sens_matrix.cmo14_10[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_10<-mo10.msm@transitionMatrix
+sens_matrix.cmo28_10[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_10<-mo10.msm@transitionMatrix
+sens_matrix.cmo52_10[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_10<-mo10.msm@transitionMatrix
+sens_matrix.cmo76_10[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_10<-mo10.msm@transitionMatrix
+sens_matrix.cmo90_10[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 11 day hic
+#14
+sens_matrix.cmo14_11<-mo11.msm@transitionMatrix
+sens_matrix.cmo14_11[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_11<-mo11.msm@transitionMatrix
+sens_matrix.cmo28_11[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_11<-mo11.msm@transitionMatrix
+sens_matrix.cmo52_11[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_11<-mo11.msm@transitionMatrix
+sens_matrix.cmo76_11[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_11<-mo11.msm@transitionMatrix
+sens_matrix.cmo90_11[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 12 day hic
+
+#14
+sens_matrix.cmo14_12<-mo12.msm@transitionMatrix
+sens_matrix.cmo14_12[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_12<-mo12.msm@transitionMatrix
+sens_matrix.cmo28_12[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_12<-mo12.msm@transitionMatrix
+sens_matrix.cmo52_12[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_12<-mo12.msm@transitionMatrix
+sens_matrix.cmo76_12[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_12<-mo12.msm@transitionMatrix
+sens_matrix.cmo90_12[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 13 day hic
+
+#14
+sens_matrix.cmo14_13<-mo13.msm@transitionMatrix
+sens_matrix.cmo14_13[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_13<-mo13.msm@transitionMatrix
+sens_matrix.cmo28_13[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_13<-mo13.msm@transitionMatrix
+sens_matrix.cmo52_13[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_13<-mo13.msm@transitionMatrix
+sens_matrix.cmo76_13[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_13<-mo13.msm@transitionMatrix
+sens_matrix.cmo90_13[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 14 day hic
+
+#14
+sens_matrix.cmo14_14<-mo14.msm@transitionMatrix
+sens_matrix.cmo14_14[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_14<-mo14.msm@transitionMatrix
+sens_matrix.cmo28_14[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_14<-mo14.msm@transitionMatrix
+sens_matrix.cmo52_14[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_14<-mo14.msm@transitionMatrix
+sens_matrix.cmo76_14[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_14<-mo14.msm@transitionMatrix
+sens_matrix.cmo90_14[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 15 day hic
+
+#14
+sens_matrix.cmo14_15<-mo15.msm@transitionMatrix
+sens_matrix.cmo14_15[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_15<-mo15.msm@transitionMatrix
+sens_matrix.cmo28_15[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_15<-mo15.msm@transitionMatrix
+sens_matrix.cmo52_15[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_15<-mo15.msm@transitionMatrix
+sens_matrix.cmo76_15[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_15<-mo15.msm@transitionMatrix
+sens_matrix.cmo90_15[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 16 day hic
+
+#14
+sens_matrix.cmo14_16<-mo16.msm@transitionMatrix
+sens_matrix.cmo14_16[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_16<-mo16.msm@transitionMatrix
+sens_matrix.cmo28_16[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_16<-mo16.msm@transitionMatrix
+sens_matrix.cmo52_16[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_16<-mo16.msm@transitionMatrix
+sens_matrix.cmo76_16[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_16<-mo16.msm@transitionMatrix
+sens_matrix.cmo90_16[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 17 day hic
+
+#14
+sens_matrix.cmo14_17<-mo17.msm@transitionMatrix
+sens_matrix.cmo14_17[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_17<-mo17.msm@transitionMatrix
+sens_matrix.cmo28_17[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_17<-mo17.msm@transitionMatrix
+sens_matrix.cmo52_17[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_17<-mo17.msm@transitionMatrix
+sens_matrix.cmo76_17[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_17<-mo17.msm@transitionMatrix
+sens_matrix.cmo90_17[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 18 day hic
+
+#14
+sens_matrix.cmo14_18<-mo18.msm@transitionMatrix
+sens_matrix.cmo14_18[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_18<-mo18.msm@transitionMatrix
+sens_matrix.cmo28_18[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_18<-mo18.msm@transitionMatrix
+sens_matrix.cmo52_18[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_18<-mo18.msm@transitionMatrix
+sens_matrix.cmo76_18[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_18<-mo18.msm@transitionMatrix
+sens_matrix.cmo90_18[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 19 day hic
+
+#14
+sens_matrix.cmo14_19<-mo19.msm@transitionMatrix
+sens_matrix.cmo14_19[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_19<-mo19.msm@transitionMatrix
+sens_matrix.cmo28_19[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_19<-mo19.msm@transitionMatrix
+sens_matrix.cmo52_19[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_19<-mo19.msm@transitionMatrix
+sens_matrix.cmo76_19[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_19<-mo19.msm@transitionMatrix
+sens_matrix.cmo90_19[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 20 day hic
+
+#14
+sens_matrix.cmo14_20<-mo20.msm@transitionMatrix
+sens_matrix.cmo14_20[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_20<-mo20.msm@transitionMatrix
+sens_matrix.cmo28_20[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_20<-mo20.msm@transitionMatrix
+sens_matrix.cmo52_20[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_20<-mo20.msm@transitionMatrix
+sens_matrix.cmo76_20[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_20<-mo20.msm@transitionMatrix
+sens_matrix.cmo90_20[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 21 day hic
+
+#14
+sens_matrix.cmo14_21<-mo21.msm@transitionMatrix
+sens_matrix.cmo14_21[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_21<-mo21.msm@transitionMatrix
+sens_matrix.cmo28_21[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_21<-mo21.msm@transitionMatrix
+sens_matrix.cmo52_21[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_21<-mo21.msm@transitionMatrix
+sens_matrix.cmo76_21[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_21<-mo21.msm@transitionMatrix
+sens_matrix.cmo90_21[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 22 day hic
+
+#14
+sens_matrix.cmo14_22<-mo22.msm@transitionMatrix
+sens_matrix.cmo14_22[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_22<-mo22.msm@transitionMatrix
+sens_matrix.cmo28_22[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_22<-mo22.msm@transitionMatrix
+sens_matrix.cmo52_22[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_22<-mo22.msm@transitionMatrix
+sens_matrix.cmo76_22[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_22<-mo22.msm@transitionMatrix
+sens_matrix.cmo90_22[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 23 day hic
+
+#14
+sens_matrix.cmo14_23<-mo23.msm@transitionMatrix
+sens_matrix.cmo14_23[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_23<-mo23.msm@transitionMatrix
+sens_matrix.cmo28_23[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_23<-mo23.msm@transitionMatrix
+sens_matrix.cmo52_23[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_23<-mo23.msm@transitionMatrix
+sens_matrix.cmo76_23[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_23<-mo23.msm@transitionMatrix
+sens_matrix.cmo90_23[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 24 day hic
+
+#14
+sens_matrix.cmo14_24<-mo24.msm@transitionMatrix
+sens_matrix.cmo14_24[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_24<-mo24.msm@transitionMatrix
+sens_matrix.cmo28_24[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_24<-mo24.msm@transitionMatrix
+sens_matrix.cmo52_24[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_24<-mo24.msm@transitionMatrix
+sens_matrix.cmo76_24[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_24<-mo24.msm@transitionMatrix
+sens_matrix.cmo90_24[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 25 day hic
+
+#14
+sens_matrix.cmo14_25<-mo25.msm@transitionMatrix
+sens_matrix.cmo14_25[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_25<-mo25.msm@transitionMatrix
+sens_matrix.cmo28_25[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_25<-mo25.msm@transitionMatrix
+sens_matrix.cmo52_25[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_25<-mo25.msm@transitionMatrix
+sens_matrix.cmo76_25[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_25<-mo25.msm@transitionMatrix
+sens_matrix.cmo90_25[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+
+# 26 day hic
+
+#14
+sens_matrix.cmo14_26<-mo26.msm@transitionMatrix
+sens_matrix.cmo14_26[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_26<-mo26.msm@transitionMatrix
+sens_matrix.cmo28_26[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_26<-mo26.msm@transitionMatrix
+sens_matrix.cmo52_26[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_26<-mo26.msm@transitionMatrix
+sens_matrix.cmo76_26[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_26<-mo26.msm@transitionMatrix
+sens_matrix.cmo90_26[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 27 day hic
+
+#14
+sens_matrix.cmo14_27<-mo27.msm@transitionMatrix
+sens_matrix.cmo14_27[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_27<-mo27.msm@transitionMatrix
+sens_matrix.cmo28_27[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_27<-mo27.msm@transitionMatrix
+sens_matrix.cmo52_27[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_27<-mo27.msm@transitionMatrix
+sens_matrix.cmo76_27[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_27<-mo27.msm@transitionMatrix
+sens_matrix.cmo90_27[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 28 day hic
+
+#14
+sens_matrix.cmo14_28<-mo28.msm@transitionMatrix
+sens_matrix.cmo14_28[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_28<-mo28.msm@transitionMatrix
+sens_matrix.cmo28_28[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_28<-mo28.msm@transitionMatrix
+sens_matrix.cmo52_28[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_28<-mo28.msm@transitionMatrix
+sens_matrix.cmo76_28[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_28<-mo28.msm@transitionMatrix
+sens_matrix.cmo90_28[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 29 day hic
+
+#14
+sens_matrix.cmo14_29<-mo29.msm@transitionMatrix
+sens_matrix.cmo14_29[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_29<-mo29.msm@transitionMatrix
+sens_matrix.cmo28_29[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_29<-mo29.msm@transitionMatrix
+sens_matrix.cmo52_29[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_29<-mo29.msm@transitionMatrix
+sens_matrix.cmo76_29[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_29<-mo29.msm@transitionMatrix
+sens_matrix.cmo90_29[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+# 30 day hic
+
+#14
+sens_matrix.cmo14_30<-mo30.msm@transitionMatrix
+sens_matrix.cmo14_30[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+#28
+sens_matrix.cmo28_30<-mo30.msm@transitionMatrix
+sens_matrix.cmo28_30[2, ]  <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+#52
+sens_matrix.cmo52_30<-mo30.msm@transitionMatrix
+sens_matrix.cmo52_30[2, ]  <-  c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+#76
+sens_matrix.cmo76_30<-mo30.msm@transitionMatrix
+sens_matrix.cmo76_30[2, ]  <-  c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+#90
+sens_matrix.cmo90_30<-mo30.msm@transitionMatrix
+sens_matrix.cmo90_30[2, ]  <-  c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+
+
+}
+
+
+
+
+
+
+
+
+
 # markov objects  cmo 14
 
 {
 mo1.msm<-new("markovchain",transitionMatrix=(sens_matrix.cmo14), name="MarkovChain Q1")
-mo2.msm<-mo1.msm^2
-mo3.msm<-mo1.msm^3
-mo4.msm<-mo1.msm^4
-mo5.msm<-mo1.msm^5
-mo6.msm<-mo1.msm^6
-mo7.msm<-mo1.msm^7
-mo8.msm<-mo1.msm^8
-mo9.msm<-mo1.msm^9
-mo10.msm<-mo1.msm^10
-mo11.msm<-mo1.msm^11
-mo12.msm<-mo1.msm^12
-mo13.msm<-mo1.msm^13
-mo14.msm<-mo1.msm^14
-mo15.msm<-mo1.msm^15
-mo16.msm<-mo1.msm^16
-mo17.msm<-mo1.msm^17
-mo18.msm<-mo1.msm^18
-mo19.msm<-mo1.msm^19
-mo20.msm<-mo1.msm^20
-mo21.msm<-mo1.msm^21
-mo22.msm<-mo1.msm^22
-mo23.msm<-mo1.msm^23
-mo24.msm<-mo1.msm^24
-mo25.msm<-mo1.msm^25
-mo26.msm<-mo1.msm^26
-mo27.msm<-mo1.msm^27
-mo28.msm<-mo1.msm^28
-mo29.msm<-mo1.msm^29
-mo30.msm<-mo1.msm^30
+  
+
+mo2.msm<-sens_matrix.cmo14_2
+
+mo3.msm<-sens_matrix.cmo14_3
+mo4.msm<-sens_matrix.cmo14_4
+mo5.msm<-sens_matrix.cmo14_5
+mo6.msm<-sens_matrix.cmo14_6
+mo7.msm<-sens_matrix.cmo14_7
+mo8.msm<-sens_matrix.cmo14_8
+mo9.msm<-sens_matrix.cmo14_9
+mo10.msm<-sens_matrix.cmo14_10
+mo11.msm<-sens_matrix.cmo14_11
+mo12.msm<-sens_matrix.cmo14_12
+mo13.msm<-sens_matrix.cmo14_13
+mo14.msm<-sens_matrix.cmo14_14
+mo15.msm<-sens_matrix.cmo14_15
+mo16.msm<-sens_matrix.cmo14_16
+mo17.msm<-sens_matrix.cmo14_17
+mo18.msm<-sens_matrix.cmo14_18
+mo19.msm<-sens_matrix.cmo14_19
+mo20.msm<-sens_matrix.cmo14_20
+mo21.msm<-sens_matrix.cmo14_21
+mo22.msm<-sens_matrix.cmo14_22
+mo23.msm<-sens_matrix.cmo14_23
+mo24.msm<-sens_matrix.cmo14_24
+mo25.msm<-sens_matrix.cmo14_25
+mo26.msm<-sens_matrix.cmo14_26
+mo27.msm<-sens_matrix.cmo14_27
+mo28.msm<-sens_matrix.cmo14_28
+mo29.msm<-sens_matrix.cmo14_29
+mo30.msm<-sens_matrix.cmo14_30
 
 rm(example.df)
 rm(df1.msm)
@@ -4086,35 +4614,37 @@ rm(df30.sim)
 
 # markov objects
 mo1.msm<-new("markovchain",transitionMatrix=(sens_matrix.cmo28), name="MarkovChain Q1")
-mo2.msm<-mo1.msm^2
-mo3.msm<-mo1.msm^3
-mo4.msm<-mo1.msm^4
-mo5.msm<-mo1.msm^5
-mo6.msm<-mo1.msm^6
-mo7.msm<-mo1.msm^7
-mo8.msm<-mo1.msm^8
-mo9.msm<-mo1.msm^9
-mo10.msm<-mo1.msm^10
-mo11.msm<-mo1.msm^11
-mo12.msm<-mo1.msm^12
-mo13.msm<-mo1.msm^13
-mo14.msm<-mo1.msm^14
-mo15.msm<-mo1.msm^15
-mo16.msm<-mo1.msm^16
-mo17.msm<-mo1.msm^17
-mo18.msm<-mo1.msm^18
-mo19.msm<-mo1.msm^19
-mo20.msm<-mo1.msm^20
-mo21.msm<-mo1.msm^21
-mo22.msm<-mo1.msm^22
-mo23.msm<-mo1.msm^23
-mo24.msm<-mo1.msm^24
-mo25.msm<-mo1.msm^25
-mo26.msm<-mo1.msm^26
-mo27.msm<-mo1.msm^27
-mo28.msm<-mo1.msm^28
-mo29.msm<-mo1.msm^29
-mo30.msm<-mo1.msm^30
+
+mo2.msm<-sens_matrix.cmo28_2
+
+mo3.msm<-sens_matrix.cmo28_3
+mo4.msm<-sens_matrix.cmo28_4
+mo5.msm<-sens_matrix.cmo28_5
+mo6.msm<-sens_matrix.cmo28_6
+mo7.msm<-sens_matrix.cmo28_7
+mo8.msm<-sens_matrix.cmo28_8
+mo9.msm<-sens_matrix.cmo28_9
+mo10.msm<-sens_matrix.cmo28_10
+mo11.msm<-sens_matrix.cmo28_11
+mo12.msm<-sens_matrix.cmo28_12
+mo13.msm<-sens_matrix.cmo28_13
+mo14.msm<-sens_matrix.cmo28_14
+mo15.msm<-sens_matrix.cmo28_15
+mo16.msm<-sens_matrix.cmo28_16
+mo17.msm<-sens_matrix.cmo28_17
+mo18.msm<-sens_matrix.cmo28_18
+mo19.msm<-sens_matrix.cmo28_19
+mo20.msm<-sens_matrix.cmo28_20
+mo21.msm<-sens_matrix.cmo28_21
+mo22.msm<-sens_matrix.cmo28_22
+mo23.msm<-sens_matrix.cmo28_23
+mo24.msm<-sens_matrix.cmo28_24
+mo25.msm<-sens_matrix.cmo28_25
+mo26.msm<-sens_matrix.cmo28_26
+mo27.msm<-sens_matrix.cmo28_27
+mo28.msm<-sens_matrix.cmo28_28
+mo29.msm<-sens_matrix.cmo28_29
+mo30.msm<-sens_matrix.cmo28_30
 
 rm(example.df)
 rm(df1.msm)
@@ -5956,35 +6486,36 @@ rm(df30.sim)
 # markov objects  cmo 52%
 {
 mo1.msm<-new("markovchain",transitionMatrix=(sens_matrix.cmo52), name="MarkovChain Q1")
-mo2.msm<-mo1.msm^2
-mo3.msm<-mo1.msm^3
-mo4.msm<-mo1.msm^4
-mo5.msm<-mo1.msm^5
-mo6.msm<-mo1.msm^6
-mo7.msm<-mo1.msm^7
-mo8.msm<-mo1.msm^8
-mo9.msm<-mo1.msm^9
-mo10.msm<-mo1.msm^10
-mo11.msm<-mo1.msm^11
-mo12.msm<-mo1.msm^12
-mo13.msm<-mo1.msm^13
-mo14.msm<-mo1.msm^14
-mo15.msm<-mo1.msm^15
-mo16.msm<-mo1.msm^16
-mo17.msm<-mo1.msm^17
-mo18.msm<-mo1.msm^18
-mo19.msm<-mo1.msm^19
-mo20.msm<-mo1.msm^20
-mo21.msm<-mo1.msm^21
-mo22.msm<-mo1.msm^22
-mo23.msm<-mo1.msm^23
-mo24.msm<-mo1.msm^24
-mo25.msm<-mo1.msm^25
-mo26.msm<-mo1.msm^26
-mo27.msm<-mo1.msm^27
-mo28.msm<-mo1.msm^28
-mo29.msm<-mo1.msm^29
-mo30.msm<-mo1.msm^30
+
+mo2.msm<-sens_matrix.cmo52_2
+mo3.msm<-sens_matrix.cmo52_3
+mo4.msm<-sens_matrix.cmo52_4
+mo5.msm<-sens_matrix.cmo52_5
+mo6.msm<-sens_matrix.cmo52_6
+mo7.msm<-sens_matrix.cmo52_7  
+mo8.msm<-sens_matrix.cmo52_8
+mo9.msm<-sens_matrix.cmo52_9
+mo10.msm<-sens_matrix.cmo52_10
+mo11.msm<-sens_matrix.cmo52_11
+mo12.msm<-sens_matrix.cmo52_12
+mo13.msm<-sens_matrix.cmo52_13
+mo14.msm<-sens_matrix.cmo52_14
+mo15.msm<-sens_matrix.cmo52_15
+mo16.msm<-sens_matrix.cmo52_16
+mo17.msm<-sens_matrix.cmo52_17
+mo18.msm<-sens_matrix.cmo52_18
+mo19.msm<-sens_matrix.cmo52_19
+mo20.msm<-sens_matrix.cmo52_20
+mo21.msm<-sens_matrix.cmo52_21
+mo22.msm<-sens_matrix.cmo52_22
+mo23.msm<-sens_matrix.cmo52_23
+mo24.msm<-sens_matrix.cmo52_24
+mo25.msm<-sens_matrix.cmo52_25
+mo26.msm<-sens_matrix.cmo52_26
+mo27.msm<-sens_matrix.cmo52_27
+mo28.msm<-sens_matrix.cmo52_28
+mo29.msm<-sens_matrix.cmo52_29
+mo30.msm<-sens_matrix.cmo52_30
 
 rm(example.df)
 rm(df1.msm)
@@ -7825,36 +8356,36 @@ rm(df30.sim)
 }
 # markov objects  cmo 76
 {
-mo1.msm<-new("markovchain",transitionMatrix=(sens_matrix.cmo76), name="MarkovChain Q1")
-mo2.msm<-mo1.msm^2
-mo3.msm<-mo1.msm^3
-mo4.msm<-mo1.msm^4
-mo5.msm<-mo1.msm^5
-mo6.msm<-mo1.msm^6
-mo7.msm<-mo1.msm^7
-mo8.msm<-mo1.msm^8
-mo9.msm<-mo1.msm^9
-mo10.msm<-mo1.msm^10
-mo11.msm<-mo1.msm^11
-mo12.msm<-mo1.msm^12
-mo13.msm<-mo1.msm^13
-mo14.msm<-mo1.msm^14
-mo15.msm<-mo1.msm^15
-mo16.msm<-mo1.msm^16
-mo17.msm<-mo1.msm^17
-mo18.msm<-mo1.msm^18
-mo19.msm<-mo1.msm^19
-mo20.msm<-mo1.msm^20
-mo21.msm<-mo1.msm^21
-mo22.msm<-mo1.msm^22
-mo23.msm<-mo1.msm^23
-mo24.msm<-mo1.msm^24
-mo25.msm<-mo1.msm^25
-mo26.msm<-mo1.msm^26
-mo27.msm<-mo1.msm^27
-mo28.msm<-mo1.msm^28
-mo29.msm<-mo1.msm^29
-mo30.msm<-mo1.msm^30
+  mo2.msm<-sens_matrix.cmo76_2
+  mo3.msm<-sens_matrix.cmo76_3
+  mo4.msm<-sens_matrix.cmo76_4
+  mo5.msm<-sens_matrix.cmo76_5
+  mo6.msm<-sens_matrix.cmo76_6
+  mo7.msm<-sens_matrix.cmo76_7  
+  mo8.msm<-sens_matrix.cmo76_8
+  mo9.msm<-sens_matrix.cmo76_9
+  mo10.msm<-sens_matrix.cmo76_10
+  mo11.msm<-sens_matrix.cmo76_11
+  mo12.msm<-sens_matrix.cmo76_12
+  mo13.msm<-sens_matrix.cmo76_13
+  mo14.msm<-sens_matrix.cmo76_14
+  mo15.msm<-sens_matrix.cmo76_15
+  mo16.msm<-sens_matrix.cmo76_16
+  mo17.msm<-sens_matrix.cmo76_17
+  mo18.msm<-sens_matrix.cmo76_18
+  mo19.msm<-sens_matrix.cmo76_19
+  mo20.msm<-sens_matrix.cmo76_20
+  mo21.msm<-sens_matrix.cmo76_21
+  mo22.msm<-sens_matrix.cmo76_22
+  mo23.msm<-sens_matrix.cmo76_23
+  mo24.msm<-sens_matrix.cmo76_24
+  mo25.msm<-sens_matrix.cmo76_25
+  mo26.msm<-sens_matrix.cmo76_26
+  mo27.msm<-sens_matrix.cmo76_27
+  mo28.msm<-sens_matrix.cmo76_28
+  mo29.msm<-sens_matrix.cmo76_29
+  mo30.msm<-sens_matrix.cmo76_30
+  
 
 rm(example.df)
 rm(df1.msm)
@@ -7864,7 +8395,7 @@ rm(df1.tm)
 
 #
 
-# SENSITIVITY ANALYSIS first order monte carlo simulations cmo 78 ---------
+# SENSITIVITY ANALYSIS first order monte carlo simulations cmo 76 ---------
 
 
 B <- 100
@@ -8363,8 +8894,7 @@ rm(sim30.msm)
 
 
 
-# SENSITIVITY ANALYSIS Utilities and costs cmo 78 -------------------------
-
+# SENSITIVITY ANALYSIS Utilities and costs cmo 76 -------------------------
 
 {
 # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
@@ -9691,45 +10221,47 @@ rm(df27.sim)
 rm(df28.sim)
 rm(df29.sim)
 rm(df30.sim)
-
+}
 
 # markov objects  cmo 90
+{
 mo1.msm<-new("markovchain",transitionMatrix=(sens_matrix.cmo90), name="MarkovChain Q1")
-mo2.msm<-mo1.msm^2
-mo3.msm<-mo1.msm^3
-mo4.msm<-mo1.msm^4
-mo5.msm<-mo1.msm^5
-mo6.msm<-mo1.msm^6
-mo7.msm<-mo1.msm^7
-mo8.msm<-mo1.msm^8
-mo9.msm<-mo1.msm^9
-mo10.msm<-mo1.msm^10
-mo11.msm<-mo1.msm^11
-mo12.msm<-mo1.msm^12
-mo13.msm<-mo1.msm^13
-mo14.msm<-mo1.msm^14
-mo15.msm<-mo1.msm^15
-mo16.msm<-mo1.msm^16
-mo17.msm<-mo1.msm^17
-mo18.msm<-mo1.msm^18
-mo19.msm<-mo1.msm^19
-mo20.msm<-mo1.msm^20
-mo21.msm<-mo1.msm^21
-mo22.msm<-mo1.msm^22
-mo23.msm<-mo1.msm^23
-mo24.msm<-mo1.msm^24
-mo25.msm<-mo1.msm^25
-mo26.msm<-mo1.msm^26
-mo27.msm<-mo1.msm^27
-mo28.msm<-mo1.msm^28
-mo29.msm<-mo1.msm^29
-mo30.msm<-mo1.msm^30
+mo2.msm<-sens_matrix.cmo90_2
+mo3.msm<-sens_matrix.cmo90_3
+mo4.msm<-sens_matrix.cmo90_4
+mo5.msm<-sens_matrix.cmo90_5
+mo6.msm<-sens_matrix.cmo90_6
+mo7.msm<-sens_matrix.cmo90_7  
+mo8.msm<-sens_matrix.cmo90_8
+mo9.msm<-sens_matrix.cmo90_9
+mo10.msm<-sens_matrix.cmo90_10
+mo11.msm<-sens_matrix.cmo90_11
+mo12.msm<-sens_matrix.cmo90_12
+mo13.msm<-sens_matrix.cmo90_13
+mo14.msm<-sens_matrix.cmo90_14
+mo15.msm<-sens_matrix.cmo90_15
+mo16.msm<-sens_matrix.cmo90_16
+mo17.msm<-sens_matrix.cmo90_17
+mo18.msm<-sens_matrix.cmo90_18
+mo19.msm<-sens_matrix.cmo90_19
+mo20.msm<-sens_matrix.cmo90_20
+mo21.msm<-sens_matrix.cmo90_21
+mo22.msm<-sens_matrix.cmo90_22
+mo23.msm<-sens_matrix.cmo90_23
+mo24.msm<-sens_matrix.cmo90_24
+mo25.msm<-sens_matrix.cmo90_25
+mo26.msm<-sens_matrix.cmo90_26
+mo27.msm<-sens_matrix.cmo90_27
+mo28.msm<-sens_matrix.cmo90_28
+mo29.msm<-sens_matrix.cmo90_29
+mo30.msm<-sens_matrix.cmo90_30
+}
 
 rm(example.df)
 rm(df1.msm)
 rm(df1.ptm)
 rm(df1.tm)
-}
+
 
 #
 
@@ -11579,4 +12111,95 @@ rm(df30.sim)
 
 # 2 WAY SENSITIVITY ANALYSIS  ---------------------------------------------
 
+# 2 WAY SENsITIVITY for GOING FROM HIT TO CMO AND FOR CMO INTO OTHER STATES
 
+{
+  example.df<-df
+  example.df<-example.df %>% select(icustay_id, icudayseq_asc, states, sofa_group)
+  colnames(example.df)[1] <- 'id'  
+  colnames(example.df)[2] <- 'day'  
+  colnames(example.df)[4] <- 'sofa'  
+  
+  f1 <- function(data, n){
+    ids <- data %>%
+      mutate(stateslead = lead(states, default = last(states))) %>%
+      group_by(grp = rleid(states == 1)) %>% 
+      filter(n() == n, states == 1, stateslead != 1) %>%     
+      group_by(id) %>%     
+      filter(n() == 1) %>%
+      pull(id)
+    
+    data %>%
+      filter(id %in% ids) %>%
+      group_by(id) %>% 
+      filter(cumsum(states) > 0)
+  }
+  
+  # https://stackoverflow.com/questions/55432875/select-rows-of-ids-that-have-a-pattern-without-losing-the-other-rows/55434003?noredirect=1#comment97588830_55434003
+  # aknowledgement to akrun for code assistance for f1
+  
+  # 1 DAY OF HIC
+  
+  df1.msm<-f1(example.df, 1)
+  # transition table
+  df1.tt<-(statetable.msm(states, id, data=df1.msm))
+  
+  # transition matrix
+  df1.tm<-as.matrix.data.frame(df1.tt)
+  df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+  df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+  df1.ptm<-df1.tm/rowSums(df1.tm)
+  
+  # cmo probability is 14% and death 40%
+  df1.ptm[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+  df1.ptm[3, ]<- c(0, 0, 0.4, 0.2,0.4)
+  sens_matrix.cmo14<-df1.ptm
+  
+  # transition matrix
+  df1.tm<-as.matrix.data.frame(df1.tt)
+  df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+  df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+  df1.ptm<-df1.tm/rowSums(df1.tm)
+  
+  # cmo probability is 28%
+  df1.ptm[2, ] <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+  sens_matrix.cmo28<-df1.ptm
+  
+  # transition matrix
+  df1.tm<-as.matrix.data.frame(df1.tt)
+  df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+  df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+  df1.ptm<-df1.tm/rowSums(df1.tm)
+  
+  # cmo probability is 52%
+  df1.ptm[2, ] <- c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+  sens_matrix.cmo52<-df1.ptm
+  
+  # transition matrix
+  df1.tm<-as.matrix.data.frame(df1.tt)
+  df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+  df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+  df1.ptm<-df1.tm/rowSums(df1.tm)
+  
+  # cmo probability is 76%
+  df1.ptm[2, ] <- c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+  sens_matrix.cmo76<-df1.ptm
+  
+  # transition matrix
+  df1.tm<-as.matrix.data.frame(df1.tt)
+  df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+  df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+  df1.ptm<-df1.tm/rowSums(df1.tm)
+  
+  # cmo probability is 90%
+  df1.ptm[2, ] <- c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+  sens_matrix.cmo90<-df1.ptm
+  
+  
+  # sens_matrix.cmo14
+  # sens_matrix.cmo28
+  # sens_matrix.cmo52
+  # sens_matrix.cmo76
+  # sens_matrix.cmo90
+  
+}
