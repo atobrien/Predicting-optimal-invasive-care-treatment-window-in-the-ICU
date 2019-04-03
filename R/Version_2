@@ -785,7 +785,7 @@ rm(sim30.msm)
 
 {
 # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
 # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
 
 # Daily costs:
@@ -3307,7 +3307,7 @@ rm(sim30.msm)
 # SENSITIVITY ANALYSIS Utilities and costs cmo 14- ------------------------
 {
 # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
 # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
 
 # Daily costs:
@@ -5211,7 +5211,7 @@ df30.sim<-df30.sim %>% filter(!(state=="5" & col1!=1))
 
 {
 # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
 # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
 
 # Daily costs:
@@ -7142,7 +7142,7 @@ rm(sim30.msm)
 
 {
 # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
 # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
 
 # Daily costs:
@@ -9042,7 +9042,7 @@ rm(sim30.msm)
 
 {
 # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
 # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
 
 # Daily costs:
@@ -10978,7 +10978,7 @@ rm(sim30.msm)
 
 {
 # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
 # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
 
 # Daily costs:
@@ -13625,7 +13625,7 @@ N <- 30
 # SENSITIVITY ANALYSIS Utilities and costs cmo 14 deaths 40- ------------------------
 {
   # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-  # Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+  # Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
   # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
   
   # Daily costs:
@@ -15522,7 +15522,7 @@ N <- 30
 # SENSITIVITY ANALYSIS Utilities and costs cmo 28 deaths 52- ------------------------
 {
   # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-  # Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+  # Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
   # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
   
   # Daily costs:
@@ -17424,7 +17424,7 @@ N <- 30
 # SENSITIVITY ANALYSIS Utilities and costs cmo 52 deaths 65- ------------------------
 {
   # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-  # Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+  # Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
   # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
   
   # Daily costs:
@@ -18782,7 +18782,7 @@ N <- 30
   rm(df30.sim)
 }
 
-# 2 way sensitivity cmo 28 52 case results ------------------------------------------------------------
+# 2 way sensitivity cmo 52 death 65 case results ------------------------------------------------------------
 sens2way52_65_30.overall_c_vect<-c()
 for (i in 1:30){
   sens2way52_65_30.overall_c_vect[i]<-get(paste("df", i, ".overallcmo90_c_mean",sep = ""))
@@ -19319,7 +19319,7 @@ N <- 30
 # SENSITIVITY ANALYSIS Utilities and costs cmo 76 deaths 77- ------------------------
 {
   # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-  # Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+  # Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
   # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
   
   # Daily costs:
@@ -21215,7 +21215,7 @@ N <- 30
 # SENSITIVITY ANALYSIS Utilities and costs cmo 90 deaths 90- ------------------------
 {
   # Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
-  # Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost–Utility Analysesin Chronic Liver Disease)
+  # Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
   # Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
   
   # Daily costs:
@@ -22600,6 +22600,219 @@ sens2way90_90_30.ce_results<- matrix(c(sens2way90_90_30.overall_c_vect,sens2way9
 colnames(sens2way90_90_30.ce_results) <- c("overall_c","overall_u","survival_c","survival_u")
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+#save results of interest----- 
+
+setwd("C:/Users/Me/Dropbox/Project/results")
+for (i in 1:30){
+  write.csv(get(paste("df",i,".summary_bc", sep="")), 
+            file=paste("df",i,".bc.csv", sep=""),
+            row.names=TRUE)}
+
+for (i in 1:30){
+  write.csv(get(paste("df",i,".senscmo14", sep="")), 
+            file=paste("df",i,".senscmo14.csv", sep=""),
+            row.names=TRUE)}
+
+for (i in 1:30){
+  write.csv(get(paste("df",i,".senscmo52", sep="")), 
+            file=paste("df",i,".senscmo52.csv", sep=""),
+            row.names=TRUE)}
+
+for (i in 1:30){
+  write.csv(get(paste("df",i,".senscmo76", sep="")), 
+            file=paste("df",i,".senscmo76.csv", sep=""),
+            row.names=TRUE)}
+
+for (i in 1:30){
+  write.csv(get(paste("df",i,".senscmo90", sep="")), 
+            file=paste("df",i,".senscmo90.csv", sep=""),
+            row.names=TRUE)}
+
+for (i in 1:30){
+  write.csv(get(paste("df",i,"sens2way14_40", sep="")), 
+            file=paste("df",i,"sens2way14_40.csv", sep=""),
+            row.names=TRUE)}
+
+for (i in 1:30){
+  write.csv(get(paste("df",i,"sens2way28_52", sep="")), 
+            file=paste("df",i,"sens2way28_52.csv", sep=""),
+            row.names=TRUE)}
+
+for (i in 1:30){
+  write.csv(get(paste("df",i,"sens2way52_65", sep="")), 
+            file=paste("df",i,"sens2way52_65.csv", sep=""),
+            row.names=TRUE)}
+
+for (i in 1:30){
+  write.csv(get(paste("df",i,"sens2way52_65_",i, sep="")), 
+            file=paste("df",i,"sens2way52_65.csv", sep=""),
+            row.names=TRUE)}
+
+for (i in 1:30){
+  write.csv(get(paste("df",i,"sens2way76_77_",i, sep="")), 
+            file=paste("df",i,"sens2way76_77.csv", sep=""),
+            row.names=TRUE)}
+
+for (i in 1:30){
+  write.csv(get(paste("df",i,"sens2way90_90_",i, sep="")), 
+            file=paste("df",i,"sens2way90_90.csv", sep=""),
+            row.names=TRUE)}
+
+#__________________________________________
+write.csv(bc.ce_results, 
+          file="bc_results.csv",
+          row.names=TRUE)
+
+write.csv(senscmo14.ce_results, 
+          file="senscmo14_results.csv",
+          row.names=TRUE)
+
+write.csv(senscmo28.ce_results, 
+          file="senscmo28_results.csv",
+          row.names=TRUE)
+
+write.csv(senscmo52.ce_results, 
+          file="senscmo52_results.csv",
+          row.names=TRUE)
+
+write.csv(senscmo76.ce_results, 
+          file="senscmo76_results.csv",
+          row.names=TRUE)
+
+write.csv(senscmo90.ce_results, 
+          file="senscmo90_results.csv",
+          row.names=TRUE)
+
+#_________________________________________
+write.csv(sens2way14_40.ce_results, 
+          file="sens2way14_40_results.csv",
+          row.names=TRUE)
+
+write.csv(sens2way28_52.ce_results, 
+          file="sens2way28_52_results.csv",
+          row.names=TRUE)
+
+write.csv(sens2way52_65_30.ce_results, 
+          file="sens2way52_65_30.csv",
+          row.names=TRUE)
+
+write.csv(sens2way76_77_30.ce_results, 
+          file="sens2way76_77_30_results.csv",
+          row.names=TRUE)
+
+
+write.csv(sens2way90_90_30.ce_results, 
+          file="sens2way90_90_results.csv",
+          row.names=TRUE)
+setwd("C:/Users/Me/Dropbox/Project")
+
+#______________________________________________________________________________#
+#                            3 WAY SENSITIVITY ANALYSIS                        #  
+#______________________________________________________________________________#
+
+
+{
+  example.df<-df
+  example.df<-example.df %>% select(icustay_id, icudayseq_asc, states, sofa_group)
+  colnames(example.df)[1] <- 'id'  
+  colnames(example.df)[2] <- 'day'  
+  colnames(example.df)[4] <- 'sofa'  
+  
+  f1 <- function(data, n){
+    ids <- data %>%
+      mutate(stateslead = lead(states, default = last(states))) %>%
+      group_by(grp = rleid(states == 1)) %>% 
+      filter(n() == n, states == 1, stateslead != 1) %>%     
+      group_by(id) %>%     
+      filter(n() == 1) %>%
+      pull(id)
+    
+    data %>%
+      filter(id %in% ids) %>%
+      group_by(id) %>% 
+      filter(cumsum(states) > 0)
+  }
+  
+  # https://stackoverflow.com/questions/55432875/select-rows-of-ids-that-have-a-pattern-without-losing-the-other-rows/55434003?noredirect=1#comment97588830_55434003
+  # aknowledgement to akrun for code assistance for f1
+  
+  # 1 DAY OF HIC
+  
+  df1.msm<-f1(example.df, 1)
+  # transition table
+  df1.tt<-(statetable.msm(states, id, data=df1.msm))
+  
+  # transition matrix
+  df1.tm<-as.matrix.data.frame(df1.tt)
+  df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+  df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+  df1.ptm<-df1.tm/rowSums(df1.tm)
+  
+  # cmo probability is 14%,  death 40% and death 11%
+  df1.ptm[2, ] <-c(,0,,,0.11)
+  df1.ptm[2, ] <- c((0.9*0.2031250),0,(1-((0.9*0.2031250)+(0.9*0.5468750)+(0.9*0.2031250))),(0.9*0.5468750),(0.9*0.2031250))
+  df1.ptm[3, ]<- c(0, 0, 0.4, 0.2,0.4)
+  sens_matrix.2way14_40<-df1.ptm
+  
+  # transition matrix
+  df1.tm<-as.matrix.data.frame(df1.tt)
+  df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+  df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+  df1.ptm<-df1.tm/rowSums(df1.tm)
+  
+  # cmo probability is 28% and death 52%
+  df1.ptm[2, ] <- c((0.75*0.2031250),0,(1-((0.75*0.2031250)+(0.75*0.5468750)+(0.75*0.2031250))),(0.75*0.5468750),(0.75*0.2031250))
+  df1.ptm[3, ]<- c(0, 0, 0.32, 0.16,0.52)
+  sens_matrix.2way28_52<-df1.ptm
+  
+  # transition matrix
+  df1.tm<-as.matrix.data.frame(df1.tt)
+  df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+  df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+  df1.ptm<-df1.tm/rowSums(df1.tm)
+  
+  # cmo probability is 52% and death 65%
+  df1.ptm[2, ] <- c((0.5*0.2031250),0,(1-((0.5*0.2031250)+(0.5*0.5468750)+(0.5*0.2031250))),(0.5*0.5468750),(0.5*0.2031250))
+  df1.ptm[3, ]<- c(0, 0, 0.23, 0.12,0.65)
+  sens_matrix.2way52_65<-df1.ptm
+  
+  # transition matrix
+  df1.tm<-as.matrix.data.frame(df1.tt)
+  df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+  df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+  df1.ptm<-df1.tm/rowSums(df1.tm)
+  
+  # cmo probability is 76% and death 77%
+  df1.ptm[2, ] <- c((0.25*0.2031250),0,(1-((0.25*0.2031250)+(0.25*0.5468750)+(0.25*0.2031250))),(0.25*0.5468750),(0.25*0.2031250))
+  df1.ptm[3, ]<- c(0, 0, 0.1533333, 0.07666667,0.77)
+  sens_matrix.2way76_77<-df1.ptm
+  
+  # transition matrix
+  df1.tm<-as.matrix.data.frame(df1.tt)
+  df1.tm<-rbind(df1.tm, c(0,0,0,1,0))
+  df1.tm<-rbind(df1.tm, c(0,0,0,0,1))
+  df1.ptm<-df1.tm/rowSums(df1.tm)
+  
+  # cmo probability is 90% and death 90%
+  df1.ptm[2, ] <- c((0.10*0.2031250),0,(1-((0.10*0.2031250)+(0.10*0.5468750)+(0.10*0.2031250))),(0.10*0.5468750),(0.10*0.2031250))
+  df1.ptm[3, ]<- c(0, 0, 0.06666666, 0.03333333,0.9)
+  sens_matrix.2way90_90<-df1.ptm
+  
+  
+}
 
 
 
