@@ -106,6 +106,7 @@ WITH v1 AS(
 
      dem AS(
 	     SELECT
+		 hadm_id,
          icustay_id,
          gender,
          admission_age,
@@ -123,6 +124,7 @@ outcome AS(
 
 cir1 AS(
           SELECT DISTINCT 
+			hadm_id,		
           icustay_id,
           charttime,
           date_trunc('day', charttime) AS day_start,
@@ -170,6 +172,7 @@ cir2 AS (
 	
 	 v9 AS(
         SELECT
+		hadm_id,
         icustay_id,
         startday,
         endday,
@@ -191,6 +194,7 @@ cir2 AS (
 
      v10 AS(
 	     SELECT
+		 hadm_id,
          icustay_id,
          startday,
          endday,
@@ -233,31 +237,161 @@ cir2 AS (
 		FROM v12
 		LEFT JOIN icustay_detail
 		USING (icustay_id)
-		ORDER BY icustay_id, icudayseq_asc)
+		ORDER BY icustay_id, icudayseq_asc),
 		
  v14 AS( SELECT 
 		hadm_id,
+		
+		min(aniongap) as min_ag,
+		max(aniongap) as max_ag,
+		avg(aniongap) as avg_ag,
 		count(aniongap) as ag_count,
+		
+		min(albumin) as min_alb,
+		max(albumin) as max_alb,
+		avg(albumin) as avg_alb,
 		count(albumin)as alb_count,
-		count(bands) as bands_count,
-		count(bicarbonate) as bicarb_count,
-		count(bilirubin) as bilir_count,
-		count(creatinine) as creat_count,
-		count(chloride) as cl_count,
-		count(glucose) as gluco_count,
-		count(hematocrit) as hemato_count,
-		count(hemoglobin) as hem_count,
-		count(lactate) as lactate_count,
-		count(platelet) as plat_count,
-		count(potassium) as k_count,
-		count(ptt) as ptt_count,
-		count(inr) as inr_count,
-		count(pt) as pt_count,
-		count(sodium) as na_count,
-		count(bun) as bun_count,
-		count(wbc) as wbc_count
-		FROM pivoted_lab
-		GROUP BY hadm_id)
 
+		min(bands) as min_bands,
+		max(bands) as max_bands,
+		avg(bands) as avg_bands,
+		count(bands)as bands_count,
+		
+		min(bicarbonate) as min_bicarb,
+		max(bicarbonate) as max_bicarb,
+		avg(bicarbonate) as avg_bicarb,
+		count(bicarbonate) as bicarb_count,
+		
+		
+		min(bilirubin) as min_bili,
+		max(bilirubin) as max_bili,
+		avg(bilirubin) as avg_bili,
+		count(bilirubin) as bili_count,
+		
+		min(creatinine) as min_creat,
+		max(creatinine) as max_creat,
+		avg(creatinine) as avg_creat,
+		count(creatinine) as creat_count,
+		
+		min(chloride) as min_cl,
+		max(chloride) as max_cl,
+		avg(chloride) as avg_cl,
+		count(chloride) as cl_count,
+		
+		min(glucose) as min_gluco,
+		max(glucose) as max_gluco,
+		avg(glucose) as avg_gluco,
+		count(glucose) as gluco_count,
+		
+		min(hematocrit) as min_hemato,
+		max(hematocrit) as max_hemato,
+		avg(hematocrit) as avg_hemato,
+		count(hematocrit) as hemato_count,
+		
+		min(hemoglobin) as min_hemo,
+		max(hemoglobin) as max_hemo,
+		avg(hemoglobin) as avg_hemo,
+		count(hemoglobin) as hemo_count,
+		
+		min(lactate) as min_lact,
+		max(lactate) as max_lact,
+		avg(lactate) as avg_lact,
+		count(lactate) as lact_count,
+		
+		min(platelet) as min_plat,
+		max(platelet) as max_plat,
+		avg(platelet) as avg_plat,
+		count(platelet) as plat_count,
+
+
+		min(potassium) as min_k,
+		max(potassium) as max_k,
+		avg(potassium) as avg_k,
+		count(potassium) as k_count,
+		
+		min(ptt) as min_ptt,
+		max(ptt) as max_ptt,
+		avg(ptt) as avg_ptt,
+		count(ptt) as ptt_count,
+		
+		min(inr) as min_inr,
+		max(inr) as max_inr,
+		avg(inr) as avg_inr,
+		count(inr) as inr_count,
+		
+		min(pt) as min_pt,
+		max(pt) as max_pt,
+		avg(pt) as avg_pt,
+		count(pt) as pt_count,
+		
+		min(sodium) as na_pt,
+		max(sodium) as na_pt,
+		avg(sodium) as na_pt,
+		count(sodium) as na_count,
+		
+		min(bun) as bun_pt,
+		max(bun) as bun_pt,
+		avg(bun) as bun_pt,
+		count(bun) as bun_count,
+		
+		min(wbc) as bun_pt,
+		max(wbc) as bun_pt,
+		avg(wbc) as bun_pt,
+		count(wbc) as wbc_count
+		
+		FROM pivoted_lab
+		GROUP BY hadm_id),
+
+
+	v15 AS(select 
+		icustay_id,
+		
+		min(heartrate) as min_hr,
+		max(heartrate) as max_hr,
+		avg(heartrate) as avg_hr,
+		count(heartrate) as hr_count,
+		
+		min(sysbp) as min_sysbp,
+		max(sysbp) as max_sysbp,
+		avg(sysbp) as avg_sysbp,
+		count(sysbp)as sysbp_count,
+
+		min(diasbp) as min_bp,
+		max(diasbp) as max_bp,
+		avg(diasbp) as avg_bp,
+		count(diasbp)as bp_count,
+		
+		min(resprate) as min_rr,
+		max(resprate) as max_rr,
+		avg(resprate) as avg_rr,
+		count(resprate) as rr_count,
+		
+		
+		min(tempc) as min_tempc,
+		max(tempc) as max_tempc,
+		avg(tempc) as avg_tempc,
+		count(tempc) as tempc_count,
+		
+		min(spo2) as min_spo2,
+		max(spo2) as max_spo2,
+		avg(spo2) as avg_spo2,
+		count(spo2) as spo2_count
+		
+		
+		FROM pivoted_vital
+		GROUP BY icustay_id),
+
+
+ v16 AS (select *
+		 from v13
+		 LEFT JOIN v15
+		 USING (icustay_id)
+		)
+
+select *
+from v16 
+JOIN v14
+USING (hadm_id)
+ORDER BY (icustay_id, icudayseq_asc)
 
 
