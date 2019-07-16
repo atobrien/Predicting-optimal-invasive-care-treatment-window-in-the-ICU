@@ -1,8 +1,9 @@
 # Work in progress
-# Author: Anthony T.O'Brien Villate MD/MPH
+# Author: Anthony T.O'Brien Villate. MD/MPH
 # Version 3.0
 
 # 0. Load libraries ----
+library("tidyverse")
 library("tidyr")
 library("dplyr")
 library("markovchain")
@@ -287,4 +288,8 @@ matrix.rmchains<-matrix(unlist(rmchain.loop),ncol=31, byrow=TRUE)
 iter2<-30
 matrix.sim.list<-lapply(seq(iter2), function(k) t(matrix(df.sim.list[[k]], nrow=nrow(df.sim.list[[k]]), ncol=31, byrow=FALSE)))
 matrix.sim.list.vertical<-lapply(seq(iter2), function(k) matrix(matrix.sim.list[[k]]))
-
+#----
+# 11. Convert vertical matrix list into dataframes & add IDs----
+# See code here ----
+df.sim.vertical<-as.data.frame(matrix.sim.list.vertical)
+df.sim.vertical<-lapply(df.sim.vertical, function(x) cbind(x, id=rep(1:ncol(matrix.sim.list[[1]]), each = 31)))
