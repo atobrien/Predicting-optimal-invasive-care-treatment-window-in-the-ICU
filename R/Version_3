@@ -282,11 +282,12 @@ rmchain.loop<-lapply(seq(patients), function(x) lapply(seq(days), function(k) rm
                                                                                            include.t0 = TRUE,
                                                                                            parallel = TRUE,
                                                                                            num.cores=detectCores()-1)))
-#---- test
+#---- 
 # 9. Convert list of list into a matrix ----
 # See code here ----
 matrix.rmchains<-matrix(unlist(rmchain.loop),ncol=31, byrow=TRUE)
 df.sim.list<-lapply(seq(iter2), function(k) matrix.rmchains[seq(k, nrow(matrix.rmchains),30),])
+
 #----
 # 10. Convert matrix into matrix list for each simulation closed loop solutionn 1-30 ----
 # See code here ----
@@ -538,30 +539,16 @@ u_died<-1
 
 # Create costs
 
-c_nhic<-list()
-for (i in seq(1:30)){
-  for (k in seq(1:30)){
-  c_nhic[[k]]<-3805+662+(ifelse(df.simulation[[i]]$day>0, 340,0))
-  }
-}
+c_nhic<-lapply(seq(iter), function(k) (3805+662+(ifelse(df.simulation[[k]]$day>0, 340,0))))
 
-c_hic<-list()
-for (i in seq(1:30)){
-  for (k in seq(1:30)){
-    c_hic[[k]]<-3805+662+(ifelse(df.simulation[[i]]$day>0, 340,0))+4650+(ifelse(df.simulation[[i]]$day %in% 0, 928.99, 0))
-  }
-}
+c_hic<-lapply(seq(iter), function(k) (3805+662+(ifelse(df.simulation[[k]]$day>0, 340,0))+4650+(ifelse(df.simulation[[k]]$day %in% 0, 928.99, 0))))
 
 c_cmo<-3805+988
 
-c_lastday<-list()
-for (i in seq(1:30)){
-  c_lastday[[i]]<-353.00 + ((3805*i)+(4650*i)+(928*i)+(775*i)+(340*i)+(724*i)) # the added costs reflect the cost of intensive care prior to changing state (eg. 1 day of hic has a cost of 1 day while 2 days will have the added 2 day costs)
-}
+c_lastday<-lapply(seq(iter), function(k) (353.00 + ((3805*k)+(4650*k)+(928*k)+(775*k)+(340*k)+(724*k))))
 
-df.sim_costs_utility<-list()
 for (i in seq(1:30)){
-  df.simulation[[i]]<-df.simulation[[i]] %>% mutate(utility= case_when(state=="2"~u_hic,
+  df.sim_costs_utility[[i]]<-df.simulation[[i]] %>% mutate(utility= case_when(state=="2"~u_hic,
                                                                        state=="1"~u_nhic,
                                                                        state=="3"~u_cmo,
                                                                        state=="4"~u_discharge, 
