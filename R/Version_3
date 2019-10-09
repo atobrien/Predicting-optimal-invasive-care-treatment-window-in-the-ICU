@@ -433,9 +433,9 @@ df19.sim<-df19.sim %>% filter(!(state=="4" & col1!=1))
 df19.sim<-df19.sim %>% filter(!(state=="5" & col1!=1))
 df19.sim<-df19.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
 
-df20.sim<-df9.sim %>% mutate(col1=streak_run(state, k=1000))
-df20.sim<-df9.sim %>% filter(!(state=="4" & col1!=1))
-df20.sim<-df9.sim %>% filter(!(state=="5" & col1!=1))
+df20.sim<-df20.sim %>% mutate(col1=streak_run(state, k=1000))
+df20.sim<-df20.sim %>% filter(!(state=="4" & col1!=1))
+df20.sim<-df20.sim %>% filter(!(state=="5" & col1!=1))
 df20.sim<-df20.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
 
 df21.sim<-df21.sim %>% mutate(col1=streak_run(state, k=1000))
@@ -538,29 +538,40 @@ u_died<-1
 
 # Create costs
 
-c_nhic<-c()
-for (i in seq(1,30)){
-  c_nhic[i]<-3805+662+(ifelse(df.simulation[[i]]$day>0, 340,0))
+c_nhic<-list()
+for (i in seq(1:30)){
+  for (k in seq(1:30)){
+  c_nhic[[k]]<-3805+662+(ifelse(df.simulation[[i]]$day>0, 340,0))
+  }
+}
+
+c_hic<-list()
+for (i in seq(1:30)){
+  for (k in seq(1:30)){
+    c_hic[[k]]<-3805+662+(ifelse(df.simulation[[i]]$day>0, 340,0))+4650+(ifelse(df.simulation[[i]]$day %in% 0, 928.99, 0))
+  }
+}
+
+c_cmo<-3805+988
+
+c_lastday<-list()
+for (i in seq(1:30)){
+  c_lastday[[i]]<-353.00 + ((3805*i)+(4650*i)+(928*i)+(775*i)+(340*i)+(724*i)) # the added costs reflect the cost of intensive care prior to changing state (eg. 1 day of hic has a cost of 1 day while 2 days will have the added 2 day costs)
+}
+
+df.sim_costs_utility<-list()
+for (i in seq(1:30)){
+  df.simulation[[i]]<-df.simulation[[i]] %>% mutate(utility= case_when(state=="2"~u_hic,
+                                                                       state=="1"~u_nhic,
+                                                                       state=="3"~u_cmo,
+                                                                       state=="4"~u_discharge, 
+                                                                       state=="5"~u_died),
+                                                    costs= case_when(state=="1"~c_nhic[[i]],
+                                                                     state=="2"~c_hic[[i]],
+                                                                     state=="3"~c_cmo,
+                                                                     state=="4"~c_lastday[[i]],
+                                                                     state=="5"~c_lastday[[i]])) 
   }
 
-
-
-
-c_hic<-3805+662+(ifelse(df.simulation[[1]]$day>0, 340,0))+4650+(ifelse(df.simulation[[1]]$day %in% 0, 928.99, 0))
-c_cmo<-3805+988
-c_lastday<-353.00 + (3805+4650+928+(775*1)+(340*1)+(724*1))
-
-
-
-df.simulation[[1]]<-df.simulation[[1]] %>% mutate(utility= case_when(state=="2"~u_hic,
-                                                                     state=="1"~u_nhic,
-                                                                     state=="3"~u_cmo,
-                                                                     state=="4"~u_discharge, 
-                                                                     state=="5"~u_died),
-                                                  costs= case_when(state=="1"~c_nhic,
-                                                                   state=="2"~c_hic,
-                                                                   state=="3"~c_cmo,
-                                                                   state=="4"~c_lastday,
-                                                                   state=="5"~c_lastday)) 
 
 
