@@ -545,7 +545,9 @@ c_hic<-lapply(seq(iter), function(k) (3805+662+(ifelse(df.simulation[[k]]$day>0,
 
 c_cmo<-3805+988
 
-c_lastday<-lapply(seq(iter), function(k) (353.00 + ((3805*k)+(4650*k)+(928*k)+(775*k)+(340*k)+(724*k))))
+c_lastday<-lapply(seq(iter), function(k) (353.00 + ((3805*k)+(4650*k)+(928*k)+(775*k)+(340*k)+(724*k)))) #here I add in the costs of the TLT length
+
+# Create columns for costs and utility values
 
 for (i in seq(1:30)){
   df.sim_costs_utility[[i]]<-df.simulation[[i]] %>% mutate(utility= case_when(state=="2"~u_hic,
@@ -561,4 +563,17 @@ for (i in seq(1:30)){
   }
 
 
+# Compute average utility and cost per individual (please note I add the length of the TLT into the logic)
+df.sim_costs_utility[[20]] %>% 
+  group_by(ID) %>% 
+  mutate(utility_mean= (sum(utility)+sum(rep(0.55, 20)))/(length(utility)+length((rep(0.55, 20)))),
+         costs_sum= sum(costs)) %>% 
+  slice(1:1) %>% 
+  select(ID, utility_mean, costs_sum) %>% 
+  ungroup() %>% 
+  summarize(u_mean= mean(utility_mean),
+         c_mean= mean(costs_sum)) 
 
+
+
+# q: should i be adding the tlts in their full or k-1
