@@ -563,17 +563,23 @@ for (i in seq(1:30)){
   }
 
 
-# Compute average utility and cost per individual (please note I add the length of the TLT into the logic)
-df.sim_costs_utility[[20]] %>% 
+# Compute average utility and cost per individual(please note I add the length of the TLT into the logic)
+# Base case utility-costs
+
+bc_uc<- lapply(seq(iter), function(k) (
+df.sim_costs_utility[[k]] %>% 
   group_by(ID) %>% 
-  mutate(utility_mean= (sum(utility)+sum(rep(0.55, 20)))/(length(utility)+length((rep(0.55, 20)))),
+  mutate(utility_mean= (sum(utility)+sum(rep(0.55, k)))/(length(utility)+length((rep(0.55, k)))),
          costs_sum= sum(costs)) %>% 
   slice(1:1) %>% 
   select(ID, utility_mean, costs_sum) %>% 
   ungroup() %>% 
   summarize(u_mean= mean(utility_mean),
          c_mean= mean(costs_sum)) 
+  )
+)
 
 
 
 # q: should i be adding the tlts in their full or k-1
+# need to add in the time umilimted version
