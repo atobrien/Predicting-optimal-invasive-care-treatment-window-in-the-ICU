@@ -1,0 +1,589 @@
+# Work in progress
+# Author: Anthony T.O'Brien Villate. MD/MPH
+# Version 3.0
+
+# 0. Load libraries ----
+library("tidyverse")
+library("tidyr")
+library("dplyr")
+library("markovchain")
+library("tdisplay", lib.loc="~/R/win-library/3.5")
+library("survival", lib.loc="~/R/win-library/3.5")
+library("survminer", lib.loc="~/R/win-library/3.5")
+library("parallel")
+library("stringr")
+library("data.table")
+library("runner")
+library("DataCombine")
+library("msm")
+library("purrr")
+library("lubridate")
+
+# note to self: need to set seeds
+#----
+# 1. Select cirrhosis cohort ----
+#
+# See code here----
+# Read data
+df<-read.csv("C:/Users/Me/Desktop/mimic_timecohort_20190304.csv")
+
+# convert icustay_id to factor
+df <- df %>% mutate(icustay_id = as.factor(icustay_id))
+
+# Replace NA in flags with 0
+df <- 
+  df %>% 
+  mutate(death_flag = replace_na(death_flag, 0),
+         cv_flag = replace_na(cv_flag, 0),
+         crrt_flag = replace_na(crrt_flag, 0),
+         vasopres_flag = replace_na(vasopres_flag, 0),
+         mechvent_flag = replace_na(mechvent_flag, 0),
+         cmo_flag = replace_na(cmo_flag, 0))
+
+# Select icustays with more than 1 day stay, only first time admission,
+# >=18years and with a sofa score
+df <- 
+  df %>% 
+  group_by(icustay_id) %>% 
+  filter(length(icustay_id)>1 & 
+           admission_age>=18 )
+
+# Import the cirrhosis dataframe. This contains the patients diagnosed with
+# cirrhosis. It will be used as a key to select only cirrhosis patients
+key<-read.csv("C:/Users/Me/Desktop/data-1546976302496.csv")
+
+key$icustay_id <- as.factor(key$icustay_id )
+
+# Prepare the key 
+key$charttime<-NULL
+key$day_start<-NULL
+key$cirrhosis_flag<-NULL
+
+# Using semi-join with the key we filter only the cirrhosis patients in the df 
+df<-semi_join(df, key)
+
+# Drop key for memory
+rm(key)
+
+# Turn variables into correct types
+df <- 
+  df %>% 
+  mutate(death_flag= as.numeric(death_flag), states= as.factor(states))
+
+# Create quartiles for each sofa score 
+# sofa goes from 0-24 so: quantile(seq(1:24))
+df <- 
+  df %>% 
+  mutate(sofa_group = case_when(sofa_last >= 0 & sofa_last <= 6 ~1,
+                                sofa_last >= 7 & sofa_last <= 12 ~ 2,
+                                sofa_last >= 13 & sofa_last <= 18 ~ 3,
+                                sofa_last >= 19 & sofa_last <= 24 ~ 4))
+
+
+
+#----
+# 2. Redefine CMO  ----
+#
+# See code here----
+
+# CMO will be redefined as follows: 
+# state--lead_state_1_day_out--2_day_out--3_day_out--4_day_out--5_day_out--CMO
+#   1               0              4                                        1
+#   1               0              0           4                            1 
+#   1               0              0           0         4                  1 
+#   1               0              0           0         0          4       1
+# This is making the assumption that patients that transition from 
+# highly invasive care to non-invasive care and then died were on CMO 
+
+df<-df %>% 
+  mutate(onedayout=lead(states, n=1L),
+         twodayout=lead(states, n=2L),
+         threedayout=lead(states, n=3L),
+         fourdayout=lead(states, n=4L),
+         fivedayout=lead(states, n=5L),
+         sixdayout=lead(states, n=6L),
+         sevendayout=lead(states, n=7L),
+         eightdayout=lead(states, n=8L),
+         ninedayout=lead(states, n=9L),
+         tendayout=lead(states, n=10L))
+
+df<-df %>% 
+  mutate(CMO_additional_flag=
+           case_when((states==1)&(onedayout==0)&(twodayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==0)&(ninedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==0)&(ninedayout==0)&(tendayout==4)~1))
+
+# Drop additional columns created to be organized
+df$onedayout<-NULL
+df$twodayout<-NULL
+df$threedayout<-NULL
+df$fourdayout<-NULL
+df$fivedayout<-NULL
+df$sixdayout<-NULL
+df$sevendayout<-NULL
+df$eightdayout<-NULL
+df$ninedayout<-NULL
+df$tendayout<-NULL
+
+# Add in the end state when it is dead (4) 
+df<-df %>% 
+  mutate(A= ifelse(states==4, 4,CMO_additional_flag))
+
+# Filling in CMO cases according to above assumption on post-HIC days
+A <- c(df$A)
+index.1<-which(df$A %in% c(1)) # define location for 1s in A
+index.14<-which(df$A %in% c(1,4)) # define location for 1s and 4s in A
+loc.1<-which(index.14 %in% index.1) # location of 1s in  index.14
+loc.4<-loc.1+1 # location of 4s relative to 1s in index.14
+start.i<-((index.14[loc.1])+1) # starting index for replacing with 2
+end.i<-((index.14[loc.4])-1) # ending index for replacing with 2 in index
+fill.v<-sort(c(start.i, end.i))# sequence of indexes to fill-in with # 2
+fill.m<-matrix(fill.v,nrow = (length(fill.v)/2),ncol = 2, byrow=TRUE) # create matrix of 
+list.1<-apply(fill.m, MARGIN=1,FUN=function(x) seq(x[1],x[2])) # create a list with indexes to replace
+list.2<-unlist(list.1) # unlist list to use as the indexes for replacement
+df$A[list.2] <- 2 # replace indexed location with 2
+
+rm(index.1)
+rm(index.14)
+rm(loc.1)
+rm(loc.4)
+rm(start.i)
+rm(end.i)
+rm(fill.v)
+rm(fill.m)
+rm(list.2)
+rm(list.1)
+rm(A)
+
+# Update states & cmo flag with new CMO definition
+df<-df %>%mutate(states= ifelse(A %in% 2, 2, states),
+                 cmo_flag=ifelse(A %in% 2, 1, cmo_flag))
+df$A<-NULL
+df$CMO_additional_flag<-NULL
+
+
+# Make a grouping factor for icu stay - NEED TO DO THIS IN SQL OR IN R 
+df <- 
+  df %>% 
+  group_by(icustay_id) %>%
+  mutate(date = ymd_hms(endday),
+         standard_time_diff= date-ymd_hms('1900-01-01 00:00:00'),
+         lagged_std= lag(standard_time_diff),
+         time_difference = standard_time_diff-lag(standard_time_diff),
+         lead_td= lead(time_difference),
+         time_difference= ifelse(is.na(time_difference),
+                                 lead_td,
+                                 time_difference)) %>% 
+  select(-c(standard_time_diff, lagged_std, lead_td, lead_std))
+  
+
+df_tt[[1]][["1.1"]]
+
+   0  1  2  3  4
+0  2 12  0  0  0
+1  4  0  0 11  0
+2  0  0  0  0  0
+3  0  0  0  0  0
+4  0  0  0  0  0
+
+df_tt[[1]][["1.1"]]
+
+0         1         2         3         4
+0 0.1428571 0.8000000 0.0000000 0.0000000 0.0000000
+1 0.2666667 0.0000000 0.0000000 0.7857143 0.0000000
+2 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+3 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+4 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+
+#----
+# Base case analysis ----  
+# See code here----
+# Select variables of interest
+example.df<-df
+example.df<-example.df %>% select(icustay_id, icudayseq_asc, states, sofa_group) %>% ungroup()
+colnames(example.df)[1] <- 'id'  
+colnames(example.df)[2] <- 'day'  
+colnames(example.df)[4] <- 'sofa'  
+
+# create a length variable to quantify the length of total tlc received in stay
+  example.df %>% 
+  group_by(id) %>% 
+  mutate(tlt_l = sum(states==1)) %>% 
+  mutate(test = lead(states)) %>% 
+  filter(tlt_l==4, test==3)  ##this shows that sql is wrong and needs to be fixed
+
+  example.df <-  
+    example.df %>% 
+    group_by(id) %>% 
+    mutate(tlt_l = sum(states==1),
+           state_lead = lead(states, default = last(states)),
+           day_lead = lead(day)) %>% 
+    filter(!(is.na(day_lead))) %>% 
+    mutate(sofa = as.factor(sofa),
+           day_lead = as.factor(day_lead),
+           states = as.factor(states),
+           state_lead = as.factor(state_lead))
+
+  colnames(example.df)[3] <- 'V1' # STATES
+  colnames(example.df)[6] <- 'V2' # STATE_LEAD
+  colnames(example.df)[7] <- 'V3' # DAY LEAD
+  colnames(example.df)[4] <- 'V4' # SOFA  
+  
+  
+df_grp <- 
+  lapply(1:30, function(x) 
+    example.df %>% 
+      filter(tlt_l %in% x) %>% 
+      group_by(V3, V4) %>% 
+      select(V1, V2, V3, V4))
+ 
+  
+df_tt <- lapply(df_grp[1:30], function(dat) lapply(split(dat[1:2],dat[3:4], drop = F),
+                                              function(x) {
+                                                      lvls <- sort(unique(unlist(x)))
+                                                      prop.table(table(factor(x[[1]], levels = 0:4), factor(x[[2]], levels = 0:4)),1)
+                                                    }))
+
+df_tt<-rapply(df_tt, f=function(x) ifelse(is.nan(x),0,x), how="replace" )
+
+#----
+# 5. Transition matrix for 1 day if HIC & claen up----
+# See code here---- 
+# 
+
+
+
+
+
+#----
+# 6. Markov object for 1 day HIC----
+# See code here ----
+mo1.msm<-new("markovchain",transitionMatrix=(df1.ptm), name="MarkovChain Q1")
+#----
+# 7. For-loop to generate closed form soluation for markov objects days 2-30 ----
+# See code here ----
+iter<-30
+mobject.loop<-lapply(seq(iter), function(k) mo1.msm^k)
+#Acknowledgement:
+# https://stackoverflow.com/questions/32052315/r-markov-chain-output-iteration
+#
+#----
+# 8. For-loop markov chain for closed form solution matrices 1 to 30 days HIC ----
+# See code here ----
+markov.object<-30 # this is the markov object transition matrix
+patients<-10 # this is for simulated patients, e.g. 10 means 10 simulated patients for 1-30 days
+days<-30 # this is the number of days 
+N<-30 # define
+rmchain.loop<-lapply(seq(patients), function(x) lapply(seq(days), function(k) rmarkovchain(n = N, 
+                                                                                           object = mobject.loop[[k]],
+                                                                                           t0 = "2",
+                                                                                           include.t0 = TRUE,
+                                                                                           parallel = TRUE,
+                                                                                           num.cores=detectCores()-1)))
+#---- 
+# 9. Convert list of list into a matrix ----
+# See code here ----
+matrix.rmchains<-matrix(unlist(rmchain.loop),ncol=31, byrow=TRUE)
+df.sim.list<-lapply(seq(iter2), function(k) matrix.rmchains[seq(k, nrow(matrix.rmchains),30),])
+
+#----
+# 10. Convert matrix into matrix list for each simulation closed loop solutionn 1-30 ----
+# See code here ----
+iter2<-30
+matrix.sim.list<-lapply(seq(iter2), function(k) t(matrix(df.sim.list[[k]], nrow=nrow(df.sim.list[[k]]), ncol=31, byrow=FALSE)))
+matrix.sim.list.vertical<-lapply(seq(iter2), function(k) matrix(matrix.sim.list[[k]]))
+
+#----
+# 11. Add IDs to dataframes----
+# See code here ----
+df.sim.vertical<-as.data.frame(matrix.sim.list.vertical)
+
+for (i in 1:30) {
+  names(df.sim.vertical)[i]<-"state"
+}
+
+df.sim.vertical$ID<-rep(1:ncol(matrix.sim.list[[1]]), each = 31)
+
+df1.sim<-cbind(df.sim.vertical[1], df.sim.vertical[31])
+df2.sim<-cbind(df.sim.vertical[2], df.sim.vertical[31])
+df3.sim<-cbind(df.sim.vertical[3], df.sim.vertical[31])
+df4.sim<-cbind(df.sim.vertical[4], df.sim.vertical[31])
+df5.sim<-cbind(df.sim.vertical[5], df.sim.vertical[31])
+df6.sim<-cbind(df.sim.vertical[6], df.sim.vertical[31])
+df7.sim<-cbind(df.sim.vertical[7], df.sim.vertical[31])
+df8.sim<-cbind(df.sim.vertical[8], df.sim.vertical[31])
+df9.sim<-cbind(df.sim.vertical[9], df.sim.vertical[31])
+df10.sim<-cbind(df.sim.vertical[10], df.sim.vertical[31])
+df11.sim<-cbind(df.sim.vertical[11], df.sim.vertical[31])
+df12.sim<-cbind(df.sim.vertical[12], df.sim.vertical[31])
+df13.sim<-cbind(df.sim.vertical[13], df.sim.vertical[31])
+df14.sim<-cbind(df.sim.vertical[14], df.sim.vertical[31])
+df15.sim<-cbind(df.sim.vertical[15], df.sim.vertical[31])
+df16.sim<-cbind(df.sim.vertical[16], df.sim.vertical[31])
+df17.sim<-cbind(df.sim.vertical[17], df.sim.vertical[31])
+df18.sim<-cbind(df.sim.vertical[18], df.sim.vertical[31])
+df19.sim<-cbind(df.sim.vertical[19], df.sim.vertical[31])
+df20.sim<-cbind(df.sim.vertical[20], df.sim.vertical[31])
+df21.sim<-cbind(df.sim.vertical[21], df.sim.vertical[31])
+df22.sim<-cbind(df.sim.vertical[22], df.sim.vertical[31])
+df23.sim<-cbind(df.sim.vertical[23], df.sim.vertical[31])
+df24.sim<-cbind(df.sim.vertical[24], df.sim.vertical[31])
+df25.sim<-cbind(df.sim.vertical[25], df.sim.vertical[31])
+df26.sim<-cbind(df.sim.vertical[26], df.sim.vertical[31])
+df27.sim<-cbind(df.sim.vertical[27], df.sim.vertical[31])
+df28.sim<-cbind(df.sim.vertical[28], df.sim.vertical[31])
+df29.sim<-cbind(df.sim.vertical[29], df.sim.vertical[31])
+df30.sim<-cbind(df.sim.vertical[30], df.sim.vertical[31])
+#----
+# 12. Add streak for filtering states & remove redundancies ----
+# See code here ----
+df1.sim<-df1.sim %>% mutate(col1=streak_run(state, k=1000))        # creates a streak 
+df1.sim<-df1.sim %>% filter(!(state=="4" & col1!=1))               # removes data after discharge (4) or death (5)
+df1.sim<-df1.sim %>% filter(!(state=="5" & col1!=1))
+df1.sim<-df1.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1) # adds day column removes col1
+
+df2.sim<-df2.sim %>% mutate(col1=streak_run(state, k=1000))
+df2.sim<-df2.sim %>% filter(!(state=="4" & col1!=1))
+df2.sim<-df2.sim %>% filter(!(state=="5" & col1!=1))
+df2.sim<-df2.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df3.sim<-df3.sim %>% mutate(col1=streak_run(state, k=1000))
+df3.sim<-df3.sim %>% filter(!(state=="4" & col1!=1))
+df3.sim<-df3.sim %>% filter(!(state=="5" & col1!=1))
+df3.sim<-df3.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df4.sim<-df4.sim %>% mutate(col1=streak_run(state, k=1000))
+df4.sim<-df4.sim %>% filter(!(state=="4" & col1!=1))
+df4.sim<-df4.sim %>% filter(!(state=="5" & col1!=1))
+df4.sim<-df4.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df5.sim<-df5.sim %>% mutate(col1=streak_run(state, k=1000))
+df5.sim<-df5.sim %>% filter(!(state=="4" & col1!=1))
+df5.sim<-df5.sim %>% filter(!(state=="5" & col1!=1))
+df5.sim<-df5.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df6.sim<-df6.sim %>% mutate(col1=streak_run(state, k=1000))
+df6.sim<-df6.sim %>% filter(!(state=="4" & col1!=1))
+df6.sim<-df6.sim %>% filter(!(state=="5" & col1!=1))
+df6.sim<-df6.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df7.sim<-df7.sim %>% mutate(col1=streak_run(state, k=1000))
+df7.sim<-df7.sim %>% filter(!(state=="4" & col1!=1))
+df7.sim<-df7.sim %>% filter(!(state=="5" & col1!=1))
+df7.sim<-df7.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df8.sim<-df8.sim %>% mutate(col1=streak_run(state, k=1000))
+df8.sim<-df8.sim %>% filter(!(state=="4" & col1!=1))
+df8.sim<-df8.sim %>% filter(!(state=="5" & col1!=1))
+df8.sim<-df8.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df9.sim<-df9.sim %>% mutate(col1=streak_run(state, k=1000))
+df9.sim<-df9.sim %>% filter(!(state=="4" & col1!=1))
+df9.sim<-df9.sim %>% filter(!(state=="5" & col1!=1))
+df9.sim<-df9.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df10.sim<-df10.sim %>% mutate(col1=streak_run(state, k=1000))
+df10.sim<-df10.sim %>% filter(!(state=="4" & col1!=1))
+df10.sim<-df10.sim %>% filter(!(state=="5" & col1!=1))
+df10.sim<-df10.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df11.sim<-df11.sim %>% mutate(col1=streak_run(state, k=1000))
+df11.sim<-df11.sim %>% filter(!(state=="4" & col1!=1))
+df11.sim<-df11.sim %>% filter(!(state=="5" & col1!=1))
+df11.sim<-df11.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df12.sim<-df12.sim %>% mutate(col1=streak_run(state, k=1000))
+df12.sim<-df12.sim %>% filter(!(state=="4" & col1!=1))
+df12.sim<-df12.sim %>% filter(!(state=="5" & col1!=1))
+df12.sim<-df12.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df13.sim<-df13.sim %>% mutate(col1=streak_run(state, k=1000))
+df13.sim<-df13.sim %>% filter(!(state=="4" & col1!=1))
+df13.sim<-df13.sim %>% filter(!(state=="5" & col1!=1))
+df13.sim<-df13.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df14.sim<-df14.sim %>% mutate(col1=streak_run(state, k=1000))
+df14.sim<-df14.sim %>% filter(!(state=="4" & col1!=1))
+df14.sim<-df14.sim %>% filter(!(state=="5" & col1!=1))
+df14.sim<-df14.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df15.sim<-df15.sim %>% mutate(col1=streak_run(state, k=1000))
+df15.sim<-df15.sim %>% filter(!(state=="4" & col1!=1))
+df15.sim<-df15.sim %>% filter(!(state=="5" & col1!=1))
+df15.sim<-df15.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df16.sim<-df16.sim %>% mutate(col1=streak_run(state, k=1000))
+df16.sim<-df16.sim %>% filter(!(state=="4" & col1!=1))
+df16.sim<-df16.sim %>% filter(!(state=="5" & col1!=1))
+df16.sim<-df16.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df17.sim<-df17.sim %>% mutate(col1=streak_run(state, k=1000))
+df17.sim<-df17.sim %>% filter(!(state=="4" & col1!=1))
+df17.sim<-df17.sim %>% filter(!(state=="5" & col1!=1))
+df17.sim<-df17.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df18.sim<-df18.sim %>% mutate(col1=streak_run(state, k=1000))
+df18.sim<-df18.sim %>% filter(!(state=="4" & col1!=1))
+df18.sim<-df18.sim %>% filter(!(state=="5" & col1!=1))
+df18.sim<-df18.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df19.sim<-df19.sim %>% mutate(col1=streak_run(state, k=1000))
+df19.sim<-df19.sim %>% filter(!(state=="4" & col1!=1))
+df19.sim<-df19.sim %>% filter(!(state=="5" & col1!=1))
+df19.sim<-df19.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df20.sim<-df20.sim %>% mutate(col1=streak_run(state, k=1000))
+df20.sim<-df20.sim %>% filter(!(state=="4" & col1!=1))
+df20.sim<-df20.sim %>% filter(!(state=="5" & col1!=1))
+df20.sim<-df20.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df21.sim<-df21.sim %>% mutate(col1=streak_run(state, k=1000))
+df21.sim<-df21.sim %>% filter(!(state=="4" & col1!=1))
+df21.sim<-df21.sim %>% filter(!(state=="5" & col1!=1))
+df21.sim<-df21.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df22.sim<-df22.sim %>% mutate(col1=streak_run(state, k=1000))
+df22.sim<-df22.sim %>% filter(!(state=="4" & col1!=1))
+df22.sim<-df22.sim %>% filter(!(state=="5" & col1!=1))
+df22.sim<-df22.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df23.sim<-df23.sim %>% mutate(col1=streak_run(state, k=1000))
+df23.sim<-df23.sim %>% filter(!(state=="4" & col1!=1))
+df23.sim<-df23.sim %>% filter(!(state=="5" & col1!=1))
+df23.sim<-df23.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df24.sim<-df24.sim %>% mutate(col1=streak_run(state, k=1000))
+df24.sim<-df24.sim %>% filter(!(state=="4" & col1!=1))
+df24.sim<-df24.sim %>% filter(!(state=="5" & col1!=1))
+df24.sim<-df24.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df25.sim<-df25.sim %>% mutate(col1=streak_run(state, k=1000))
+df25.sim<-df25.sim %>% filter(!(state=="4" & col1!=1))
+df25.sim<-df25.sim %>% filter(!(state=="5" & col1!=1))
+df25.sim<-df25.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df26.sim<-df26.sim %>% mutate(col1=streak_run(state, k=1000))
+df26.sim<-df26.sim %>% filter(!(state=="4" & col1!=1))
+df26.sim<-df26.sim %>% filter(!(state=="5" & col1!=1))
+df26.sim<-df26.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df27.sim<-df27.sim %>% mutate(col1=streak_run(state, k=1000))
+df27.sim<-df27.sim %>% filter(!(state=="4" & col1!=1))
+df27.sim<-df27.sim %>% filter(!(state=="5" & col1!=1))
+df27.sim<-df27.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df28.sim<-df28.sim %>% mutate(col1=streak_run(state, k=1000))
+df28.sim<-df28.sim %>% filter(!(state=="4" & col1!=1))
+df28.sim<-df28.sim %>% filter(!(state=="5" & col1!=1))
+df28.sim<-df28.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df29.sim<-df29.sim %>% mutate(col1=streak_run(state, k=1000))
+df29.sim<-df29.sim %>% filter(!(state=="4" & col1!=1))
+df29.sim<-df29.sim %>% filter(!(state=="5" & col1!=1))
+df29.sim<-df29.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+df30.sim<-df30.sim %>% mutate(col1=streak_run(state, k=1000))
+df30.sim<-df30.sim %>% filter(!(state=="4" & col1!=1))
+df30.sim<-df30.sim %>% filter(!(state=="5" & col1!=1))
+df30.sim<-df30.sim %>% mutate(day = (rowid(ID))-1) %>% select(-col1)
+
+#----
+# 13. Combine dataframes into one list of dataframes & clean up----
+# See code here ----
+df.simulation<-list(df1.sim, df2.sim, df3.sim, df4.sim, df5.sim, df6.sim, 
+                    df7.sim, df8.sim, df9.sim, df10.sim, df11.sim, df12.sim, 
+                    df13.sim, df14.sim, df15.sim, df16.sim, df17.sim, df18.sim, 
+                    df19.sim, df20.sim, df21.sim, df22.sim, df23.sim, df24.sim, 
+                    df25.sim, df26.sim, df27.sim, df28.sim, df29.sim, df30.sim)
+
+rm(df1.sim, df2.sim, df3.sim, df4.sim, df5.sim, df6.sim, 
+   df7.sim, df8.sim, df9.sim, df10.sim, df11.sim, df12.sim, 
+   df13.sim, df14.sim, df15.sim, df16.sim, df17.sim, df18.sim, 
+   df19.sim, df20.sim, df21.sim, df22.sim, df23.sim, df24.sim, 
+   df25.sim, df26.sim, df27.sim, df28.sim, df29.sim, df30.sim)
+
+
+#----
+# 14. Utilities and costs ----
+# See code here ----
+
+# Utility value for being in ICU:	0.66, 0.39-0.93,	Beta,	(Cost effectiveness of antimicrobial catheters in the intensive care unit: addressing uncertainty in the decision)
+# Utility value for highly invasive care:	0.55,	0.39-0.71,	(Beta,	Comparison of Health-Related Quality of Life Preferences Between Physicians and Cirrhotic Patients: Implications for Cost-Utility Analysesin Chronic Liver Disease)
+# Utility value for paliative care:	0.28,	0.23-0.35,	Beta,	(Ultrasound Elastography for Fibrosis Surveillance Is Cos tEffective in Patients with Chronic Hepatitis C Virus in the UK)
+
+# Daily costs:
+# ICU Room & Board	 $3,805.00 	-	-
+# Dialysis	 $4,650.00 	 $400.00 	 $8,900.00 
+# Mechanical ventilation first day 	 $928.99 	-	-
+# Mechanical ventilation	 $775.00 	-	-
+# Comfort care	 $988.00 	-	-
+# Initial hospital physican care	 $662.00 	-	-
+# Subsequent hospital physican care	 $340.00 	-	-
+# Hospital discharge day	 $353.00 	-	-
+# Critical care phsycian care	 $724.00 	-	-
+
+# sources: BIDMC - Patient Financial Services & HMFP - Finance
+
+# utilities
+u_nhic<-0.66
+u_hic<-0.55
+u_cmo<-0.28
+u_discharge<-1
+u_died<-1
+
+#----
+# 15. Base case analysis ----
+# See code here ----
+
+# Create costs
+
+c_nhic<-lapply(seq(iter), function(k) (3805+662+(ifelse(df.simulation[[k]]$day>0, 340,0))))
+
+c_hic<-lapply(seq(iter), function(k) (3805+662+(ifelse(df.simulation[[k]]$day>0, 340,0))+4650+(ifelse(df.simulation[[k]]$day %in% 0, 928.99, 0))))
+
+c_cmo<-3805+988
+
+c_lastday<-lapply(seq(iter), function(k) (353.00 + ((3805*k)+(4650*k)+(928*k)+(775*k)+(340*k)+(724*k)))) #here I add in the costs of the TLT length
+
+# Create columns for costs and utility values
+
+for (i in seq(1:30)){
+  df.sim_costs_utility[[i]]<-df.simulation[[i]] %>% mutate(utility= case_when(state=="2"~u_hic,
+                                                                              state=="1"~u_nhic,
+                                                                              state=="3"~u_cmo,
+                                                                              state=="4"~u_discharge, 
+                                                                              state=="5"~u_died),
+                                                           costs= case_when(state=="1"~c_nhic[[i]],
+                                                                            state=="2"~c_hic[[i]],
+                                                                            state=="3"~c_cmo,
+                                                                            state=="4"~c_lastday[[i]],
+                                                                            state=="5"~c_lastday[[i]])) 
+}
+
+
+# Compute average utility and cost per individual(please note I add the length of the TLT into the logic)
+# Base case utility-costs
+
+bc_uc<- lapply(seq(iter), function(k) (
+  df.sim_costs_utility[[k]] %>% 
+    group_by(ID) %>% 
+    mutate(utility_mean= (sum(utility)+sum(rep(0.55, k)))/(length(utility)+length((rep(0.55, k)))),
+           costs_sum= sum(costs)) %>% 
+    slice(1:1) %>% 
+    select(ID, utility_mean, costs_sum) %>% 
+    ungroup() %>% 
+    summarize(u_mean= mean(utility_mean),
+              c_mean= mean(costs_sum)) 
+)
+)
+
+
+
+# q: should i be adding the tlts in their full or k-1
+# need to add in the time umilimted version
