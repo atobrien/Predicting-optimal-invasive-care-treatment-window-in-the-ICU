@@ -1,6 +1,6 @@
 # Work in progress
 # Author: Anthony T.O'Brien Villate. MD/MPH
-# Version 3.0
+# Version 4.0
 
 # 0. Load libraries ----
 library("tidyverse")
@@ -20,6 +20,14 @@ library("purrr")
 library("lubridate")
 
 # note to self: need to set seeds
+
+#definition of states in version 4
+#0 non aggrssive 
+#1 aggressive icu 
+#2 cmo
+#3 home
+#4 death
+
 #----
 # 1. Select cirrhosis cohort ----
 #
@@ -168,7 +176,7 @@ df$A<-NULL
 df$CMO_additional_flag<-NULL
 
 
-# Make a grouping factor for icu stay - NEED TO DO THIS IN SQL OR IN R 
+# Make a grouping factor for icu stay
 df <- 
   df %>% 
   group_by(icustay_id) %>%
@@ -180,26 +188,9 @@ df <-
          time_difference= ifelse(is.na(time_difference),
                                  lead_td,
                                  time_difference)) %>% 
-  select(-c(standard_time_diff, lagged_std, lead_td, lead_std))
+  select(-c(standard_time_diff, lagged_std, lead_td))
   
 
-df_tt[[1]][["1.1"]]
-
-   0  1  2  3  4
-0  2 12  0  0  0
-1  4  0  0 11  0
-2  0  0  0  0  0
-3  0  0  0  0  0
-4  0  0  0  0  0
-
-df_tt[[1]][["1.1"]]
-
-0         1         2         3         4
-0 0.1428571 0.8000000 0.0000000 0.0000000 0.0000000
-1 0.2666667 0.0000000 0.0000000 0.7857143 0.0000000
-2 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
-3 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
-4 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
 
 #----
 # Base case analysis ----  
@@ -211,13 +202,17 @@ colnames(example.df)[1] <- 'id'
 colnames(example.df)[2] <- 'day'  
 colnames(example.df)[4] <- 'sofa'  
 
-# create a length variable to quantify the length of total tlc received in stay
+# check logic of states to see if makes sense (sanity check)
   example.df %>% 
   group_by(id) %>% 
   mutate(tlt_l = sum(states==1)) %>% 
-  mutate(test = lead(states)) %>% 
-  filter(tlt_l==4, test==3)  ##this shows that sql is wrong and needs to be fixed
+  filter(states==3, lag(states)==4)
+  filter(states==4, lead(states)==3)   
+  #this shows that a few individuals are going from home to deat/death to home
+  # which means there is an error in the sql logic which needs to ammended 
 
+  
+  # create a length variable to quantify the length of total tlc received in stay  
   example.df <-  
     example.df %>% 
     group_by(id) %>% 
@@ -235,30 +230,103 @@ colnames(example.df)[4] <- 'sofa'
   colnames(example.df)[7] <- 'V3' # DAY LEAD
   colnames(example.df)[4] <- 'V4' # SOFA  
   
-  
+# groups the individuals into data frames by the lenght of time they were in 
+# aggressive care  
 df_grp <- 
   lapply(1:30, function(x) 
     example.df %>% 
-      filter(tlt_l %in% x) %>% 
-      group_by(V3, V4) %>% 
+      filter(tlt_l %in% x) %>% # filtering by length of aggressive icu stay
+      group_by(V3, V4) %>%     # grouping by day and by sofa score 
       select(V1, V2, V3, V4))
- 
-  
-df_tt <- lapply(df_grp[1:30], function(dat) lapply(split(dat[1:2],dat[3:4], drop = F),
-                                              function(x) {
-                                                      lvls <- sort(unique(unlist(x)))
-                                                      prop.table(table(factor(x[[1]], levels = 0:4), factor(x[[2]], levels = 0:4)),1)
-                                                    }))
+
+# creates a dataframe of transition matrices for each one of the days and lengths ()
+df_tt <- lapply(df_grp[1:30], 
+                function(dat) 
+                  lapply(split(dat[1:2],dat[3:4], drop = F),
+                         function(x) {
+                           lvls <- sort(unique(unlist(x)))
+                           prop.table(table(factor(x[[1]], levels = 0:4), factor(x[[2]], levels = 0:4)),1)
+                           }))
+
+# this divdes the transition matrices into
+# those that had 1,2,3,4,5,6,7 days of aggressive icu and then into 
+# total_days_spent_in_icu.sofa_quartile
 
 df_tt<-rapply(df_tt, f=function(x) ifelse(is.nan(x),0,x), how="replace" )
 
-#----
-# 5. Transition matrix for 1 day if HIC & claen up----
-# See code here---- 
-# 
+
+
+df_tt[[1]][["1.1"]]
+0  1  2  3  4
+0  2 12  0  0  0
+1  4  0  0 11  0
+2  0  0  0  0  0
+3  0  0  0  0  0
+4  0  0  0  0  0
+
+df_tt[[1]][["1.1"]]
+0         1         2         3         4
+0 0.1428571 0.8000000 0.0000000 0.0000000 0.0000000
+1 0.2666667 0.0000000 0.0000000 0.7857143 0.0000000
+2 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+3 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+4 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
 
 
 
+# remove icu days which have 0 information 
+# (need to improve so that icu days are preserved)
+#                                                   needs to be fixed
+ 
+df_tt<-df_tt[lengths(df_tt) > 0]
+
+# SHOULD NOT BE APPLIED TO DAY 1 of any group 
+# this is an error to apply to initial transition matrix 
+
+
+# Designate permanent states
+for (i in  1:length(df_tt)){
+  for (z in 1:length(df_tt[[i]])){
+    df_tt[[i]][[z]][4,4]<-1
+    df_tt[[i]][[z]][5,5]<-1
+  }
+}
+
+
+
+#1 day of agressive icu - day one - sofa group 1 
+test<-colSums((df_tt[[1]][["1.1"]]/sum(df_tt[[1]][["1.1"]]))*1000)
+
+#1 day of agressive icu - day two - sofa group 1 
+row1<-test[1]*df_tt[[1]][["2.1"]][1,]
+row2<-test[2]*df_tt[[1]][["2.1"]][2,]
+row3<-test[3]*df_tt[[1]][["2.1"]][3,]
+row4<-test[4]*df_tt[[1]][["2.1"]][4,]
+row5<-test[5]*df_tt[[1]][["2.1"]][5,]
+test2<-colSums(rbind(row1,row2,row3,row4,row5))
+
+
+#1 day of agressive icu - day two - sofa group 1 
+row1<-test2[1]*df_tt[[1]][["3.1"]][1,]
+row2<-test2[2]*df_tt[[1]][["3.1"]][2,]
+row3<-test2[3]*df_tt[[1]][["3.1"]][3,]
+row4<-test2[4]*df_tt[[1]][["3.1"]][4,]
+row5<-test2[5]*df_tt[[1]][["3.1"]][5,]
+test3<-colSums(rbind(row1,row2,row3,row4,row5))
+
+# 1 day of aggressive icu - day 3 to 30- sofa group 1
+
+# repeat for sofa group 2,3,4
+
+# then do the same thing for 2 days of aggressive care
+# then 3 days 
+# then 4 days
+
+
+
+#-------------------------------------------------------------------------------
+
+# OLD VERSION BELOW
 
 
 #----
@@ -270,9 +338,7 @@ mo1.msm<-new("markovchain",transitionMatrix=(df1.ptm), name="MarkovChain Q1")
 # See code here ----
 iter<-30
 mobject.loop<-lapply(seq(iter), function(k) mo1.msm^k)
-#Acknowledgement:
-# https://stackoverflow.com/questions/32052315/r-markov-chain-output-iteration
-#
+
 #----
 # 8. For-loop markov chain for closed form solution matrices 1 to 30 days HIC ----
 # See code here ----
