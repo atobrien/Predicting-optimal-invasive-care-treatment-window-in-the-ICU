@@ -1,6 +1,6 @@
 # Work in progress
 # Author: Anthony T.O'Brien Villate. MD/MPH
-# Version 4.0
+# Version 3.0
 
 # 0. Load libraries ----
 library("tidyverse")
@@ -237,6 +237,7 @@ df_grp <-
     example.df %>% 
       filter(tlt_l %in% x) %>% # filtering by length of aggressive icu stay
       group_by(V3, V4) %>%     # grouping by day and by sofa score 
+      mutate(V5= stringr)
       select(V1, V2, V3, V4))
 
 # creates a dataframe of transition matrices for each one of the days and lengths ()
@@ -244,9 +245,28 @@ df_tt <- lapply(df_grp[1:30],
                 function(dat) 
                   lapply(split(dat[1:2],dat[3:4], drop = F),
                          function(x) {
-                           lvls <- sort(unique(unlist(x)))
+                           lvls <- sort(unique(unlist(x))) 
                            prop.table(table(factor(x[[1]], levels = 0:4), factor(x[[2]], levels = 0:4)),1)
                            }))
+
+testers <- lapply(df_grp[1:1], 
+                  function(dat){ 
+                    split(dat[1:2],dat[3:4], drop = F)
+                  }
+)
+
+testers
+
+tester <- lapply(df_grp[1:1], 
+                 function(dat)
+                   lapply(split(dat[1:2],dat[3:4], drop = F),
+                          function(x) {
+                            lvls <- sort(unique(unlist(x)))
+                          }))
+
+
+                
+
 
 # this divdes the transition matrices into
 # those that had 1,2,3,4,5,6,7 days of aggressive icu and then into 
