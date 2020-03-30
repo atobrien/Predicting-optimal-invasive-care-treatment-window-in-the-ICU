@@ -1,0 +1,246 @@
+# Work in progress
+# Author: Anthony T.O'Brien Villate. MD/MPH
+# Multistate models & decision analysis for ICU aggressive care
+
+# 0. Load libraries ------------------------------------------------------------
+library("tidyverse")
+library("dplyr")
+library("stringr")
+library("runner")
+library("msm")
+library("lubridate")
+
+
+# Definitions 
+# States
+# 0 non aggrssive 
+# 1 aggressive icu 
+# 2 cmo
+# 3 home
+# 4 death
+
+
+# 1. Select cirrhosis cohort ---------------------------------------------------
+
+df<-read.csv("C:/Users/Me/Desktop/mimic_timecohort_20190304.csv")
+
+# convert icustay_id to factor
+df <- df %>% mutate(icustay_id = as.factor(icustay_id))
+
+# Replace NA in flags with 0
+df <- 
+  df %>% 
+  mutate(death_flag = replace_na(death_flag, 0),
+         cv_flag = replace_na(cv_flag, 0),
+         crrt_flag = replace_na(crrt_flag, 0),
+         vasopres_flag = replace_na(vasopres_flag, 0),
+         mechvent_flag = replace_na(mechvent_flag, 0),
+         cmo_flag = replace_na(cmo_flag, 0))
+
+# Select icustays with more than 1 day stay, only first time admission,
+# >=18years and with a sofa score
+
+
+df <- 
+  df %>% 
+  group_by(icustay_id) %>% 
+  filter(length(icustay_id)>1 & 
+           admission_age>=18)  
+
+# select patients that received mechanical ventilation
+df<-df %>% inner_join(y=df %>% filter(mechvent_flag %in% 1) %>% distinct(icustay_id) )
+
+# Create quartiles for each sofa score 
+# sofa goes from 0-24 so: quantile(seq(1:24))
+df <- 
+  df %>% 
+  mutate(sofa_group = case_when(sofa_last >= 0 & sofa_last <= 6 ~1,
+                                sofa_last >= 7 & sofa_last <= 12 ~ 2,
+                                sofa_last >= 13 & sofa_last <= 18 ~ 3,
+                                sofa_last >= 19 & sofa_last <= 24 ~ 4))
+
+# 2. Redefine CMO --------------------------------------------------------------
+
+# CMO will be redefined as follows: 
+# state--lead_state_1_day_out--2_day_out--3_day_out--4_day_out--5_day_out--CMO
+#   1               0              4                                        1
+#   1               0              0           4                            1 
+#   1               0              0           0         4                  1 
+#   1               0              0           0         0          4       1
+# This is making the assumption that patients that transition from 
+# highly invasive care to non-invasive care and then died were on CMO 
+
+df<-df %>% 
+  mutate(onedayout=lead(states, n=1L),
+         twodayout=lead(states, n=2L),
+         threedayout=lead(states, n=3L),
+         fourdayout=lead(states, n=4L),
+         fivedayout=lead(states, n=5L),
+         sixdayout=lead(states, n=6L),
+         sevendayout=lead(states, n=7L),
+         eightdayout=lead(states, n=8L),
+         ninedayout=lead(states, n=9L),
+         tendayout=lead(states, n=10L))
+
+df<-df %>% 
+  mutate(CMO_additional_flag=
+           case_when((states==1)&(onedayout==0)&(twodayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==0)&(ninedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==0)&(ninedayout==0)&(tendayout==4)~1))
+
+# Drop additional columns created to be organized
+df$onedayout<-NULL
+df$twodayout<-NULL
+df$threedayout<-NULL
+df$fourdayout<-NULL
+df$fivedayout<-NULL
+df$sixdayout<-NULL
+df$sevendayout<-NULL
+df$eightdayout<-NULL
+df$ninedayout<-NULL
+df$tendayout<-NULL
+
+# Add in the end state when it is dead (4) 
+df<-df %>% 
+  mutate(A= ifelse(states==4, 4,CMO_additional_flag))
+
+# Filling in CMO cases according to above assumption on post-HIC days
+A <- c(df$A)
+index.1<-which(df$A %in% c(1)) # define location for 1s in A
+index.14<-which(df$A %in% c(1,4)) # define location for 1s and 4s in A
+loc.1<-which(index.14 %in% index.1) # location of 1s in  index.14
+loc.4<-loc.1+1 # location of 4s relative to 1s in index.14
+start.i<-((index.14[loc.1])+1) # starting index for replacing with 2
+end.i<-((index.14[loc.4])-1) # ending index for replacing with 2 in index
+fill.v<-sort(c(start.i, end.i))# sequence of indexes to fill-in with # 2
+fill.m<-matrix(fill.v,nrow = (length(fill.v)/2),ncol = 2, byrow=TRUE) # create matrix of 
+list.1<-apply(fill.m, MARGIN=1,FUN=function(x) seq(x[1],x[2])) # create a list with indexes to replace
+list.2<-unlist(list.1) # unlist list to use as the indexes for replacement
+df$A[list.2] <- 2 # replace indexed location with 2
+
+rm(index.1)
+rm(index.14)
+rm(loc.1)
+rm(loc.4)
+rm(start.i)
+rm(end.i)
+rm(fill.v)
+rm(fill.m)
+rm(list.2)
+rm(list.1)
+rm(A)
+
+# Update states & cmo flag with new CMO definition
+df<-df %>%mutate(states= ifelse(A %in% 2, 2, states),
+                 cmo_flag=ifelse(A %in% 2, 1, cmo_flag))
+df$A<-NULL
+df$CMO_additional_flag<-NULL
+
+
+# add in group factor for number of days of icu aggressive care received--------
+
+df<-
+  df %>% 
+  left_join((df %>% 
+                    group_by(icustay_id) %>% 
+                    filter(states %in% 1) %>% 
+                    tally() %>% 
+                    select(icustay_id, treatment_grp=n)),
+            by='icustay_id')
+
+
+
+# 3 Check if there are people entering more than once---------------------------
+
+nrow((inner_join(x=df %>% filter(first_icu_stay %in% 'True'),
+           y=df %>% filter(first_icu_stay %in% 'False'), 
+           by='icustay_id')))
+
+# 4 ASSUMPTION on state logic---------------------------------------------------
+# this is a mismatch in logic can't go from 4->3
+df<-df %>% 
+  group_by(icustay_id) %>% 
+  mutate(states= 
+           ifelse(states %in% 4 
+                  & lead(states) %in% c(unique(df$states)[1:4]), 1,states)) 
+
+
+# 5 Multistate models ----------------------------------------------------------
+
+# Prepare data
+msmdf <- 
+  df %>% 
+  select(icustay_id, 
+         sofa_score=sofa_last,
+         sofa_quantile=sofa_group,
+         treatment_grp,
+         time=icudayseq_asc,
+         sex=gender,
+         age=admission_age,
+         states) %>% 
+  mutate(treatment_grp= as.factor(treatment_grp))
+
+
+lmsm<-lapply(1:30, function(x) msmdf %>% filter(treatment_grp %in% x))
+lqmatrix<-lapply(1:30, function(x) matrix((statetable.msm(states, icustay_id, lmsm[[x]])/rowSums(statetable.msm(states, icustay_id, lmsm[[x]]))), ncol=5,byrow=F))
+
+
+
+# Prepare initial state matrix (redo by first day by sofa group)
+statetable<-statetable.msm(states, icustay_id, msmdf)
+statetable_percents<-statetable/rowSums(statetable)
+matrix_statetable<-matrix(statetable_percents, ncol=5, byrow=FALSE)
+
+# Add end states to initial matrix
+# Specifying a model
+
+twoway4.q <- 
+  as.matrix(rbind(matrix_statetable,
+            c(rep(0,each= ncol(statetable_percents))), #state: home
+            c(rep(0,each= ncol(statetable_percents)))  #state: death
+            )
+          )
+
+# Adjust states to fit msm function since states dont align with initial matrix
+msmdf <- msmdf %>% mutate(states= (as.integer(states)+1),time= as.numeric(time))
+
+# Crude estimate
+crude<-crudeinits.msm(states ~ time, 
+                      icustay_id, 
+                      data = msmdf, 
+                      qmatrix = twoway4.q)
+
+#Model 1: Simple bidirectional model
+fit1.msm <- msm(states ~ time, 
+                 icustay_id, 
+                 data = msmdf, 
+                 qmatrix = twoway4.q,
+                 death= c(4,5),
+                 control=list(fnscale=5000,maxit=500))
+
+#Model 2:  Covariates on the transition rates
+fit2.msm <- msm(states ~ time, 
+                icustay_id, 
+                data = msmdf, 
+                qmatrix = twoway4.q,
+                death= c(4,5),
+                covariates = ~ sofa_quantile+treatment_grp,
+                control=list(fnscale=5000,maxit=500))
+
+
+test<-lapply(1:30, function(x) pmatrix.msm(fit2.msm, t=x, covariates=list(sofa_quantile=1)))
+
+test[[2]][4,4]<-0
+test[[1]][5,5]<-0
+n<-100
+as.matrix(colSums(n*test[[1]]/sum(test[[1]])))
+
+pmatrix.msm(fit2.msm, t=1, covariates=list(sofa_quantile=1))
+
+
