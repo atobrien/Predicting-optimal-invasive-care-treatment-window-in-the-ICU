@@ -1,0 +1,887 @@
+# Work in progress
+# Author: Anthony T.O'Brien Villate. MD/MPH
+# Multistate models & decision analysis for ICU aggressive care
+
+# 0. Load libraries ------------------------------------------------------------
+library("tidyverse")
+library("dplyr")
+library("stringr")
+library("runner")
+library("msm")
+library("lubridate")
+library("parallel")
+library("markovchain")
+
+
+
+
+# Definitions 
+# States
+# 0 non aggrssive 
+# 1 aggressive icu 
+# 2 cmo
+# 3 home
+# 4 death
+
+
+# 1. Select cirrhosis cohort ---------------------------------------------------
+
+df<-read.csv("C:/Users/Me/Desktop/mimic_timecohort_20190304.csv")
+
+# convert icustay_id to factor
+df <- df %>% mutate(icustay_id = as.factor(icustay_id))
+
+# Replace NA in flags with 0
+df <- 
+  df %>% 
+  mutate(death_flag = replace_na(death_flag, 0),
+         cv_flag = replace_na(cv_flag, 0),
+         crrt_flag = replace_na(crrt_flag, 0),
+         vasopres_flag = replace_na(vasopres_flag, 0),
+         mechvent_flag = replace_na(mechvent_flag, 0),
+         cmo_flag = replace_na(cmo_flag, 0))
+
+# Select icustays with more than 1 day stay, only first time admission,
+# >=18years and with a sofa score
+
+
+df <- 
+  df %>% 
+  group_by(icustay_id) %>% 
+  filter(length(icustay_id)>1 & 
+           admission_age>=18)  
+
+# select patients that received mechanical ventilation
+df<-df %>% inner_join(y=df %>% filter(mechvent_flag %in% 1) %>% distinct(icustay_id) )
+
+# Create quartiles for each sofa score 
+# sofa goes from 0-24 so: quantile(seq(1:24))
+df <- 
+  df %>% 
+  mutate(sofa_group = case_when(sofa_last >= 0 & sofa_last <= 6 ~1,
+                                sofa_last >= 7 & sofa_last <= 12 ~ 2,
+                                sofa_last >= 13 & sofa_last <= 18 ~ 3,
+                                sofa_last >= 19 & sofa_last <= 24 ~ 4))
+
+
+
+# 2. Redefine CMO --------------------------------------------------------------
+
+# CMO will be redefined as follows: 
+# state--lead_state_1_day_out--2_day_out--3_day_out--4_day_out--5_day_out--CMO
+#   1               0              4                                        1
+#   1               0              0           4                            1 
+#   1               0              0           0         4                  1 
+#   1               0              0           0         0          4       1
+# This is making the assumption that patients that transition from 
+# highly invasive care to non-invasive care and then died were on CMO 
+
+df<-df %>% 
+  mutate(onedayout=lead(states, n=1L),
+         twodayout=lead(states, n=2L),
+         threedayout=lead(states, n=3L),
+         fourdayout=lead(states, n=4L),
+         fivedayout=lead(states, n=5L),
+         sixdayout=lead(states, n=6L),
+         sevendayout=lead(states, n=7L),
+         eightdayout=lead(states, n=8L),
+         ninedayout=lead(states, n=9L),
+         tendayout=lead(states, n=10L))
+
+df<-df %>% 
+  mutate(CMO_additional_flag=
+           case_when((states==1)&(onedayout==0)&(twodayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==0)&(ninedayout==4)~1,
+                     (states==1)&(onedayout==0)&(twodayout==0)&(threedayout==0)&(fourdayout==0)&(fivedayout==0)&(sixdayout==0)&(sevendayout==0)&(eightdayout==0)&(ninedayout==0)&(tendayout==4)~1))
+
+# Drop additional columns created to be organized
+df$onedayout<-NULL
+df$twodayout<-NULL
+df$threedayout<-NULL
+df$fourdayout<-NULL
+df$fivedayout<-NULL
+df$sixdayout<-NULL
+df$sevendayout<-NULL
+df$eightdayout<-NULL
+df$ninedayout<-NULL
+df$tendayout<-NULL
+
+# Add in the end state when it is dead (4) 
+df<-df %>% 
+  mutate(A= ifelse(states==4, 4,CMO_additional_flag))
+
+# Filling in CMO cases according to above assumption on post-HIC days
+A <- c(df$A)
+index.1<-which(df$A %in% c(1)) # define location for 1s in A
+index.14<-which(df$A %in% c(1,4)) # define location for 1s and 4s in A
+loc.1<-which(index.14 %in% index.1) # location of 1s in  index.14
+loc.4<-loc.1+1 # location of 4s relative to 1s in index.14
+start.i<-((index.14[loc.1])+1) # starting index for replacing with 2
+end.i<-((index.14[loc.4])-1) # ending index for replacing with 2 in index
+fill.v<-sort(c(start.i, end.i))# sequence of indexes to fill-in with # 2
+fill.m<-matrix(fill.v,nrow = (length(fill.v)/2),ncol = 2, byrow=TRUE) # create matrix of 
+list.1<-apply(fill.m, MARGIN=1,FUN=function(x) seq(x[1],x[2])) # create a list with indexes to replace
+list.2<-unlist(list.1) # unlist list to use as the indexes for replacement
+df$A[list.2] <- 2 # replace indexed location with 2
+
+rm(index.1)
+rm(index.14)
+rm(loc.1)
+rm(loc.4)
+rm(start.i)
+rm(end.i)
+rm(fill.v)
+rm(fill.m)
+rm(list.2)
+rm(list.1)
+rm(A)
+
+# Update states & cmo flag with new CMO definition
+df<-df %>%mutate(states= ifelse(A %in% 2, 2, states),
+                 cmo_flag=ifelse(A %in% 2, 1, cmo_flag))
+df$A<-NULL
+df$CMO_additional_flag<-NULL
+
+
+# add in group factor for number of days of icu aggressive care received
+
+df<-
+  df %>% 
+  left_join((df %>% 
+                    group_by(icustay_id) %>% 
+                    filter(states %in% 1) %>% 
+                    tally() %>% 
+                    select(icustay_id, treatment_grp=n)),
+            by='icustay_id')
+
+
+
+# 3 Check if there are people entering more than once---------------------------
+
+nrow((inner_join(x=df %>% filter(first_icu_stay %in% 'True'),
+           y=df %>% filter(first_icu_stay %in% 'False'), 
+           by='icustay_id')))
+
+# 4. Assumption on state logic---------------------------------------------------
+# this is a mismatch in logic can't go from 4->3
+df<-df %>% 
+  group_by(icustay_id) %>% 
+  mutate(states= 
+           ifelse(states %in% 4 
+                  & lead(states) %in% c(unique(df$states)[1:4]), 1,states)) 
+
+
+# 5. Multistate models ----------------------------------------------------------
+
+# Prepare data
+msmdf <- 
+  df %>% 
+  select(icustay_id, 
+         sofa_score=sofa_last,
+         sofa_quantile=sofa_group,
+         treatment_grp,
+         time=icudayseq_asc,
+         sex=gender,
+         age=admission_age,
+         states) %>% 
+  mutate(treatment_grp= as.factor(treatment_grp),
+         states= (as.integer(states)+1), # since a matrix can't be naturally named 0 we add 1 to all states
+         time= as.numeric(time)) # time needs to be numeric to use in model
+  
+nstates<-msmdf %>% ungroup() %>% select(states) %>% mutate(maxstates=max(states)) %>% distinct(maxstates)
+
+# Create a list to organize the treatment categories 
+# therefore we have 1 day of aggressive care, 2 days ...up to 30 days
+lmsm<-lapply(1:30, function(x) msmdf %>% filter(treatment_grp %in% x))
+
+
+# Prepare initial state matrix using actual data 
+qmsm<-lapply(1:30, function(x) msmdf %>% 
+               filter(treatment_grp %in% x) %>% 
+               group_by(icustay_id) %>% 
+               filter(time %in% c(0,1)))
+
+lqmatrix<-lapply(1:30, 
+                 function(x) 
+                   matrix((statetable.msm(states, icustay_id, qmsm[[x]])/
+                             rowSums(statetable.msm(states, icustay_id, qmsm[[x]]))), 
+                          ncol=5,
+                          byrow=F))
+
+# Add end states and convert matrices to 5x5 dimension
+ltm <- lapply(1:30, function(x)
+  as.matrix(rbind(lqmatrix[[x]],
+                  c(rep(0,each= (nstates[[1]]))), #state: home
+                  c(rep(0,each= (nstates[[1]])))   #state: death
+  )))
+
+rowmax <-  max(sapply(ltm, nrow))
+ltm<-lapply(ltm, function(x) 
+  rbind(x, matrix(0, ncol = ncol(x), nrow = rowmax-nrow(x))))
+
+       
+# Specifying a model
+# Crude estimate
+lfit.crude<- c()
+for (i in 1:30){
+  lfit.crude[[i]]<-crudeinits.msm(states ~ time, 
+                             icustay_id, 
+                             data = lmsm[[i]], 
+                             qmatrix = ltm[[i]]
+                             )
+                }
+
+#Model 1: Covariates on transition rates
+# Since we may not have enough data in some sections 
+# We opt to do each model by treatment day, rather than for loop/map/lapply
+# this way we can pin point where we dont have enough data for convergence
+
+fit.msm1<-msm(states ~ time, icustay_id, data = lmsm[[1]], qmatrix = ltm[[1]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm2<-msm(states ~ time, icustay_id, data = lmsm[[2]], qmatrix = ltm[[2]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm3<-msm(states ~ time, icustay_id, data = lmsm[[3]], qmatrix = ltm[[3]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm4<-msm(states ~ time, icustay_id, data = lmsm[[4]], qmatrix = ltm[[4]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm5<-msm(states ~ time, icustay_id, data = lmsm[[5]], qmatrix = ltm[[5]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm6<-msm(states ~ time, icustay_id, data = lmsm[[6]], qmatrix = ltm[[6]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm7<-msm(states ~ time, icustay_id, data = lmsm[[7]], qmatrix = ltm[[7]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm8<-msm(states ~ time, icustay_id, data = lmsm[[8]], qmatrix = ltm[[8]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm9<-msm(states ~ time, icustay_id, data = lmsm[[9]], qmatrix = ltm[[9]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm10<-msm(states ~ time, icustay_id, data = lmsm[[10]], qmatrix = ltm[[10]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm11<-msm(states ~ time, icustay_id, data = lmsm[[11]], qmatrix = ltm[[11]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm12<-msm(states ~ time, icustay_id, data = lmsm[[12]], qmatrix = ltm[[12]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm13<-msm(states ~ time, icustay_id, data = lmsm[[13]], qmatrix = ltm[[13]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm14<-msm(states ~ time, icustay_id, data = lmsm[[14]], qmatrix = ltm[[14]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm15<-msm(states ~ time, icustay_id, data = lmsm[[15]], qmatrix = ltm[[15]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm16<-msm(states ~ time, icustay_id, data = lmsm[[16]], qmatrix = ltm[[16]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm17<-msm(states ~ time, icustay_id, data = lmsm[[17]], qmatrix = ltm[[17]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm18<-msm(states ~ time, icustay_id, data = lmsm[[18]], qmatrix = ltm[[18]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm19<-msm(states ~ time, icustay_id, data = lmsm[[19]], qmatrix = ltm[[19]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm20<-msm(states ~ time, icustay_id, data = lmsm[[20]], qmatrix = ltm[[20]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm21<-msm(states ~ time, icustay_id, data = lmsm[[21]], qmatrix = ltm[[21]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm22<-msm(states ~ time, icustay_id, data = lmsm[[22]], qmatrix = ltm[[22]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm23<-msm(states ~ time, icustay_id, data = lmsm[[23]], qmatrix = ltm[[23]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm24<-msm(states ~ time, icustay_id, data = lmsm[[24]], qmatrix = ltm[[24]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm25<-msm(states ~ time, icustay_id, data = lmsm[[25]], qmatrix = ltm[[25]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm26<-msm(states ~ time, icustay_id, data = lmsm[[26]], qmatrix = ltm[[26]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm27<-msm(states ~ time, icustay_id, data = lmsm[[27]], qmatrix = ltm[[27]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm28<-msm(states ~ time, icustay_id, data = lmsm[[28]], qmatrix = ltm[[28]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm29<-msm(states ~ time, icustay_id, data = lmsm[[29]], qmatrix = ltm[[29]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+fit.msm30<-msm(states ~ time, icustay_id, data = lmsm[[30]], qmatrix = ltm[[30]],death= c(4,5),covariates = ~ sofa_quantile,control=list(fnscale=5000,maxit=500))
+
+# gather treatment options that converged (currently manual process)
+# note: needs to be made recursive
+fit.list<- list(fit.msm2,
+            fit.msm6,
+            fit.msm8, #not max convergence
+            fit.msm10,
+            fit.msm11,
+            fit.msm12,
+            fit.msm13,
+            fit.msm14,
+            fit.msm17, #not max convergence
+            fit.msm20,
+            fit.msm21,
+            fit.msm27,
+            fit.msm29,
+            fit.msm30)
+
+
+
+#6. Transition matrices ----------------------------------------------------------------
+
+# sofa group 1
+tm.sofa1<-lapply(1:length(fit.list), 
+       function(x)
+         lapply(1:30, 
+                function(y) 
+                  pmatrix.msm(fit.list[[x]],
+                              t=y, 
+                              covariates = list(sofa_quantile = 1))))
+
+
+# sofa group 2
+tm.sofa2<-lapply(1:length(fit.list), 
+                 function(x)
+                   lapply(1:30, 
+                          function(y) 
+                            pmatrix.msm(fit.list[[x]],
+                                        t=y, 
+                                        covariates = list(sofa_quantile = 2))))
+
+
+
+# sofa group 3
+tm.sofa3<-lapply(1:length(fit.list), 
+                 function(x)
+                   lapply(1:30, 
+                          function(y) 
+                            pmatrix.msm(fit.list[[x]],
+                                        t=y, 
+                                        covariates = list(sofa_quantile = 3))))
+
+
+
+# sofa group 4
+tm.sofa4<-lapply(1:length(fit.list), 
+                 function(x)
+                   lapply(1:30, 
+                          function(y) 
+                            pmatrix.msm(fit.list[[x]],
+                                        t=y, 
+                                        covariates = list(sofa_quantile = 4))))
+
+
+# Markov objects
+
+# sofa group 1
+mo.sofa1<-lapply(1:length(tm.sofa1), 
+       function(x) 
+         lapply(1:30, 
+                function(y) 
+                  new("markovchain",
+                      transitionMatrix=((as.matrix.data.frame(tm.sofa1[[x]][[y]]))))
+                )
+       )
+
+# sofa group 2
+mo.sofa2<-lapply(1:length(tm.sofa2), 
+                  function(x) 
+                    lapply(1:30, 
+                           function(y) 
+                             new("markovchain",
+                                 transitionMatrix=((as.matrix.data.frame(tm.sofa1[[x]][[y]]))))
+                    )
+)
+
+# sofa group 3
+mo.sofa3<-lapply(1:length(tm.sofa3), 
+                  function(x) 
+                    lapply(1:30, 
+                           function(y) 
+                             new("markovchain",
+                                 transitionMatrix=((as.matrix.data.frame(tm.sofa1[[x]][[y]]))))
+                    )
+)
+
+# sofa group 4
+mo.sofa4<-lapply(1:length(tm.sofa4), 
+                  function(x) 
+                    lapply(1:30, 
+                           function(y) 
+                             new("markovchain",
+                                 transitionMatrix=((as.matrix.data.frame(tm.sofa1[[x]][[y]]))))
+                    )
+)
+
+
+#7. Marcov chain -----------------------------------------------------------------
+N <- 10000 # number of patients
+nsim<- 1 # number of simulations (at present only designed for one simulation)
+ndays<-30 # number of days in intervention (i.e. number of transition matrices to use)
+
+#sofa 1
+mc.sofa1<-
+  lapply(1:nsim, function(z)
+  lapply(1:length(mo.sofa1), 
+       function(x)
+         lapply(1:ndays, function(y)
+           rmarkovchain(n = N-1, 
+                        object = mo.sofa1[[x]][[y]],
+                        t0 = "1",
+                        include.t0 = TRUE,
+                        parallel = TRUE,
+                        num.cores=detectCores()-1)
+         )
+       )
+  )
+
+
+
+#sofa 2
+mc.sofa2<-
+  lapply(1:nsim, function(z)
+    lapply(1:length(mo.sofa2), 
+           function(x)
+             lapply(1:ndays, function(y)
+               rmarkovchain(n = N-1, 
+                            object = mo.sofa2[[x]][[y]],
+                            t0 = "1",
+                            include.t0 = TRUE,
+                            parallel = TRUE,
+                            num.cores=detectCores()-1)
+             )
+    )
+  )
+
+
+
+#sofa 3
+mc.sofa3<-
+  lapply(1:nsim, function(z)
+    lapply(1:length(mo.sofa3), 
+           function(x)
+             lapply(1:ndays, function(y)
+               rmarkovchain(n = N-1, 
+                            object = mo.sofa3[[x]][[y]],
+                            t0 = "2",
+                            include.t0 = TRUE,
+                            parallel = TRUE,
+                            num.cores=detectCores()-1)
+             )
+    )
+  )
+
+
+#sofa 4
+mc.sofa4<-
+  lapply(1:nsim, function(z)
+    lapply(1:length(mo.sofa4), 
+           function(x)
+             lapply(1:ndays, function(y)
+               rmarkovchain(n = N-1, 
+                            object = mo.sofa4[[x]][[y]],
+                            t0 = "2",
+                            include.t0 = TRUE,
+                            parallel = TRUE,
+                            num.cores=detectCores()-1)
+             )
+    )
+  )
+
+
+#8. Convert marcov chain list of list into a matrix chain-------------------------
+# note: needs to be made recursive
+#x  length of simulation-
+#y  number of day of aggressive care- length of 
+#z  day 1  (up to 30)
+ 
+#sofa1 
+matrixchain.sofa1<-
+lapply(1:length(mc.sofa1[[1]]), function(y)
+cbind(          #x    y    z
+matrix(mc.sofa1[[1]][[y]][[1]]),
+matrix(mc.sofa1[[1]][[y]][[2]]),
+matrix(mc.sofa1[[1]][[y]][[3]]),
+matrix(mc.sofa1[[1]][[y]][[4]]),
+matrix(mc.sofa1[[1]][[y]][[5]]),
+matrix(mc.sofa1[[1]][[y]][[6]]),
+matrix(mc.sofa1[[1]][[y]][[7]]),
+matrix(mc.sofa1[[1]][[y]][[8]]),
+matrix(mc.sofa1[[1]][[y]][[9]]),
+matrix(mc.sofa1[[1]][[y]][[10]]),
+matrix(mc.sofa1[[1]][[y]][[11]]),
+matrix(mc.sofa1[[1]][[y]][[12]]),
+matrix(mc.sofa1[[1]][[y]][[13]]),
+matrix(mc.sofa1[[1]][[y]][[14]]),
+matrix(mc.sofa1[[1]][[y]][[15]]),
+matrix(mc.sofa1[[1]][[y]][[16]]),
+matrix(mc.sofa1[[1]][[y]][[17]]),
+matrix(mc.sofa1[[1]][[y]][[18]]),
+matrix(mc.sofa1[[1]][[y]][[19]]),
+matrix(mc.sofa1[[1]][[y]][[20]]),
+matrix(mc.sofa1[[1]][[y]][[21]]),
+matrix(mc.sofa1[[1]][[y]][[22]]),
+matrix(mc.sofa1[[1]][[y]][[23]]),
+matrix(mc.sofa1[[1]][[y]][[24]]),
+matrix(mc.sofa1[[1]][[y]][[25]]),
+matrix(mc.sofa1[[1]][[y]][[26]]),
+matrix(mc.sofa1[[1]][[y]][[27]]),
+matrix(mc.sofa1[[1]][[y]][[28]]),
+matrix(mc.sofa1[[1]][[y]][[29]]),
+matrix(mc.sofa1[[1]][[y]][[30]])
+)
+)
+
+
+#sofa2 
+matrixchain.sofa2<-
+  lapply(1:length(mc.sofa2[[1]]), function(y)
+    cbind(          #x    y    z
+      matrix(mc.sofa2[[1]][[y]][[1]]),
+      matrix(mc.sofa2[[1]][[y]][[2]]),
+      matrix(mc.sofa2[[1]][[y]][[3]]),
+      matrix(mc.sofa2[[1]][[y]][[4]]),
+      matrix(mc.sofa2[[1]][[y]][[5]]),
+      matrix(mc.sofa2[[1]][[y]][[6]]),
+      matrix(mc.sofa2[[1]][[y]][[7]]),
+      matrix(mc.sofa2[[1]][[y]][[8]]),
+      matrix(mc.sofa2[[1]][[y]][[9]]),
+      matrix(mc.sofa2[[1]][[y]][[10]]),
+      matrix(mc.sofa2[[1]][[y]][[11]]),
+      matrix(mc.sofa2[[1]][[y]][[12]]),
+      matrix(mc.sofa2[[1]][[y]][[13]]),
+      matrix(mc.sofa2[[1]][[y]][[14]]),
+      matrix(mc.sofa2[[1]][[y]][[15]]),
+      matrix(mc.sofa2[[1]][[y]][[16]]),
+      matrix(mc.sofa2[[1]][[y]][[17]]),
+      matrix(mc.sofa2[[1]][[y]][[18]]),
+      matrix(mc.sofa2[[1]][[y]][[19]]),
+      matrix(mc.sofa2[[1]][[y]][[20]]),
+      matrix(mc.sofa2[[1]][[y]][[21]]),
+      matrix(mc.sofa2[[1]][[y]][[22]]),
+      matrix(mc.sofa2[[1]][[y]][[23]]),
+      matrix(mc.sofa2[[1]][[y]][[24]]),
+      matrix(mc.sofa2[[1]][[y]][[25]]),
+      matrix(mc.sofa2[[1]][[y]][[26]]),
+      matrix(mc.sofa2[[1]][[y]][[27]]),
+      matrix(mc.sofa2[[1]][[y]][[28]]),
+      matrix(mc.sofa2[[1]][[y]][[29]]),
+      matrix(mc.sofa2[[1]][[y]][[30]])
+    )
+  )
+
+#sofa3
+matrixchain.sofa3<-
+  lapply(1:length(mc.sofa3[[1]]), function(y)
+    cbind(          #x    y    z
+      matrix(mc.sofa3[[1]][[y]][[1]]),
+      matrix(mc.sofa3[[1]][[y]][[2]]),
+      matrix(mc.sofa3[[1]][[y]][[3]]),
+      matrix(mc.sofa3[[1]][[y]][[4]]),
+      matrix(mc.sofa3[[1]][[y]][[5]]),
+      matrix(mc.sofa3[[1]][[y]][[6]]),
+      matrix(mc.sofa3[[1]][[y]][[7]]),
+      matrix(mc.sofa3[[1]][[y]][[8]]),
+      matrix(mc.sofa3[[1]][[y]][[9]]),
+      matrix(mc.sofa3[[1]][[y]][[10]]),
+      matrix(mc.sofa3[[1]][[y]][[11]]),
+      matrix(mc.sofa3[[1]][[y]][[12]]),
+      matrix(mc.sofa3[[1]][[y]][[13]]),
+      matrix(mc.sofa3[[1]][[y]][[14]]),
+      matrix(mc.sofa3[[1]][[y]][[15]]),
+      matrix(mc.sofa3[[1]][[y]][[16]]),
+      matrix(mc.sofa3[[1]][[y]][[17]]),
+      matrix(mc.sofa3[[1]][[y]][[18]]),
+      matrix(mc.sofa3[[1]][[y]][[19]]),
+      matrix(mc.sofa3[[1]][[y]][[20]]),
+      matrix(mc.sofa3[[1]][[y]][[21]]),
+      matrix(mc.sofa3[[1]][[y]][[22]]),
+      matrix(mc.sofa3[[1]][[y]][[23]]),
+      matrix(mc.sofa3[[1]][[y]][[24]]),
+      matrix(mc.sofa3[[1]][[y]][[25]]),
+      matrix(mc.sofa3[[1]][[y]][[26]]),
+      matrix(mc.sofa3[[1]][[y]][[27]]),
+      matrix(mc.sofa3[[1]][[y]][[28]]),
+      matrix(mc.sofa3[[1]][[y]][[29]]),
+      matrix(mc.sofa3[[1]][[y]][[30]])
+    )
+  )
+
+#sofa4 
+matrixchain.sofa4<-
+  lapply(1:length(mc.sofa4[[1]]), function(y)
+    cbind(          #x    y    z
+      matrix(mc.sofa4[[1]][[y]][[1]]),
+      matrix(mc.sofa4[[1]][[y]][[2]]),
+      matrix(mc.sofa4[[1]][[y]][[3]]),
+      matrix(mc.sofa4[[1]][[y]][[4]]),
+      matrix(mc.sofa4[[1]][[y]][[5]]),
+      matrix(mc.sofa4[[1]][[y]][[6]]),
+      matrix(mc.sofa4[[1]][[y]][[7]]),
+      matrix(mc.sofa4[[1]][[y]][[8]]),
+      matrix(mc.sofa4[[1]][[y]][[9]]),
+      matrix(mc.sofa4[[1]][[y]][[10]]),
+      matrix(mc.sofa4[[1]][[y]][[11]]),
+      matrix(mc.sofa4[[1]][[y]][[12]]),
+      matrix(mc.sofa4[[1]][[y]][[13]]),
+      matrix(mc.sofa4[[1]][[y]][[14]]),
+      matrix(mc.sofa4[[1]][[y]][[15]]),
+      matrix(mc.sofa4[[1]][[y]][[16]]),
+      matrix(mc.sofa4[[1]][[y]][[17]]),
+      matrix(mc.sofa4[[1]][[y]][[18]]),
+      matrix(mc.sofa4[[1]][[y]][[19]]),
+      matrix(mc.sofa4[[1]][[y]][[20]]),
+      matrix(mc.sofa4[[1]][[y]][[21]]),
+      matrix(mc.sofa4[[1]][[y]][[22]]),
+      matrix(mc.sofa4[[1]][[y]][[23]]),
+      matrix(mc.sofa4[[1]][[y]][[24]]),
+      matrix(mc.sofa4[[1]][[y]][[25]]),
+      matrix(mc.sofa4[[1]][[y]][[26]]),
+      matrix(mc.sofa4[[1]][[y]][[27]]),
+      matrix(mc.sofa4[[1]][[y]][[28]]),
+      matrix(mc.sofa4[[1]][[y]][[29]]),
+      matrix(mc.sofa4[[1]][[y]][[30]])
+    )
+  )
+
+
+#9. Utilities per day----------------------------------------------------------
+u_nhic<-0.66/365 #non aggresive care in icu
+u_hic<-0.55/365  #aggressive care in icu
+u_cmo<-0.28/365  # cmo
+u_discharge<-1/365 # discharge
+u_died<-0     #died  
+hc_correction<-0.5/365
+
+
+
+# sofa 1
+u.sofa1 <- 
+  lapply(1:length(matrixchain.sofa1), 
+         function(x)
+  as.tibble(matrixchain.sofa1[[x]]) %>% 
+  tibble::rowid_to_column("ID") %>% 
+  gather(day, value=state, V1:V30) %>% 
+  arrange(ID) %>% 
+  mutate(los_days=  str_replace_all(day,pattern = "[a-zA-Z ]", replacement="")) %>% 
+  select(-(day)) %>% 
+  mutate(aggressive_care_tx_group= x) %>%  #update with index
+  # mutate(col1=streak_run(state, k=1000)) %>%  #remove redundant days 
+  # filter(!(state=="4" & col1!=1)) %>%         #to stop utility from counting after reaching absorption state
+  # filter(!(state=="5" & col1!=1)) %>%         3if requiered
+  mutate(utility= case_when(state %in% '1'~ u_nhic,
+                            state %in% '2'~ u_hic,
+                            state %in% '3'~ u_cmo,
+                            state %in% '4'~ u_discharge,
+                            state %in% '5'~ u_died)) %>% 
+  group_by(los_days=as.numeric(los_days), ID) %>% 
+  summarize(utility= sum(utility)+(length(ID)*u_nhic)) %>% 
+  group_by(as.numeric(los_days)) %>% 
+  summarize(total_utility= sum(utility)) %>% 
+  ungroup() %>% 
+  mutate(cum_utility=cumsum(total_utility)) %>% 
+  ungroup() %>% 
+  mutate(qald=cum_utility/N,
+         total_qald=sum(qald)+hc_correction) %>% 
+  mutate(aggressive_care_tx_group= x)
+  )
+
+u.sofa1<-do.call("rbind", u.sofa1)
+
+# sofa 2
+u.sofa2 <- 
+  lapply(1:length(matrixchain.sofa2), 
+         function(x)
+           as.tibble(matrixchain.sofa2[[x]]) %>% 
+           tibble::rowid_to_column("ID") %>% 
+           gather(day, value=state, V1:V30) %>% 
+           arrange(ID) %>% 
+           mutate(los_days=  str_replace_all(day,pattern = "[a-zA-Z ]", replacement="")) %>% 
+           select(-(day)) %>% 
+           mutate(aggressive_care_tx_group= x) %>%  #update with index
+           # mutate(col1=streak_run(state, k=1000)) %>%  #remove redundant days 
+           # filter(!(state=="4" & col1!=1)) %>%         #to stop utility from counting after reaching absorption state
+           # filter(!(state=="5" & col1!=1)) %>%         3if requiered
+           mutate(utility= case_when(state %in% '1'~ u_nhic,
+                                     state %in% '2'~ u_hic,
+                                     state %in% '3'~ u_cmo,
+                                     state %in% '4'~ u_discharge,
+                                     state %in% '5'~ u_died)) %>% 
+           group_by(los_days=as.numeric(los_days), ID) %>% 
+           summarize(utility= sum(utility)+(length(ID)*u_nhic)) %>% 
+           group_by(as.numeric(los_days)) %>% 
+           summarize(total_utility= sum(utility)) %>% 
+           ungroup() %>% 
+           mutate(cum_utility=cumsum(total_utility)) %>% 
+           ungroup() %>% 
+           mutate(qald=cum_utility/N,
+                  total_qald=sum(qald)+hc_correction) %>% 
+           mutate(aggressive_care_tx_group= x)
+  )
+
+u.sofa2<-do.call("rbind", u.sofa2)
+
+
+# sofa 3
+u.sofa3 <- 
+  lapply(1:length(matrixchain.sofa3), 
+         function(x)
+           as.tibble(matrixchain.sofa3[[x]]) %>% 
+           tibble::rowid_to_column("ID") %>% 
+           gather(day, value=state, V1:V30) %>% 
+           arrange(ID) %>% 
+           mutate(los_days=  str_replace_all(day,pattern = "[a-zA-Z ]", replacement="")) %>% 
+           select(-(day)) %>% 
+           mutate(aggressive_care_tx_group= x) %>%  #update with index
+           # mutate(col1=streak_run(state, k=1000)) %>%  #remove redundant days 
+           # filter(!(state=="4" & col1!=1)) %>%         #to stop utility from counting after reaching absorption state
+           # filter(!(state=="5" & col1!=1)) %>%         3if requiered
+           mutate(utility= case_when(state %in% '1'~ u_nhic,
+                                     state %in% '2'~ u_hic,
+                                     state %in% '3'~ u_cmo,
+                                     state %in% '4'~ u_discharge,
+                                     state %in% '5'~ u_died)) %>% 
+           group_by(los_days=as.numeric(los_days), ID) %>% 
+           summarize(utility= sum(utility)+(length(ID)*u_hic)) %>% 
+           group_by(as.numeric(los_days)) %>% 
+           summarize(total_utility= sum(utility)) %>% 
+           ungroup() %>% 
+           mutate(cum_utility=cumsum(total_utility)) %>% 
+           ungroup() %>% 
+           mutate(qald=cum_utility/N,
+                  total_qald=sum(qald)+hc_correction) %>% 
+           mutate(aggressive_care_tx_group= x)
+  )
+
+u.sofa3<-do.call("rbind", u.sofa3)
+
+
+# sofa 4
+u.sofa4 <- 
+  lapply(1:length(matrixchain.sofa4), 
+         function(x)
+           as.tibble(matrixchain.sofa4[[x]]) %>% 
+           tibble::rowid_to_column("ID") %>% 
+           gather(day, value=state, V1:V30) %>% 
+           arrange(ID) %>% 
+           mutate(los_days=  str_replace_all(day,pattern = "[a-zA-Z ]", replacement="")) %>% 
+           select(-(day)) %>% 
+           mutate(aggressive_care_tx_group= x) %>%  #update with index
+           # mutate(col1=streak_run(state, k=1000)) %>%  #remove redundant days 
+           # filter(!(state=="4" & col1!=1)) %>%         #to stop utility from counting after reaching absorption state
+           # filter(!(state=="5" & col1!=1)) %>%         3if requiered
+           mutate(utility= case_when(state %in% '1'~ u_nhic,
+                                     state %in% '2'~ u_hic,
+                                     state %in% '3'~ u_cmo,
+                                     state %in% '4'~ u_discharge,
+                                     state %in% '5'~ u_died)) %>% 
+           group_by(los_days=as.numeric(los_days), ID) %>% 
+           summarize(utility= sum(utility)+(length(ID)*u_hic)) %>% 
+           group_by(as.numeric(los_days)) %>% 
+           summarize(total_utility= sum(utility)) %>% 
+           ungroup() %>% 
+           mutate(cum_utility=cumsum(total_utility)) %>% 
+           ungroup() %>% 
+           mutate(qald=cum_utility/N,
+                  total_qald=sum(qald)+hc_correction) %>% 
+           mutate(aggressive_care_tx_group= x)
+  )
+
+u.sofa4<-do.call("rbind", u.sofa4)
+
+#10.Max utility per aggressive regimen over 30 days by sofa group---------------
+
+max_qald.sofa1<-u.sofa1 %>% 
+  select(los_days=`as.numeric(los_days)`,total_qald,aggressive_care_tx_group) %>% 
+  group_by(aggressive_care_tx_group) %>% 
+  summarize(total_qald=max(total_qald))%>% 
+  mutate(xaxis= case_when(aggressive_care_tx_group %in% 1~2,
+                          aggressive_care_tx_group %in% 2~6,
+                          aggressive_care_tx_group %in% 3~8,
+                          aggressive_care_tx_group %in% 4~10,
+                          aggressive_care_tx_group %in% 5~11,
+                          aggressive_care_tx_group %in% 6~12,
+                          aggressive_care_tx_group %in% 7~13,
+                          aggressive_care_tx_group %in% 8~14,
+                          aggressive_care_tx_group %in% 9~17,
+                          aggressive_care_tx_group %in% 10~20,
+                          aggressive_care_tx_group %in% 11~21,
+                          aggressive_care_tx_group %in% 12~27,
+                          aggressive_care_tx_group %in% 13~29,
+                          aggressive_care_tx_group %in% 14~30))
+
+max_qald.sofa2<-u.sofa2 %>% 
+  select(los_days=`as.numeric(los_days)`,total_qald,aggressive_care_tx_group) %>% 
+  group_by(aggressive_care_tx_group) %>% 
+  summarize(total_qald=max(total_qald))%>% 
+  mutate(xaxis= case_when(aggressive_care_tx_group %in% 1~2,
+                          aggressive_care_tx_group %in% 2~6,
+                          aggressive_care_tx_group %in% 3~8,
+                          aggressive_care_tx_group %in% 4~10,
+                          aggressive_care_tx_group %in% 5~11,
+                          aggressive_care_tx_group %in% 6~12,
+                          aggressive_care_tx_group %in% 7~13,
+                          aggressive_care_tx_group %in% 8~14,
+                          aggressive_care_tx_group %in% 9~17,
+                          aggressive_care_tx_group %in% 10~20,
+                          aggressive_care_tx_group %in% 11~21,
+                          aggressive_care_tx_group %in% 12~27,
+                          aggressive_care_tx_group %in% 13~29,
+                          aggressive_care_tx_group %in% 14~30))
+
+max_qald.sofa3<-u.sofa3 %>% 
+  select(los_days=`as.numeric(los_days)`,total_qald,aggressive_care_tx_group) %>% 
+  group_by(aggressive_care_tx_group) %>% 
+  summarize(total_qald=max(total_qald))%>% 
+  mutate(xaxis= case_when(aggressive_care_tx_group %in% 1~2,
+                          aggressive_care_tx_group %in% 2~6,
+                          aggressive_care_tx_group %in% 3~8,
+                          aggressive_care_tx_group %in% 4~10,
+                          aggressive_care_tx_group %in% 5~11,
+                          aggressive_care_tx_group %in% 6~12,
+                          aggressive_care_tx_group %in% 7~13,
+                          aggressive_care_tx_group %in% 8~14,
+                          aggressive_care_tx_group %in% 9~17,
+                          aggressive_care_tx_group %in% 10~20,
+                          aggressive_care_tx_group %in% 11~21,
+                          aggressive_care_tx_group %in% 12~27,
+                          aggressive_care_tx_group %in% 13~29,
+                          aggressive_care_tx_group %in% 14~30))
+
+max_qald.sofa4<-u.sofa4 %>% 
+  select(los_days=`as.numeric(los_days)`,total_qald,aggressive_care_tx_group) %>% 
+  group_by(aggressive_care_tx_group) %>% 
+  summarize(total_qald=max(total_qald)) %>% 
+  mutate(xaxis= case_when(aggressive_care_tx_group %in% 1~2,
+                          aggressive_care_tx_group %in% 2~6,
+                          aggressive_care_tx_group %in% 3~8,
+                          aggressive_care_tx_group %in% 4~10,
+                          aggressive_care_tx_group %in% 5~11,
+                          aggressive_care_tx_group %in% 6~12,
+                          aggressive_care_tx_group %in% 7~13,
+                          aggressive_care_tx_group %in% 8~14,
+                          aggressive_care_tx_group %in% 9~17,
+                          aggressive_care_tx_group %in% 10~20,
+                          aggressive_care_tx_group %in% 11~21,
+                          aggressive_care_tx_group %in% 12~27,
+                          aggressive_care_tx_group %in% 13~29,
+                          aggressive_care_tx_group %in% 14~30))
+
+# 11. Graphs --------------------------------------------------------------
+
+ggplot(max_qald.sofa1,aes(x=xaxis, y=total_qald))+
+  geom_point()+
+  geom_smooth(span = 0.25, color='#e7298a')+
+  #geom_line()+
+  theme_bw()+
+  scale_x_continuous(breaks = scales::pretty_breaks(n=30))+
+  xlab('Days of aggresive treatment')+
+  ylab('Quality adjusted life days')+
+  labs(subtitle = "SOFA 1")
+
+
+ggplot(max_qald.sofa2,aes(x=xaxis, y=total_qald))+
+  geom_point()+
+  geom_smooth(span = 0.25, color='#fdc086')+
+  #geom_line()+
+  theme_bw()+
+  scale_x_continuous(breaks = scales::pretty_breaks(n=30))+
+  xlab('Days of aggresive treatment')+
+  ylab('Quality adjusted life days')+
+  labs(subtitle = "SOFA 2")
+
+ggplot(max_qald.sofa3,aes(x=xaxis, y=total_qald))+
+  geom_point()+
+  geom_smooth(span = 0.25,color='#beaed4')+
+  #geom_line()+
+  theme_bw()+
+  scale_x_continuous(breaks = scales::pretty_breaks(n=30))+
+  xlab('Days of aggresive treatment')+
+  ylab('Quality adjusted life days')+
+  labs(subtitle = "SOFA 3")
+
+ggplot(max_qald.sofa4,aes(x=xaxis, y=total_qald))+
+  geom_point(color='grey10')+
+  geom_smooth(span = 0.25, color='#386cb0')+
+  theme_bw()+
+  scale_x_continuous(breaks = scales::pretty_breaks(n=30))+
+  scale_y_continuous(breaks = scales::pretty_breaks(n=10))+
+  xlab('Days of aggresive treatment')+
+  ylab('Quality adjusted life days')+
+  labs(subtitle = "SOFA 4")
+
+
+# To do/notes:------------------------------------------------------------------
+
+# 1) Create a reproducible pipeline for obtaining cohort via sql
+# 2) Be more specific with states, ie track time more adequately and extract states more precisely
+# 3) Redefine CMO from the sql stage
+# 3) A distribution of utilities can be used (eg norm(start,end, etc)) to create ranges for utilities as opposed to fix value
+# therefore review utilites and add in ranges (secondary sensitivity analysis)
+# 4) multisimulation matrices can also be introduced
+
